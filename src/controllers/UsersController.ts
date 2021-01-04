@@ -152,8 +152,33 @@ export class UsersController extends BaseHttpController {
     }
   }
 
+  @httpGet(
+    '/refresh',
+    jwtMiddleware({
+      secret: process.env.JWT_SECRET as string,
+      algorithms: ['HS256'],
+      requestProperty: 'payload',
+    })
+  )
   private async GetNewToken(
     @request() req: AuthenticatedRequest,
     @response() res: Response
-  ) {}
+  ) {
+    try {
+      const token = this.authService.GenerateToken(req.payload.userInfo);
+      const refreshToken = this.authService.GenerateRefreshToken(
+        req.payload.userInfo
+      );
+
+      return this.ok(
+        this.userService.GetRefreshTokenResponse(
+          token,
+          refreshToken,
+          req.payload.userInfo
+        )
+      );
+    } catch (error) {
+      return this.internalServerError();
+    }
+  }
 }

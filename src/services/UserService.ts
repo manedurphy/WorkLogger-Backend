@@ -7,6 +7,7 @@ import { UserReadDto } from '../data/dtos/UserReadDto';
 import { User } from '../models';
 import { UserLoginResponseObject } from '../responseObjects/UserLoginResponse';
 import { UserTokenValidResponseObject } from '../responseObjects/UserTokenValidResponseObject';
+import { UserRefreshTokenResponseObject } from '../responseObjects/UserRefreshTokenResponseObject';
 
 @injectable()
 export class UserService {
@@ -57,6 +58,14 @@ export class UserService {
     user: UserReadDto
   ) {
     return new UserLoginResponseObject(token, refreshToken, user);
+  }
+
+  public GetRefreshTokenResponse(
+    token: string,
+    refreshToken: string,
+    user: UserReadDto
+  ) {
+    return new UserRefreshTokenResponseObject(token, refreshToken, user);
   }
 
   public GetTokenValidResponse(user: UserReadDto) {
