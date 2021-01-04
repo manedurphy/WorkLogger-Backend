@@ -17,7 +17,7 @@ export class UserService {
     return this._errorMessage;
   }
 
-  public ValidateRegistrationForm(req: Request): boolean {
+  public ValidateForm(req: Request): boolean {
     const errors = validationResult(req);
     const errorsPresent = !errors.isEmpty();
 

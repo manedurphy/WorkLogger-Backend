@@ -1,4 +1,5 @@
 import * as express from 'express';
+import jwtMiddleware from 'express-jwt';
 import './data/SQLDatabase';
 import './controllers';
 import { Container } from 'inversify';
@@ -25,6 +26,15 @@ const server = new InversifyExpressServer(container);
 server.setConfig((app) => {
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
+  app.use(
+    jwtMiddleware({
+      secret: process.env.JWT_SECRET as string,
+      algorithms: ['HS256'],
+      requestProperty: 'payload',
+    }).unless({
+      path: ['/api/users/login', '/api/users/register'],
+    })
+  );
 });
 
 export default server.build();

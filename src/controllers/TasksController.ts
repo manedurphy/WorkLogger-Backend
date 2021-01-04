@@ -1,5 +1,4 @@
 import { Request, Response } from 'express';
-import jwtMiddleware from 'express-jwt';
 import { inject } from 'inversify';
 import { Types } from '../constants/Types';
 import { TaskRepository } from '../data/repositories/TaskRepository';
@@ -24,14 +23,7 @@ export class TasksController extends BaseHttpController {
     this.taskRepository = taskRepository;
   }
 
-  @httpGet(
-    '/',
-    jwtMiddleware({
-      secret: process.env.JWT_SECRET as string,
-      algorithms: ['HS256'],
-      requestProperty: 'payload',
-    })
-  )
+  @httpGet('/')
   public async GetIncompleteTasks(
     @request() req: AuthenticatedRequest,
     @response() res: Response

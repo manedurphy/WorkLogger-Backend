@@ -6,4 +6,5 @@ export class ValidationMessages {
   public static LAST_NAME = 'Must include last name';
   public static EMAIL = 'Invalid email';
   public static PASSWORD = 'Password must be at least 6 characters long';
+  public static PASSWORD_MISSING = 'Please enter your password';
 }

@@ -10,7 +10,6 @@ import { Types } from '../constants/Types';
 import { ActivationPasswordRepository } from '../data/repositories/ActivationPasswordRepository';
 import { AuthService } from '../services/AuthService';
 import { ValidationMessages } from '../constants/ValidationMessages';
-import jwtMiddleware from 'express-jwt';
 import { AuthenticatedRequest } from './interfaces/interfaces';
 import {
   controller,
@@ -71,9 +70,7 @@ export class UsersController extends BaseHttpController {
   private async Register(@request() req: Request, @response() res: Response) {
     Logger.Warn(req.body, true);
     try {
-      const registrationFormErrorsPresent = this.userService.ValidateRegistrationForm(
-        req
-      );
+      const registrationFormErrorsPresent = this.userService.ValidateForm(req);
       const passordsMatch = this.userService.ValidatePassordsMatch(req);
 
       if (registrationFormErrorsPresent || !passordsMatch)
@@ -98,9 +95,22 @@ export class UsersController extends BaseHttpController {
     }
   }
 
-  @httpPost('/login', LoggerMiddleware)
+  @httpPost(
+    '/login',
+    LoggerMiddleware,
+    body('email').not().isEmpty().withMessage(ValidationMessages.EMAIL),
+    body('password')
+      .not()
+      .isEmpty()
+      .withMessage(ValidationMessages.PASSWORD_MISSING)
+  )
   private async Login(@request() req: Request, @response() res: Response) {
     try {
+      const loginFormsPresent = this.userService.ValidateForm(req);
+
+      if (loginFormsPresent)
+        return this.badRequest(this.userService.errorMessage);
+
       await this.userRepository.Get();
 
       const existingUser = this.userRepository.GetByEmail(req.body.email);
@@ -133,14 +143,7 @@ export class UsersController extends BaseHttpController {
     }
   }
 
-  @httpGet(
-    '/verify-token',
-    jwtMiddleware({
-      secret: process.env.JWT_SECRET as string,
-      algorithms: ['HS256'],
-      requestProperty: 'payload',
-    })
-  )
+  @httpGet('/verify-token')
   private async VerifyToken(
     @request() req: AuthenticatedRequest,
     @response() res: Response
@@ -154,14 +157,7 @@ export class UsersController extends BaseHttpController {
     }
   }
 
-  @httpGet(
-    '/refresh',
-    jwtMiddleware({
-      secret: process.env.JWT_SECRET as string,
-      algorithms: ['HS256'],
-      requestProperty: 'payload',
-    })
-  )
+  @httpGet('/refresh')
   private async GetNewToken(
     @request() req: AuthenticatedRequest,
     @response() res: Response
