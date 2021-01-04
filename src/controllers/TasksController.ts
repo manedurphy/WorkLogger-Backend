@@ -1,6 +1,7 @@
 import { Response } from 'express';
 import { inject } from 'inversify';
 import { Types } from '../constants/Types';
+import { Logger } from '@overnightjs/logger';
 import { TaskRepository } from '../data/repositories/TaskRepository';
 import { AuthenticatedRequest } from './interfaces/interfaces';
 import { LogRepository } from '../data/repositories/LogRepository';
@@ -9,6 +10,7 @@ import { body } from 'express-validator';
 import { TaskService } from '../services/TaskService';
 import { ValidationMessages } from '../constants/ValidationMessages';
 import { HttpResponse } from '../constants/HttpResponse';
+import { LogService } from '../services/LogService';
 import {
   BaseHttpController,
   controller,
@@ -25,16 +27,19 @@ export class TasksController extends BaseHttpController {
   private readonly taskRepository: TaskRepository;
   private readonly logRepository: LogRepository;
   private readonly taskService: TaskService;
+  private readonly logService: LogService;
 
   public constructor(
     @inject(Types.TaskRepository) taskRepository: TaskRepository,
     @inject(Types.LogRepository) logRepository: LogRepository,
-    @inject(Types.TaskService) taskService: TaskService
+    @inject(Types.TaskService) taskService: TaskService,
+    @inject(Types.LogService) logService: LogService
   ) {
     super();
     this.taskRepository = taskRepository;
     this.logRepository = logRepository;
     this.taskService = taskService;
+    this.logService = logService;
   }
 
   @httpGet('/incomplete')
@@ -46,6 +51,7 @@ export class TasksController extends BaseHttpController {
       await this.taskRepository.GetByStatus(req.payload.userInfo.id, false);
       return this.ok(this.taskRepository.tasks);
     } catch (error) {
+      Logger.Warn(error);
       return this.internalServerError();
     }
   }
@@ -63,6 +69,7 @@ export class TasksController extends BaseHttpController {
 
       return this.ok(this.taskRepository.task);
     } catch (error) {
+      Logger.Warn(error);
       return this.internalServerError();
     }
   }
@@ -76,6 +83,7 @@ export class TasksController extends BaseHttpController {
       await this.taskRepository.GetByStatus(req.payload.userInfo.id, true);
       return this.ok(this.taskRepository.tasks);
     } catch (error) {
+      Logger.Warn(error);
       return this.internalServerError();
     }
   }
@@ -93,6 +101,7 @@ export class TasksController extends BaseHttpController {
 
       return this.ok(this.taskRepository.task);
     } catch (error) {
+      Logger.Warn(error);
       return this.internalServerError();
     }
   }
@@ -146,10 +155,13 @@ export class TasksController extends BaseHttpController {
       await this.taskRepository.Add(req.body);
       const task = this.taskRepository.task;
 
+      req.body.weekOf = this.logService.GetSunday();
+      req.body.day = this.logService.GetToday();
       if (task) await this.logRepository.Add(req.body, task);
 
       return this.created('/', { message: 'Task created' }); // come back to this
     } catch (error) {
+      Logger.Warn(error);
       return this.internalServerError();
     }
   }
@@ -168,6 +180,7 @@ export class TasksController extends BaseHttpController {
 
       return this.statusCode(204);
     } catch (error) {
+      Logger.Warn(error);
       return this.internalServerError();
     }
   }
@@ -186,6 +199,7 @@ export class TasksController extends BaseHttpController {
 
       return this.ok(HttpResponse.TASK_UPDATE);
     } catch (error) {
+      Logger.Warn(error);
       return this.internalServerError();
     }
   }
@@ -204,6 +218,7 @@ export class TasksController extends BaseHttpController {
 
       return this.ok(HttpResponse.TASK_UPDATE);
     } catch (error) {
+      Logger.Warn(error);
       return this.internalServerError();
     }
   }
@@ -222,6 +237,7 @@ export class TasksController extends BaseHttpController {
 
       return this.ok(HttpResponse.TASK_UPDATE);
     } catch (error) {
+      Logger.Warn(error);
       return this.internalServerError();
     }
   }

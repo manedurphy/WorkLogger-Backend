@@ -18,10 +18,11 @@ export class LogRepository implements ILogRepository {
     this._log = log;
   }
 
-  public async Add(log: Log, task: Task): Promise<void> {
+  public async Add(log: Log /** Make Dto */, task: Task): Promise<void> {
     Log.create({
       ...log,
       loggedAt: log.loggedAt || new Date(),
+      productiveHours: task.hoursWorked,
       TaskId: task.id,
       UserId: task.UserId,
     });
