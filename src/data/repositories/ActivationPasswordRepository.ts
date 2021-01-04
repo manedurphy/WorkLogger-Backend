@@ -1,17 +1,13 @@
 import { injectable } from 'inversify';
-import { ActivationPassword } from '../../models';
+import { ActivationPassword, User } from '../../models';
 import { IActivationPasswordRepository } from '../interfaces/IActivationPasswordRepository';
 
 @injectable()
 export class ActivationPasswordRepository
   implements IActivationPasswordRepository {
-  public GenerateActivationPassword(): string {
-    return require('crypto').randomBytes(80).toString('hex');
-  }
-
-  public async GetById(userId: number): Promise<ActivationPassword | null> {
+  public async Get(password: string): Promise<ActivationPassword | null> {
     const activationPassword = await ActivationPassword.findOne({
-      where: { UserId: userId },
+      where: { password },
     });
     return activationPassword;
   }
@@ -20,5 +16,20 @@ export class ActivationPasswordRepository
     const activationPassword = this.GenerateActivationPassword();
     ActivationPassword.create({ password: activationPassword, UserId: userId });
     return activationPassword;
+  }
+
+  public GenerateActivationPassword(): string {
+    return require('crypto').randomBytes(80).toString('hex');
+  }
+
+  public async Update(activationPassword: ActivationPassword): Promise<void> {
+    const user = await User.findOne({
+      where: { id: activationPassword.UserId },
+    });
+
+    if (user) {
+      user.update({ active: true });
+      activationPassword.destroy();
+    }
   }
 }

@@ -1,4 +1,5 @@
 export class ValidationMessages {
+  /** USERS */
   public static PASSWORDS_DO_NOT_MATCH =
     'Passwords do not match. Please try again.';
   public static FIRST_NAME = 'Must include first name';
