@@ -51,30 +51,30 @@ export class TasksController extends BaseHttpController {
       await this.taskRepository.GetByStatus(req.payload.userInfo.id, false);
       return this.ok(this.taskRepository.tasks);
     } catch (error) {
-      Logger.Warn(error);
+      Logger.Err(error);
       return this.internalServerError();
     }
   }
 
-  @httpGet('/incomplete/:projectNumber', LoggerMiddleware)
+  @httpGet('/incomplete/:id', LoggerMiddleware)
   private async GetIncompleteTask(
     @request() req: AuthenticatedRequest,
     @response() res: Response
   ) {
     try {
       await this.taskRepository.GetByStatus(req.payload.userInfo.id, false);
-      this.taskRepository.GetByProjectNumber(+req.params.projectNumber);
+      this.taskRepository.GetById(+req.params.id);
 
       if (!this.taskRepository.task) return this.notFound();
 
       return this.ok(this.taskRepository.task);
     } catch (error) {
-      Logger.Warn(error);
+      Logger.Err(error);
       return this.internalServerError();
     }
   }
 
-  @httpGet('/complete')
+  @httpGet('/complete', LoggerMiddleware)
   private async GetCompleteTasks(
     @request() req: AuthenticatedRequest,
     @response() res: Response
@@ -83,25 +83,25 @@ export class TasksController extends BaseHttpController {
       await this.taskRepository.GetByStatus(req.payload.userInfo.id, true);
       return this.ok(this.taskRepository.tasks);
     } catch (error) {
-      Logger.Warn(error);
+      Logger.Err(error);
       return this.internalServerError();
     }
   }
 
-  @httpGet('/complete/:projectNumber', LoggerMiddleware)
+  @httpGet('/complete/:id', LoggerMiddleware)
   private async GetCompleteTask(
     @request() req: AuthenticatedRequest,
     @response() res: Response
   ) {
     try {
       await this.taskRepository.GetByStatus(req.payload.userInfo.id, true);
-      this.taskRepository.GetByProjectNumber(+req.params.projectNumber);
+      this.taskRepository.GetById(+req.params.id);
 
       if (!this.taskRepository.task) return this.notFound();
 
       return this.ok(this.taskRepository.task);
     } catch (error) {
-      Logger.Warn(error);
+      Logger.Err(error);
       return this.internalServerError();
     }
   }
@@ -153,91 +153,107 @@ export class TasksController extends BaseHttpController {
         return this.badRequest(HttpResponse.TASK_EXISTS);
 
       await this.taskRepository.Add(req.body);
-      const task = this.taskRepository.task;
+      const task = this.taskRepository.task!;
 
-      req.body.weekOf = this.logService.GetSunday();
-      req.body.day = this.logService.GetToday();
-      if (task) await this.logRepository.Add(req.body, task);
+      if (task) {
+        req.body.weekOf = this.logService.GetSunday();
+        req.body.day = this.logService.GetToday();
+        req.body.productiveHours = task.hoursWorked;
+        await this.logRepository.Add(req.body, task);
+      }
 
       return this.created('/', { message: 'Task created' }); // come back to this
     } catch (error) {
-      Logger.Warn(error);
+      Logger.Err(error);
       return this.internalServerError();
     }
   }
 
-  @httpDelete('/:projectNumber', LoggerMiddleware)
+  @httpDelete('/:id', LoggerMiddleware)
   private async DeleteTask(
     @request() req: AuthenticatedRequest,
     @response() res: Response
   ) {
     try {
       await this.taskRepository.Get(req.payload.userInfo.id);
-      this.taskRepository.GetByProjectNumber(+req.params.projectNumber);
+      this.taskRepository.GetById(+req.params.id);
 
       if (!this.taskRepository.task) return this.notFound();
       await this.taskRepository.Delete();
 
       return this.statusCode(204);
     } catch (error) {
-      Logger.Warn(error);
+      Logger.Err(error);
       return this.internalServerError();
     }
   }
 
-  @httpPut('/:projectNumber', LoggerMiddleware)
+  @httpPut('/:id', LoggerMiddleware)
   private async Update(
     @request() req: AuthenticatedRequest,
     @response() res: Response
   ) {
     try {
       await this.taskRepository.Get(req.payload.userInfo.id);
-      this.taskRepository.GetByProjectNumber(+req.params.projectNumber);
+      this.taskRepository.GetById(+req.params.id);
 
+      const currentWorkedHours = this.taskRepository.task?.hoursWorked;
       if (!this.taskRepository.task) return this.notFound();
       await this.taskRepository.Update(req.body);
 
+      const task = this.taskRepository.task;
+
+      if (task && currentWorkedHours != null) {
+        await this.logRepository.GetByTaskId(task.id);
+
+        req.body.weekOf = this.logService.GetSunday();
+        req.body.day = this.logService.GetToday();
+        req.body.productiveHours = task.hoursWorked - currentWorkedHours;
+
+        this.logRepository.Add(req.body, task);
+      }
+
       return this.ok(HttpResponse.TASK_UPDATE);
     } catch (error) {
-      Logger.Warn(error);
+      Logger.Err(error);
       return this.internalServerError();
     }
   }
 
-  @httpPut('/incomplete/:projectNumber', LoggerMiddleware)
+  @httpPut('/incomplete/:id', LoggerMiddleware)
   private async CompleteTask(
     @request() req: AuthenticatedRequest,
     @response() res: Response
   ) {
     try {
       await this.taskRepository.GetByStatus(req.payload.userInfo.id, false);
-      this.taskRepository.GetByProjectNumber(+req.params.projectNumber);
+      this.taskRepository.GetById(+req.params.id);
 
       if (!this.taskRepository.task) return this.notFound();
       await this.taskRepository.Complete();
 
       return this.ok(HttpResponse.TASK_UPDATE);
     } catch (error) {
-      Logger.Warn(error);
+      Logger.Err(error);
       return this.internalServerError();
     }
   }
 
-  @httpPut('/complete/:projectNumber', LoggerMiddleware)
+  @httpPut('/complete/:id', LoggerMiddleware)
   private async InCompleteTask(
     @request() req: AuthenticatedRequest,
     @response() res: Response
   ) {
     try {
       await this.taskRepository.GetByStatus(req.payload.userInfo.id, true);
-      this.taskRepository.GetByProjectNumber(+req.params.projectNumber);
+      this.taskRepository.GetById(+req.params.id);
 
       if (!this.taskRepository.task) return this.notFound();
       await this.taskRepository.InComplete();
 
       return this.ok(HttpResponse.TASK_UPDATE);
     } catch (error) {
-      Logger.Warn(error);
+      Logger.Err(error);
       return this.internalServerError();
     }
   }

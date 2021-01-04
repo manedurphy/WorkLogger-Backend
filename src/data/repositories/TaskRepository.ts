@@ -20,6 +20,11 @@ export class TaskRepository implements ITaskRepository {
     this._tasks = tasks;
   }
 
+  public GetById(id: number): void {
+    const task = this._tasks.find((task) => task.id === id) || null;
+    this._task = task;
+  }
+
   public GetByProjectNumber(projectNumber: number): void {
     const task = this._tasks.find(
       (task) => task.projectNumber === projectNumber
@@ -39,7 +44,7 @@ export class TaskRepository implements ITaskRepository {
 
   public async Add(task: Task): Promise<void> {
     const newTask = await Task.create(task);
-    this._task = newTask;
+    this._task = newTask || null;
   }
 
   public async Delete(): Promise<void> {
@@ -47,7 +52,8 @@ export class TaskRepository implements ITaskRepository {
   }
 
   public async Update(updatedTask: Task): Promise<void> {
-    this._task?.update(updatedTask);
+    const task = (await this._task?.update(updatedTask)) || null;
+    this._task = task;
   }
 
   public async Complete(): Promise<void> {

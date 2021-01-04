@@ -10,9 +10,9 @@ export class LogRepository implements ILogRepository {
     return this._log;
   }
 
-  public async Get(projectNumber: number, userId: number): Promise<void> {
+  public async GetByTaskId(taskId: number): Promise<void> {
     const log = await Log.findAll({
-      where: { projectNumber, UserId: userId },
+      where: { TaskId: taskId },
       order: [['id', 'DESC']],
     });
     this._log = log;
@@ -22,7 +22,7 @@ export class LogRepository implements ILogRepository {
     Log.create({
       ...log,
       loggedAt: log.loggedAt || new Date(),
-      productiveHours: task.hoursWorked,
+      productiveHours: log.productiveHours,
       TaskId: task.id,
       UserId: task.UserId,
     });
