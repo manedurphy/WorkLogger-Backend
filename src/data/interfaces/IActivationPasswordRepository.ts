@@ -2,6 +2,6 @@ import { ActivationPassword } from '../../models';
 
 export interface IActivationPasswordRepository {
   GenerateActivationPassword(): string;
-  Add(userId: number): void;
+  Add(userId: number): string;
   GetById(id: number): Promise<ActivationPassword | null>;
 }

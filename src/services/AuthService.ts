@@ -15,7 +15,7 @@ export class AuthService {
     );
   }
 
-  private sendVerificationEmail(activationPassword: string) {
+  public sendVerificationEmail(activationPassword: string) {
     const verificationLink =
       process.env.NODE_ENV === 'production'
         ? `https://work-log-connor-app.herokuapp.com/verify/${activationPassword}`

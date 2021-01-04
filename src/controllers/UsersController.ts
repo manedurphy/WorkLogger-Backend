@@ -15,19 +15,28 @@ import {
   httpPost,
   BaseHttpController,
 } from 'inversify-express-utils';
+import { AuthService } from '../services/AuthService';
+import { ActivationPasswordRepository } from '../data/repositories/ActivationPasswordRepository';
 
 @controller('/api/users')
 export class UsersController extends BaseHttpController {
-  private userRepository: UserRepository;
-  private userService: UserService;
+  private readonly userRepository: UserRepository;
+  private readonly activationPasswordRepository: ActivationPasswordRepository;
+  private readonly userService: UserService;
+  private readonly authService: AuthService;
 
   public constructor(
     @inject(Types.UserRepository) userRepository: UserRepository,
-    @inject(Types.UserService) userService: UserService
+    @inject(Types.ActivationPasswordRepository)
+    activationPasswordRepository: ActivationPasswordRepository,
+    @inject(Types.UserService) userService: UserService,
+    @inject(Types.AuthService) authService: AuthService
   ) {
     super();
     this.userRepository = userRepository;
+    this.activationPasswordRepository = activationPasswordRepository;
     this.userService = userService;
+    this.authService = authService;
   }
 
   @httpGet('/', LoggerMiddleware)
@@ -64,7 +73,12 @@ export class UsersController extends BaseHttpController {
 
       await this.userService.HashPassword(req);
 
-      this.userRepository.Add(req.body);
+      const newUser = await this.userRepository.Add(req.body);
+      const activationPassword = this.activationPasswordRepository.Add(
+        newUser.id
+      );
+
+      this.authService.sendVerificationEmail(activationPassword);
 
       return this.created('/register', { message: 'User created' }); //come back to this
     } catch (error) {

@@ -16,8 +16,11 @@ export class ActivationPasswordRepository
     return activationPassword;
   }
 
-  public Add(userId: number): void {
+  public Add(userId: number): string {
     const activationPassword = this.GenerateActivationPassword();
     ActivationPassword.create({ password: activationPassword, UserId: userId });
+    console.log(activationPassword);
+    console.log('USER ID: ', userId);
+    return activationPassword;
   }
 }
