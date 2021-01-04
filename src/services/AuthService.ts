@@ -8,10 +8,20 @@ export class AuthService {
   public GenerateToken(user: UserReadDto) {
     return jwt.sign(
       {
-        user,
+        userInfo: user,
       },
       process.env.JWT_SECRET as string,
       { expiresIn: process.env.JWT_EXP }
+    );
+  }
+
+  public GenerateRefreshToken(user: UserReadDto) {
+    return jwt.sign(
+      {
+        userInfo: user,
+      },
+      process.env.JWT_SECRET as string,
+      { expiresIn: process.env.REFRESH_EXP }
     );
   }
 

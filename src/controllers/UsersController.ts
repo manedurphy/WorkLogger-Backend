@@ -7,6 +7,11 @@ import { UserService } from '../services/UserService';
 import { LoggerMiddleware } from '../middleware/LoggerMiddleware';
 import { HttpResponse } from '../constants/HttpResponse';
 import { Types } from '../constants/Types';
+import { ActivationPasswordRepository } from '../data/repositories/ActivationPasswordRepository';
+import { AuthService } from '../services/AuthService';
+import { ValidationMessages } from '../constants/ValidationMessages';
+import jwtMiddleware from 'express-jwt';
+import { AuthenticatedRequest } from './interfaces/interfaces';
 import {
   controller,
   httpGet,
@@ -15,8 +20,6 @@ import {
   httpPost,
   BaseHttpController,
 } from 'inversify-express-utils';
-import { AuthService } from '../services/AuthService';
-import { ActivationPasswordRepository } from '../data/repositories/ActivationPasswordRepository';
 
 @controller('/api/users')
 export class UsersController extends BaseHttpController {
@@ -53,9 +56,17 @@ export class UsersController extends BaseHttpController {
   @httpPost(
     '/register',
     LoggerMiddleware,
-    body('firstName').not().isEmpty().withMessage('Must include first name'),
-    body('lastName').not().isEmpty().withMessage('Must include last name'),
-    body('email').isEmail().withMessage('Invalid email')
+    body('firstName')
+      .not()
+      .isEmpty()
+      .withMessage(ValidationMessages.FIRST_NAME),
+    body('lastName').not().isEmpty().withMessage(ValidationMessages.LAST_NAME),
+    body('email').isEmail().withMessage(ValidationMessages.EMAIL),
+    body('password')
+      .not()
+      .isEmpty()
+      .isLength({ min: 6 })
+      .withMessage(ValidationMessages.PASSWORD)
   )
   private async Register(@request() req: Request, @response() res: Response) {
     Logger.Warn(req.body, true);
@@ -105,13 +116,44 @@ export class UsersController extends BaseHttpController {
         return this.badRequest(HttpResponse.INVALID_CREDENTIALS);
 
       const userReadDto = this.userService.MapUserReadDto(existingUser);
+      const token = this.authService.GenerateToken(userReadDto);
+      const refreshToken = this.authService.GenerateRefreshToken(userReadDto);
       const userLoginResponseObject = this.userService.GetLoginResponse(
+        token,
+        refreshToken,
         userReadDto
       );
+
       return this.ok(userLoginResponseObject);
     } catch (error) {
       Logger.Err('ERROR IN LOGIN ROUTE', error);
       return this.internalServerError();
     }
   }
+
+  @httpGet(
+    '/verify-token',
+    jwtMiddleware({
+      secret: process.env.JWT_SECRET as string,
+      algorithms: ['HS256'],
+      requestProperty: 'payload',
+    })
+  )
+  private async VerifyToken(
+    @request() req: AuthenticatedRequest,
+    @response() res: Response
+  ) {
+    try {
+      return this.ok(
+        this.userService.GetTokenValidResponse(req.payload.userInfo)
+      );
+    } catch (error) {
+      return this.internalServerError();
+    }
+  }
+
+  private async GetNewToken(
+    @request() req: AuthenticatedRequest,
+    @response() res: Response
+  ) {}
 }

@@ -1,25 +1,19 @@
 import { Request } from 'express';
 import { validationResult } from 'express-validator';
-import { inject, injectable } from 'inversify';
+import { injectable } from 'inversify';
 import { ValidationMessages } from '../constants/ValidationMessages';
 import { compare, hash } from 'bcrypt';
 import { UserReadDto } from '../data/dtos/UserReadDto';
 import { User } from '../models';
 import { UserLoginResponseObject } from '../responseObjects/UserLoginResponse';
-import { AuthService } from './AuthService';
-import { Types } from '../constants/Types';
+import { UserTokenValidResponseObject } from '../responseObjects/UserTokenValidResponseObject';
 
 @injectable()
 export class UserService {
   private _errorMessage: string = '';
-  private authService: AuthService;
 
   get errorMessage() {
     return this._errorMessage;
-  }
-
-  public constructor(@inject(Types.AuthService) authService: AuthService) {
-    this.authService = authService;
   }
 
   public ValidateRegistrationForm(req: Request): boolean {
@@ -57,8 +51,15 @@ export class UserService {
     return new UserReadDto(user.id, user.firstName, user.lastName, user.email);
   }
 
-  public GetLoginResponse(user: UserReadDto) {
-    const token = this.authService.GenerateToken(user);
-    return new UserLoginResponseObject(token, user);
+  public GetLoginResponse(
+    token: string,
+    refreshToken: string,
+    user: UserReadDto
+  ) {
+    return new UserLoginResponseObject(token, refreshToken, user);
+  }
+
+  public GetTokenValidResponse(user: UserReadDto) {
+    return new UserTokenValidResponseObject(user);
   }
 }
