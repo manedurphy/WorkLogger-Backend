@@ -4,6 +4,9 @@ import { Types } from '../constants/Types';
 import { TaskRepository } from '../data/repositories/TaskRepository';
 import { AuthenticatedRequest } from './interfaces/interfaces';
 import { LogRepository } from '../data/repositories/LogRepository';
+import { LoggerMiddleware } from '../middleware/LoggerMiddleware';
+import { body } from 'express-validator';
+import { TaskService } from '../services/TaskService';
 import {
   BaseHttpController,
   controller,
@@ -17,14 +20,17 @@ import {
 export class TasksController extends BaseHttpController {
   private readonly taskRepository: TaskRepository;
   private readonly logRepository: LogRepository;
+  private readonly taskService: TaskService;
 
   public constructor(
     @inject(Types.TaskRepository) taskRepository: TaskRepository,
-    @inject(Types.LogRepository) logRepository: LogRepository
+    @inject(Types.LogRepository) logRepository: LogRepository,
+    @inject(Types.TaskService) taskService: TaskService
   ) {
     super();
     this.taskRepository = taskRepository;
     this.logRepository = logRepository;
+    this.taskService = taskService;
   }
 
   @httpGet('/')
@@ -40,7 +46,7 @@ export class TasksController extends BaseHttpController {
     }
   }
 
-  @httpGet('/incomplete/:projectNumber')
+  @httpGet('/incomplete/:projectNumber', LoggerMiddleware)
   private async GetIncompleteTask(
     @request() req: AuthenticatedRequest,
     @response() res: Response
@@ -57,9 +63,45 @@ export class TasksController extends BaseHttpController {
     }
   }
 
-  @httpPost('/')
-  public async CreateTask(@request() req: Request, @response() res: Response) {
+  @httpPost(
+    '/',
+    LoggerMiddleware,
+    body('name').not().isEmpty().withMessage('Task name is missing'),
+    body('projectNumber')
+      .not()
+      .isEmpty()
+      .withMessage('Project number is missing'),
+    body('hoursAvailableToWork')
+      .not()
+      .isEmpty()
+      .withMessage('Please enter available hours'),
+    body('hoursWorked')
+      .not()
+      .isEmpty()
+      .withMessage('Please enter the numbers of hours worked'),
+    body('reviewHours')
+      .not()
+      .isEmpty()
+      .withMessage('Please enter the number of review hours'),
+    body('numberOfReviews')
+      .not()
+      .isEmpty()
+      .withMessage('Number of reviews is missing'),
+    body('hoursRequiredByBim')
+      .not()
+      .isEmpty()
+      .withMessage('Hours required by BIM is missing')
+  )
+  public async CreateTask(
+    @request() req: AuthenticatedRequest,
+    @response() res: Response
+  ) {
     try {
+      const taskFormErrorsPresent = this.taskService.Validate(req);
+
+      if (taskFormErrorsPresent)
+        return this.badRequest(this.taskService.errorMessage);
+
       await this.taskRepository.Add(req.body);
       const task = this.taskRepository.task;
 
@@ -71,3 +113,5 @@ export class TasksController extends BaseHttpController {
     }
   }
 }
+
+// "reviewHours": 4,

@@ -11,14 +11,16 @@ import { AuthService } from './services/AuthService';
 import { ActivationPasswordRepository } from './data/repositories/ActivationPasswordRepository';
 import { TaskRepository } from './data/repositories/TaskRepository';
 import { LogRepository } from './data/repositories/LogRepository';
+import { TaskService } from './services/TaskService';
 
 const container = new Container();
 
 container.bind<UserRepository>(Types.UserRepository).to(UserRepository);
 container.bind<TaskRepository>(Types.TaskRepository).to(TaskRepository);
+container.bind<LogRepository>(Types.LogRepository).to(LogRepository);
 container.bind<UserService>(Types.UserService).to(UserService);
 container.bind<AuthService>(Types.AuthService).to(AuthService);
-container.bind<LogRepository>(Types.LogRepository).to(LogRepository);
+container.bind<TaskService>(Types.TaskService).to(TaskService);
 container
   .bind<ActivationPasswordRepository>(Types.ActivationPasswordRepository)
   .to(ActivationPasswordRepository);

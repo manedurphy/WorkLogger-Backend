@@ -6,4 +6,5 @@ export class Types {
   public static TaskRepository: string = 'TaskRepository';
   public static UserService: string = 'UserService';
   public static AuthService: string = 'AuthService';
+  public static TaskService: string = 'TaskService';
 }
