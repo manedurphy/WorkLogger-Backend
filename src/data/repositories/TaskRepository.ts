@@ -45,4 +45,16 @@ export class TaskRepository implements ITaskRepository {
   public async Delete(): Promise<void> {
     this._task?.destroy();
   }
+
+  public async Update(updatedTask: Task): Promise<void> {
+    this._task?.update(updatedTask);
+  }
+
+  public async Complete(): Promise<void> {
+    this._task?.update({ complete: true });
+  }
+
+  public async InComplete(): Promise<void> {
+    this._task?.update({ complete: false });
+  }
 }

@@ -6,4 +6,7 @@ export interface ITaskRepository {
   GetByProjectNumber(projectNumber: number): void;
   Add(task: Task): Promise<void>;
   Delete(): Promise<void>;
+  Update(updatedTask: Task): Promise<void>;
+  Complete(): Promise<void>;
+  InComplete(): Promise<void>;
 }

@@ -15,6 +15,7 @@ import {
   httpDelete,
   httpGet,
   httpPost,
+  httpPut,
   request,
   response,
 } from 'inversify-express-utils';
@@ -36,8 +37,8 @@ export class TasksController extends BaseHttpController {
     this.taskService = taskService;
   }
 
-  @httpGet('/')
-  public async GetIncompleteTasks(
+  @httpGet('/incomplete')
+  private async GetIncompleteTasks(
     @request() req: AuthenticatedRequest,
     @response() res: Response
   ) {
@@ -56,6 +57,34 @@ export class TasksController extends BaseHttpController {
   ) {
     try {
       await this.taskRepository.GetByStatus(req.payload.userInfo.id, false);
+      this.taskRepository.GetByProjectNumber(+req.params.projectNumber);
+
+      return this.ok(this.taskRepository.task);
+    } catch (error) {
+      return this.internalServerError();
+    }
+  }
+
+  @httpGet('/complete')
+  private async GetCompleteTasks(
+    @request() req: AuthenticatedRequest,
+    @response() res: Response
+  ) {
+    try {
+      await this.taskRepository.GetByStatus(req.payload.userInfo.id, true);
+      return this.ok(this.taskRepository.tasks);
+    } catch (error) {
+      return this.internalServerError();
+    }
+  }
+
+  @httpGet('/complete/:projectNumber', LoggerMiddleware)
+  private async GetCompleteTask(
+    @request() req: AuthenticatedRequest,
+    @response() res: Response
+  ) {
+    try {
+      await this.taskRepository.GetByStatus(req.payload.userInfo.id, true);
       this.taskRepository.GetByProjectNumber(+req.params.projectNumber);
 
       return this.ok(this.taskRepository.task);
@@ -121,7 +150,7 @@ export class TasksController extends BaseHttpController {
     }
   }
 
-  @httpDelete('/:projectNumber')
+  @httpDelete('/:projectNumber', LoggerMiddleware)
   private async DeleteTask(
     @request() req: AuthenticatedRequest,
     @response() res: Response
@@ -134,6 +163,59 @@ export class TasksController extends BaseHttpController {
       await this.taskRepository.Delete();
 
       return this.statusCode(204);
+    } catch (error) {
+      return this.internalServerError();
+    }
+  }
+
+  @httpPut('/:projectNumber', LoggerMiddleware)
+  private async Update(
+    @request() req: AuthenticatedRequest,
+    @response() res: Response
+  ) {
+    try {
+      await this.taskRepository.Get(req.payload.userInfo.id);
+      this.taskRepository.GetByProjectNumber(+req.params.projectNumber);
+
+      await this.taskRepository.Update(req.body);
+
+      return this.ok(HttpResponse.TASK_UPDATE);
+    } catch (error) {
+      return this.internalServerError();
+    }
+  }
+
+  @httpPut('/incomplete/:projectNumber', LoggerMiddleware)
+  private async CompleteTask(
+    @request() req: AuthenticatedRequest,
+    @response() res: Response
+  ) {
+    try {
+      await this.taskRepository.GetByStatus(req.payload.userInfo.id, false);
+      this.taskRepository.GetByProjectNumber(+req.params.projectNumber);
+
+      if (!this.taskRepository.task) return this.notFound();
+
+      await this.taskRepository.Complete();
+
+      return this.ok(HttpResponse.TASK_UPDATE);
+    } catch (error) {
+      return this.internalServerError();
+    }
+  }
+
+  @httpPut('/complete/:projectNumber', LoggerMiddleware)
+  private async InCompleteTask(
+    @request() req: AuthenticatedRequest,
+    @response() res: Response
+  ) {
+    try {
+      await this.taskRepository.GetByStatus(req.payload.userInfo.id, true);
+      this.taskRepository.GetByProjectNumber(+req.params.projectNumber);
+
+      await this.taskRepository.InComplete();
+
+      return this.ok(HttpResponse.TASK_UPDATE);
     } catch (error) {
       return this.internalServerError();
     }
