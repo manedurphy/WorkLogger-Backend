@@ -5,4 +5,5 @@ export interface ITaskRepository {
   GetByStatus(userId: number, complete: boolean): Promise<void>;
   GetByProjectNumber(projectNumber: number): void;
   Add(task: Task): Promise<void>;
+  Delete(): Promise<void>;
 }

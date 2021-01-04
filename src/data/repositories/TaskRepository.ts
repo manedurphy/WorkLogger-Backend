@@ -41,4 +41,8 @@ export class TaskRepository implements ITaskRepository {
     const newTask = await Task.create(task);
     this._task = newTask;
   }
+
+  public async Delete(): Promise<void> {
+    this._task?.destroy();
+  }
 }

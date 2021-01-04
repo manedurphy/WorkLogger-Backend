@@ -12,6 +12,7 @@ import { HttpResponse } from '../constants/HttpResponse';
 import {
   BaseHttpController,
   controller,
+  httpDelete,
   httpGet,
   httpPost,
   request,
@@ -115,6 +116,24 @@ export class TasksController extends BaseHttpController {
       if (task) await this.logRepository.Add(req.body, task);
 
       return this.created('/', { message: 'Task created' }); // come back to this
+    } catch (error) {
+      return this.internalServerError();
+    }
+  }
+
+  @httpDelete('/:projectNumber')
+  private async DeleteTask(
+    @request() req: AuthenticatedRequest,
+    @response() res: Response
+  ) {
+    try {
+      await this.taskRepository.Get(req.payload.userInfo.id);
+      this.taskRepository.GetByProjectNumber(+req.params.projectNumber);
+
+      if (!this.taskRepository.task) return this.notFound();
+      await this.taskRepository.Delete();
+
+      return this.statusCode(204);
     } catch (error) {
       return this.internalServerError();
     }
