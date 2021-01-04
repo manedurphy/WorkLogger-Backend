@@ -148,15 +148,90 @@ Models.ActivationPassword.init(
   }
 );
 
+Models.Log.init(
+  {
+    id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      primaryKey: true,
+      autoIncrement: true,
+    },
+    name: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    projectNumber: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    hoursAvailableToWork: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    hoursWorked: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    hoursRemaining: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    notes: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    numberOfReviews: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    reviewHours: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    hoursRequiredByBim: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    complete: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+    },
+    loggedAt: {
+      type: DataTypes.DATE,
+      allowNull: false,
+    },
+    TaskId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    UserId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+  },
+  {
+    sequelize,
+    createdAt: true,
+    updatedAt: false,
+    modelName: 'Log',
+  }
+);
+
 Models.User.hasMany(Models.Task);
 Models.User.hasOne(Models.ActivationPassword);
+Models.Task.hasMany(Models.Log);
+Models.User.hasMany(Models.Log);
 Models.ActivationPassword.belongsTo(Models.User);
 Models.Task.belongsTo(Models.User);
+Models.Log.belongsTo(Models.User);
+Models.Log.belongsTo(Models.Task);
 
 (async () => {
   await Models.User.sync();
   await Models.Task.sync();
   await Models.ActivationPassword.sync();
+  await Models.Log.sync();
 })();
 
 export default sequelize;
