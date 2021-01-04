@@ -12,6 +12,9 @@ export interface LogAttributes {
   reviewHours: number;
   hoursRequiredByBim: number;
   complete: boolean;
+  day: number;
+  weekOf: string;
+  productiveHours: number;
   loggedAt: Date;
   TaskId: number;
   UserId: number;

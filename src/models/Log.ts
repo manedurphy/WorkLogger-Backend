@@ -14,6 +14,9 @@ export class Log
   public reviewHours!: number;
   public hoursRequiredByBim!: number;
   public complete!: boolean;
+  public day!: number;
+  public weekOf!: string;
+  public productiveHours!: number;
   public loggedAt!: Date;
   public TaskId!: number;
   public UserId!: number;

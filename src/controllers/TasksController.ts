@@ -59,6 +59,8 @@ export class TasksController extends BaseHttpController {
       await this.taskRepository.GetByStatus(req.payload.userInfo.id, false);
       this.taskRepository.GetByProjectNumber(+req.params.projectNumber);
 
+      if (!this.taskRepository.task) return this.notFound();
+
       return this.ok(this.taskRepository.task);
     } catch (error) {
       return this.internalServerError();
@@ -86,6 +88,8 @@ export class TasksController extends BaseHttpController {
     try {
       await this.taskRepository.GetByStatus(req.payload.userInfo.id, true);
       this.taskRepository.GetByProjectNumber(+req.params.projectNumber);
+
+      if (!this.taskRepository.task) return this.notFound();
 
       return this.ok(this.taskRepository.task);
     } catch (error) {
@@ -177,6 +181,7 @@ export class TasksController extends BaseHttpController {
       await this.taskRepository.Get(req.payload.userInfo.id);
       this.taskRepository.GetByProjectNumber(+req.params.projectNumber);
 
+      if (!this.taskRepository.task) return this.notFound();
       await this.taskRepository.Update(req.body);
 
       return this.ok(HttpResponse.TASK_UPDATE);
@@ -195,7 +200,6 @@ export class TasksController extends BaseHttpController {
       this.taskRepository.GetByProjectNumber(+req.params.projectNumber);
 
       if (!this.taskRepository.task) return this.notFound();
-
       await this.taskRepository.Complete();
 
       return this.ok(HttpResponse.TASK_UPDATE);
@@ -213,6 +217,7 @@ export class TasksController extends BaseHttpController {
       await this.taskRepository.GetByStatus(req.payload.userInfo.id, true);
       this.taskRepository.GetByProjectNumber(+req.params.projectNumber);
 
+      if (!this.taskRepository.task) return this.notFound();
       await this.taskRepository.InComplete();
 
       return this.ok(HttpResponse.TASK_UPDATE);

@@ -4,18 +4,18 @@ import { ILogRepository } from '../interfaces/ILogRepository';
 
 @injectable()
 export class LogRepository implements ILogRepository {
-  private _logs: Log[] = [];
+  private _log: Log[] = [];
 
-  get logs() {
-    return this._logs;
+  get log() {
+    return this._log;
   }
 
-  public async Get(taskId: number): Promise<void> {
-    const logs = await Log.findAll({
-      where: { TaskId: taskId },
+  public async Get(projectNumber: number, userId: number): Promise<void> {
+    const log = await Log.findAll({
+      where: { projectNumber, UserId: userId },
       order: [['id', 'DESC']],
     });
-    this._logs = logs;
+    this._log = log;
   }
 
   public async Add(log: Log, task: Task): Promise<void> {

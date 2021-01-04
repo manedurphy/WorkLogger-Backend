@@ -197,6 +197,19 @@ Models.Log.init(
       allowNull: false,
       defaultValue: false,
     },
+    day: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    weekOf: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    productiveHours: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 0,
+    },
     loggedAt: {
       type: DataTypes.DATE,
       allowNull: false,
