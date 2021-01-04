@@ -6,6 +6,7 @@ import { body } from 'express-validator';
 import { UserService } from '../services/UserService';
 import { LoggerMiddleware } from '../middleware/LoggerMiddleware';
 import { HttpResponse } from '../constants/HttpResponse';
+import { Types } from '../constants/Types';
 import {
   controller,
   httpGet,
@@ -21,8 +22,8 @@ export class UsersController extends BaseHttpController {
   private userService: UserService;
 
   public constructor(
-    @inject('UserRepository') userRepository: UserRepository,
-    @inject('UserService') userService: UserService
+    @inject(Types.UserRepository) userRepository: UserRepository,
+    @inject(Types.UserService) userService: UserService
   ) {
     super();
     this.userRepository = userRepository;
@@ -64,6 +65,7 @@ export class UsersController extends BaseHttpController {
       await this.userService.HashPassword(req);
 
       this.userRepository.Add(req.body);
+
       return this.created('/register', { message: 'User created' }); //come back to this
     } catch (error) {
       Logger.Err('ERROR IN REGISTER ROUTE', error);

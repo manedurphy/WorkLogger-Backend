@@ -156,6 +156,7 @@ Models.Task.belongsTo(Models.User);
 (async () => {
   await Models.User.sync();
   await Models.Task.sync();
+  await Models.ActivationPassword.sync();
 })();
 
 export default sequelize;

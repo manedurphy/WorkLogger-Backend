@@ -6,20 +6,20 @@ import { compare, hash } from 'bcrypt';
 import { UserReadDto } from '../data/dtos/UserReadDto';
 import { User } from '../models';
 import { UserLoginResponseObject } from '../responseObjects/UserLoginResponse';
-import { TokenService } from './TokenService';
+import { AuthService } from './AuthService';
 import { Types } from '../constants/Types';
 
 @injectable()
 export class UserService {
   private _errorMessage: string = '';
-  private tokenService: TokenService;
+  private authService: AuthService;
 
   get errorMessage() {
     return this._errorMessage;
   }
 
-  public constructor(@inject(Types.TokenService) tokenService: TokenService) {
-    this.tokenService = tokenService;
+  public constructor(@inject(Types.AuthService) authService: AuthService) {
+    this.authService = authService;
   }
 
   public ValidateRegistrationForm(req: Request): boolean {
@@ -58,7 +58,7 @@ export class UserService {
   }
 
   public GetLoginResponse(user: UserReadDto) {
-    const token = this.tokenService.GenerateToken(user);
+    const token = this.authService.GenerateToken(user);
     return new UserLoginResponseObject(token, user);
   }
 }

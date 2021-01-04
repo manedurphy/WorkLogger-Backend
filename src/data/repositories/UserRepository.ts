@@ -1,9 +1,20 @@
-import { injectable } from 'inversify';
+import { inject, injectable } from 'inversify';
+import { Types } from '../../constants/Types';
 import { User } from '../../models';
 import { IUserRepository } from '../interfaces/IUserRepository';
+import { ActivationPasswordRepository } from './ActivationPasswordRepository';
 
 @injectable()
 export class UserRepository implements IUserRepository {
+  private readonly activationPasswordRepository: ActivationPasswordRepository;
+
+  public constructor(
+    @inject(Types.ActivationPasswordRepository)
+    activationPasswordRepository: ActivationPasswordRepository
+  ) {
+    this.activationPasswordRepository = activationPasswordRepository;
+  }
+
   public async Get(): Promise<User[]> {
     const users = await User.findAll();
     return users;
@@ -14,8 +25,9 @@ export class UserRepository implements IUserRepository {
     return user;
   }
 
-  public Add(user: User): void {
-    User.create(user);
+  public async Add(user: User): Promise<void> {
+    const newUser = await User.create(user);
+    this.activationPasswordRepository.Add(newUser.id);
   }
 
   public async GetByEmail(email: string): Promise<User | null> {

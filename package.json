@@ -12,6 +12,7 @@
   "license": "ISC",
   "dependencies": {
     "@overnightjs/logger": "^1.2.0",
+    "@sendgrid/mail": "^7.4.0",
     "bcrypt": "^5.0.0",
     "express-jwt": "^6.0.0",
     "express-validator": "^6.9.1",
