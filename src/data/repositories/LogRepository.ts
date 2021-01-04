@@ -1,5 +1,6 @@
 import { injectable } from 'inversify';
 import { Log, Task } from '../../models';
+import { LogCreateDto } from '../dtos/LogCreateDto';
 import { ILogRepository } from '../interfaces/ILogRepository';
 
 @injectable()
@@ -18,11 +19,10 @@ export class LogRepository implements ILogRepository {
     this._log = log;
   }
 
-  public async Add(log: Log /** Make Dto */, task: Task): Promise<void> {
+  public async Add(logCreateDto: LogCreateDto, task: Task): Promise<void> {
     Log.create({
-      ...log,
-      loggedAt: log.loggedAt || new Date(),
-      productiveHours: log.productiveHours,
+      ...logCreateDto,
+      loggedAt: new Date(),
       TaskId: task.id,
       UserId: task.UserId,
     });

@@ -153,13 +153,14 @@ export class TasksController extends BaseHttpController {
         return this.badRequest(HttpResponse.TASK_EXISTS);
 
       await this.taskRepository.Add(req.body);
-      const task = this.taskRepository.task!;
+      const newTask = this.taskRepository.task!;
 
-      if (task) {
-        req.body.weekOf = this.logService.GetSunday();
-        req.body.day = this.logService.GetToday();
-        req.body.productiveHours = task.hoursWorked;
-        await this.logRepository.Add(req.body, task);
+      if (newTask) {
+        const logCreateDto = this.logService.MapProps(
+          req.body,
+          newTask.hoursWorked
+        );
+        await this.logRepository.Add(logCreateDto, newTask);
       }
 
       return this.created('/', { message: 'Task created' }); // come back to this
@@ -197,20 +198,18 @@ export class TasksController extends BaseHttpController {
       await this.taskRepository.Get(req.payload.userInfo.id);
       this.taskRepository.GetById(+req.params.id);
 
-      const currentWorkedHours = this.taskRepository.task?.hoursWorked;
+      const previouslyWorkedHours = this.taskRepository.task?.hoursWorked;
       if (!this.taskRepository.task) return this.notFound();
       await this.taskRepository.Update(req.body);
 
       const task = this.taskRepository.task;
 
-      if (task && currentWorkedHours != null) {
+      if (task && previouslyWorkedHours != null) {
         await this.logRepository.GetByTaskId(task.id);
+        const hoursWorked = task.hoursWorked - previouslyWorkedHours;
+        const logCreateDto = this.logService.MapProps(req.body, hoursWorked);
 
-        req.body.weekOf = this.logService.GetSunday();
-        req.body.day = this.logService.GetToday();
-        req.body.productiveHours = task.hoursWorked - currentWorkedHours;
-
-        this.logRepository.Add(req.body, task);
+        await this.logRepository.Add(logCreateDto, task);
       }
 
       return this.ok(HttpResponse.TASK_UPDATE);
