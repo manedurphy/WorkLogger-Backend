@@ -15,11 +15,20 @@ export class TaskRepository implements ITaskRepository {
     return this._task;
   }
 
-  public GetByProjectNumber(projectNumber: number): Task | undefined {
-    return this._tasks.find((task) => task.projectNumber === projectNumber);
+  public async Get(userId: number): Promise<void> {
+    const tasks = await Task.findAll({ where: { UserId: userId } });
+    this._tasks = tasks;
   }
 
-  public async Get(userId: number, complete: boolean): Promise<void> {
+  public GetByProjectNumber(projectNumber: number): void {
+    const task = this._tasks.find(
+      (task) => task.projectNumber === projectNumber
+    );
+
+    if (task) this._task = task;
+  }
+
+  public async GetByStatus(userId: number, complete: boolean): Promise<void> {
     const tasks = await Task.findAll({
       where: { UserId: userId, complete },
       order: [['id', 'DESC']],

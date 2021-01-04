@@ -8,4 +8,7 @@ export class HttpResponse {
   /** ACTIVATION PASSWORDS */
   public static INVALID_PASSWORD =
     'Invalid link. Account could not be verified';
+
+  /** TASKS */
+  public static TASK_EXISTS = 'Task with that project number already exists';
 }

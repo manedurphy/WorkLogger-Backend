@@ -1,4 +1,3 @@
-import { log } from 'console';
 import { injectable } from 'inversify';
 import { Log, Task } from '../../models';
 import { ILogRepository } from '../interfaces/ILogRepository';

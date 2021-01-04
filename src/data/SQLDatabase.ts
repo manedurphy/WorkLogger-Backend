@@ -68,7 +68,7 @@ Models.Task.init(
       allowNull: false,
     },
     projectNumber: {
-      type: DataTypes.STRING,
+      type: DataTypes.INTEGER,
       allowNull: false,
     },
     hoursAvailableToWork: {
@@ -161,7 +161,7 @@ Models.Log.init(
       allowNull: false,
     },
     projectNumber: {
-      type: DataTypes.STRING,
+      type: DataTypes.INTEGER,
       allowNull: false,
     },
     hoursAvailableToWork: {

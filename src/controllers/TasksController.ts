@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import { inject } from 'inversify';
 import { Types } from '../constants/Types';
 import { TaskRepository } from '../data/repositories/TaskRepository';
@@ -7,6 +7,8 @@ import { LogRepository } from '../data/repositories/LogRepository';
 import { LoggerMiddleware } from '../middleware/LoggerMiddleware';
 import { body } from 'express-validator';
 import { TaskService } from '../services/TaskService';
+import { ValidationMessages } from '../constants/ValidationMessages';
+import { HttpResponse } from '../constants/HttpResponse';
 import {
   BaseHttpController,
   controller,
@@ -39,7 +41,7 @@ export class TasksController extends BaseHttpController {
     @response() res: Response
   ) {
     try {
-      await this.taskRepository.Get(req.payload.userInfo.id, false);
+      await this.taskRepository.GetByStatus(req.payload.userInfo.id, false);
       return this.ok(this.taskRepository.tasks);
     } catch (error) {
       return this.internalServerError();
@@ -52,12 +54,10 @@ export class TasksController extends BaseHttpController {
     @response() res: Response
   ) {
     try {
-      await this.taskRepository.Get(req.payload.userInfo.id, false);
-      const task = this.taskRepository.GetByProjectNumber(
-        req.params.projectNumber
-      );
+      await this.taskRepository.GetByStatus(req.payload.userInfo.id, false);
+      this.taskRepository.GetByProjectNumber(+req.params.projectNumber);
 
-      return this.ok(task);
+      return this.ok(this.taskRepository.task);
     } catch (error) {
       return this.internalServerError();
     }
@@ -66,41 +66,48 @@ export class TasksController extends BaseHttpController {
   @httpPost(
     '/',
     LoggerMiddleware,
-    body('name').not().isEmpty().withMessage('Task name is missing'),
+    body('name').not().isEmpty().withMessage(ValidationMessages.TASK_NAME),
     body('projectNumber')
       .not()
       .isEmpty()
-      .withMessage('Project number is missing'),
+      .withMessage(ValidationMessages.PROJECT_NUMBER),
     body('hoursAvailableToWork')
       .not()
       .isEmpty()
-      .withMessage('Please enter available hours'),
+      .withMessage(ValidationMessages.AVAILABLE_HOURS),
     body('hoursWorked')
       .not()
       .isEmpty()
-      .withMessage('Please enter the numbers of hours worked'),
+      .withMessage(ValidationMessages.HOURS_WORKED),
     body('reviewHours')
       .not()
       .isEmpty()
-      .withMessage('Please enter the number of review hours'),
+      .withMessage(ValidationMessages.REVIEW_HOURS),
     body('numberOfReviews')
       .not()
       .isEmpty()
-      .withMessage('Number of reviews is missing'),
+      .withMessage(ValidationMessages.NUMBER_OF_REVIEWS),
     body('hoursRequiredByBim')
       .not()
       .isEmpty()
-      .withMessage('Hours required by BIM is missing')
+      .withMessage(ValidationMessages.HOURS_BIM)
   )
   public async CreateTask(
     @request() req: AuthenticatedRequest,
     @response() res: Response
   ) {
+    // May need to verify userId --> userRepository DI
     try {
-      const taskFormErrorsPresent = this.taskService.Validate(req);
+      const taskFormErrorsPresent = this.taskService.ValidateForm(req);
 
       if (taskFormErrorsPresent)
         return this.badRequest(this.taskService.errorMessage);
+
+      await this.taskRepository.Get(req.payload.userInfo.id);
+      this.taskRepository.GetByProjectNumber(req.body.projectNumber);
+
+      if (this.taskRepository.task)
+        return this.badRequest(HttpResponse.TASK_EXISTS);
 
       await this.taskRepository.Add(req.body);
       const task = this.taskRepository.task;
@@ -113,5 +120,3 @@ export class TasksController extends BaseHttpController {
     }
   }
 }
-
-// "reviewHours": 4,

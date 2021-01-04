@@ -1,5 +1,4 @@
 import { Request } from 'express';
-import { validationResult } from 'express-validator';
 import { injectable } from 'inversify';
 import { ValidationMessages } from '../constants/ValidationMessages';
 import { compare, hash } from 'bcrypt';
@@ -8,31 +7,19 @@ import { User } from '../models';
 import { UserLoginResponseObject } from '../responseObjects/UserLoginResponse';
 import { UserTokenValidResponseObject } from '../responseObjects/UserTokenValidResponseObject';
 import { UserRefreshTokenResponseObject } from '../responseObjects/UserRefreshTokenResponseObject';
+import { ValidationService } from './ValidationService';
 
 @injectable()
-export class UserService {
-  private _errorMessage: string = '';
-
-  get errorMessage() {
-    return this._errorMessage;
-  }
-
-  public ValidateForm(req: Request): boolean {
-    const errors = validationResult(req);
-    const errorsPresent = !errors.isEmpty();
-
-    if (errorsPresent) {
-      this._errorMessage = errors.array()[0].msg;
-    }
-
-    return errorsPresent;
+export class UserService extends ValidationService {
+  public constructor() {
+    super();
   }
 
   public ValidatePassordsMatch(req: Request): boolean {
     const passwordsMatch = req.body.password === req.body.password2;
 
     if (!passwordsMatch) {
-      this._errorMessage = ValidationMessages.PASSWORDS_DO_NOT_MATCH;
+      this.errorMessage = ValidationMessages.PASSWORDS_DO_NOT_MATCH;
     }
 
     return passwordsMatch;
