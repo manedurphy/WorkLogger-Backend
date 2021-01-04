@@ -5,4 +5,5 @@ export interface AuthenticatedRequest extends Request {
     userInfo: User;
   };
   params: any;
+  body: any;
 }

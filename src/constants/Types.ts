@@ -1,5 +1,6 @@
 export class Types {
   public static UserRepository: string = 'UserRepository';
+  public static LogRepository: string = 'LogRepository';
   public static ActivationPasswordRepository: string =
     'ActivationPasswordRepository';
   public static TaskRepository: string = 'TaskRepository';

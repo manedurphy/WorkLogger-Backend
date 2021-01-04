@@ -3,6 +3,7 @@ import { inject } from 'inversify';
 import { Types } from '../constants/Types';
 import { TaskRepository } from '../data/repositories/TaskRepository';
 import { AuthenticatedRequest } from './interfaces/interfaces';
+import { LogRepository } from '../data/repositories/LogRepository';
 import {
   BaseHttpController,
   controller,
@@ -15,12 +16,15 @@ import {
 @controller('/api/tasks')
 export class TasksController extends BaseHttpController {
   private readonly taskRepository: TaskRepository;
+  private readonly logRepository: LogRepository;
 
   public constructor(
-    @inject(Types.TaskRepository) taskRepository: TaskRepository
+    @inject(Types.TaskRepository) taskRepository: TaskRepository,
+    @inject(Types.LogRepository) logRepository: LogRepository
   ) {
     super();
     this.taskRepository = taskRepository;
+    this.logRepository = logRepository;
   }
 
   @httpGet('/')
@@ -57,6 +61,10 @@ export class TasksController extends BaseHttpController {
   public async CreateTask(@request() req: Request, @response() res: Response) {
     try {
       await this.taskRepository.Add(req.body);
+      const task = this.taskRepository.task;
+
+      if (task) await this.logRepository.Add(req.body, task);
+
       return this.created('/', { message: 'Task created' }); // come back to this
     } catch (error) {
       return this.internalServerError();
