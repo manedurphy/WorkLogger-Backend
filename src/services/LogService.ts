@@ -1,6 +1,7 @@
 import { injectable } from 'inversify';
 import { LogCreateDto } from '../data/dtos/LogCreateDto';
 import { ILogCreateDto } from '../data/interfaces/ILogCreateDto';
+import { Log } from '../models';
 
 @injectable()
 export class LogService {
@@ -28,5 +29,18 @@ export class LogService {
     body.productiveHours = hoursWorked;
 
     return new LogCreateDto(body);
+  }
+
+  public LogMatchesUser(logItem: Log, userId: number): boolean {
+    return logItem.UserId === userId;
+  }
+
+  public GetHoursWorked(log: Log[]) {
+    let sum = 0;
+
+    for (let i = 0; i < log.length; i++) {
+      sum += log[i].hoursWorked;
+    }
+    return sum;
   }
 }

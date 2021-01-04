@@ -21,8 +21,8 @@ export class TaskRepository implements ITaskRepository {
   }
 
   public GetById(id: number): void {
-    const task = this._tasks.find((task) => task.id === id) || null;
-    this._task = task;
+    const task = this._tasks.find((task) => task.id === id);
+    this._task = task || null;
   }
 
   public GetByProjectNumber(projectNumber: number): void {
@@ -52,8 +52,12 @@ export class TaskRepository implements ITaskRepository {
   }
 
   public async Update(updatedTask: Task): Promise<void> {
-    const task = (await this._task?.update(updatedTask)) || null;
-    this._task = task;
+    const task = await this._task?.update(updatedTask);
+    this._task = task || null;
+  }
+
+  public async UpdateHours(hoursWorked: number): Promise<void> {
+    this._task?.update({ hoursWorked });
   }
 
   public async Complete(): Promise<void> {

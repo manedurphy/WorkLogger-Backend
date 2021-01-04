@@ -4,4 +4,7 @@ import { Log } from '../../models/Log';
 export interface ILogRepository {
   GetByTaskId(taskId: number): Promise<void>;
   Add(log: Log, task: Task): Promise<void>;
+  Update(log: Log): Promise<void>;
+  GetById(id: number): Promise<void>;
+  Delete(id: number): Promise<void>;
 }

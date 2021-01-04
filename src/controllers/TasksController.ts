@@ -206,6 +206,8 @@ export class TasksController extends BaseHttpController {
 
       if (task && previouslyWorkedHours != null) {
         await this.logRepository.GetByTaskId(task.id);
+        Logger.Imp(task.hoursWorked);
+        Logger.Imp(previouslyWorkedHours);
         const hoursWorked = task.hoursWorked - previouslyWorkedHours;
         const logCreateDto = this.logService.MapProps(req.body, hoursWorked);
 
