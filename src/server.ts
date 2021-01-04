@@ -8,10 +8,12 @@ import { Types } from './constants/Types';
 import { UserService } from './services/UserService';
 import { AuthService } from './services/AuthService';
 import { ActivationPasswordRepository } from './data/repositories/ActivationPasswordRepository';
+import { TaskRepository } from './data/repositories/TaskRepository';
 
 const container = new Container();
 
 container.bind<UserRepository>(Types.UserRepository).to(UserRepository);
+container.bind<TaskRepository>(Types.TaskRepository).to(TaskRepository);
 container.bind<UserService>(Types.UserService).to(UserService);
 container.bind<AuthService>(Types.AuthService).to(AuthService);
 container

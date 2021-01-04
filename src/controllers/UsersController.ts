@@ -45,8 +45,8 @@ export class UsersController extends BaseHttpController {
   @httpGet('/', LoggerMiddleware)
   private async GetUsers(@request() req: Request, @response() res: Response) {
     try {
-      const users = await this.userRepository.Get();
-      return this.ok(users);
+      await this.userRepository.Get();
+      return this.ok(this.userRepository.users);
     } catch (error) {
       Logger.Err(error);
       return this.internalServerError();
@@ -79,7 +79,7 @@ export class UsersController extends BaseHttpController {
       if (registrationFormErrorsPresent || !passordsMatch)
         return this.badRequest(this.userService.errorMessage);
 
-      const existingUser = await this.userRepository.GetByEmail(req.body.email);
+      const existingUser = this.userRepository.GetByEmail(req.body.email);
       if (existingUser) return this.badRequest(HttpResponse.USER_EXISTS);
 
       await this.userService.HashPassword(req);
@@ -98,10 +98,12 @@ export class UsersController extends BaseHttpController {
     }
   }
 
-  @httpPost('/login')
+  @httpPost('/login', LoggerMiddleware)
   private async Login(@request() req: Request, @response() res: Response) {
     try {
-      const existingUser = await this.userRepository.GetByEmail(req.body.email);
+      await this.userRepository.Get();
+
+      const existingUser = this.userRepository.GetByEmail(req.body.email);
       if (!existingUser) return this.notFound();
 
       if (!existingUser.active)
@@ -170,13 +172,13 @@ export class UsersController extends BaseHttpController {
         req.payload.userInfo
       );
 
-      return this.ok(
-        this.userService.GetRefreshTokenResponse(
-          token,
-          refreshToken,
-          req.payload.userInfo
-        )
+      const refreshTokenResponse = this.userService.GetRefreshTokenResponse(
+        token,
+        refreshToken,
+        req.payload.userInfo
       );
+
+      return this.ok(refreshTokenResponse);
     } catch (error) {
       return this.internalServerError();
     }
