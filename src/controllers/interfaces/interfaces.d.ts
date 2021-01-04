@@ -4,4 +4,5 @@ export interface AuthenticatedRequest extends Request {
   payload: {
     userInfo: User;
   };
+  params: any;
 }

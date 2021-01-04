@@ -10,6 +10,10 @@ export class TaskRepository implements ITaskRepository {
     return this._tasks;
   }
 
+  public GetByProjectNumber(projectNumber: number): Task | undefined {
+    return this._tasks.find((task) => task.projectNumber === projectNumber);
+  }
+
   public async Get(userId: number, complete: boolean): Promise<void> {
     const tasks = await Task.findAll({
       where: { UserId: userId, complete },
@@ -17,10 +21,6 @@ export class TaskRepository implements ITaskRepository {
     });
 
     this._tasks = tasks;
-  }
-
-  public async GetById(id: number): Promise<Task | null> {
-    throw new Error('Method not implemented.');
   }
 
   public async Add(task: Task): Promise<void> {

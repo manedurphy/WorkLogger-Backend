@@ -36,6 +36,23 @@ export class TasksController extends BaseHttpController {
     }
   }
 
+  @httpGet('/incomplete/:projectNumber')
+  private async GetIncompleteTask(
+    @request() req: AuthenticatedRequest,
+    @response() res: Response
+  ) {
+    try {
+      await this.taskRepository.Get(req.payload.userInfo.id, false);
+      const task = this.taskRepository.GetByProjectNumber(
+        req.params.projectNumber
+      );
+
+      return this.ok(task);
+    } catch (error) {
+      return this.internalServerError();
+    }
+  }
+
   @httpPost('/')
   public async CreateTask(@request() req: Request, @response() res: Response) {
     try {
