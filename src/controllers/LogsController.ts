@@ -6,6 +6,7 @@ import { AuthenticatedRequest } from './interfaces/interfaces';
 import { Logger } from '@overnightjs/logger';
 import { LoggerMiddleware } from '../middleware/LoggerMiddleware';
 import { LogService } from '../services/LogService';
+import { TaskRepository } from '../data/repositories/TaskRepository';
 import {
   BaseHttpController,
   controller,
@@ -14,7 +15,6 @@ import {
   request,
   response,
 } from 'inversify-express-utils';
-import { TaskRepository } from '../data/repositories/TaskRepository';
 
 @controller('/api/logs')
 export class LogsController extends BaseHttpController {
