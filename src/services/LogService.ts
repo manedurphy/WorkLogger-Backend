@@ -35,12 +35,15 @@ export class LogService {
     return logItem.UserId === userId;
   }
 
-  public GetHoursWorked(log: Log[]) {
+  public async GetHoursWorked(log: Log[]) {
     let sum = 0;
 
-    for (let i = 0; i < log.length; i++) {
-      sum += log[i].hoursWorked;
+    for (let i = log.length - 1; i >= 0; i--) {
+      sum += log[i].productiveHours;
+      log[i].hoursWorked = sum;
+      await log[i].save();
     }
+
     return sum;
   }
 }

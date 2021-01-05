@@ -90,7 +90,7 @@ export class LogsController extends BaseHttpController {
       await this.taskRepository.Get(req.payload.userInfo.id);
 
       this.taskRepository.GetById(taskId);
-      const hoursWorked = this.logService.GetHoursWorked(
+      const hoursWorked = await this.logService.GetHoursWorked(
         this.logRepository.log
       );
 
