@@ -5,20 +5,7 @@ import { ITaskRepository } from '../interfaces/ITaskRepository';
 
 @injectable()
 export class TaskRepository implements ITaskRepository {
-  // private _tasks: Task[] = [];
-  // private _task: Task | null = null;
-
-  // get tasks() {
-  //   return this._tasks;
-  // }
-
-  // get task() {
-  //   return this._task;
-  // }
-
   public async Get(userId: number): Promise<Task[]> {
-    // const tasks = await Task.findAll({ where: { UserId: userId } });
-    // this._tasks = tasks;
     return Task.findAll({ where: { UserId: userId } });
   }
 
@@ -53,10 +40,6 @@ export class TaskRepository implements ITaskRepository {
     updatedTask: TaskCreateDto
   ): Promise<Task | null> {
     return task.update(updatedTask);
-  }
-
-  public async UpdateHours(hoursWorked: number): Promise<void> {
-    // this._task?.update({ hoursWorked });
   }
 
   public async Complete(task: Task): Promise<void> {
