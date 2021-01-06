@@ -1,7 +1,7 @@
 import { injectable } from 'inversify';
 import { LogCreateDto } from '../data/dtos/LogCreateDto';
 import { ILogCreateDto } from '../data/interfaces/ILogCreateDto';
-import { Log } from '../models';
+import { Log, Task } from '../models';
 
 @injectable()
 export class LogService {
@@ -42,8 +42,13 @@ export class LogService {
     let sum = 0;
 
     for (let i = log.length - 1; i >= 0; i--) {
-      sum += log[i].productiveHours;
-      log[i].hoursWorked = sum;
+      if (i === log.length - 1) {
+        log[i].productiveHours = log[i].hoursWorked;
+      } else {
+        const diff = log[i].hoursWorked - log[i + 1].hoursWorked;
+        sum += diff;
+        log[i].productiveHours = diff;
+      }
       await log[i].save();
     }
 

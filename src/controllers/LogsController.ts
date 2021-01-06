@@ -15,6 +15,7 @@ import {
   request,
   response,
 } from 'inversify-express-utils';
+import { Log } from '../models';
 
 @controller('/api/logs')
 export class LogsController extends BaseHttpController {
@@ -59,8 +60,7 @@ export class LogsController extends BaseHttpController {
       if (!logItem) return this.notFound();
 
       if (!this.logService.LogMatchesUser(logItem, req.payload.userInfo.id))
-        // May not be necessary
-        return this.statusCode(401);
+        return this.statusCode(401); // May not be necessary
 
       return this.ok(logItem);
     } catch (error) {
@@ -78,25 +78,18 @@ export class LogsController extends BaseHttpController {
       const logItem = await this.logRepository.GetById(+req.params.id);
       if (!logItem) return this.notFound();
 
-      // const taskId = logItem?.TaskId;
       if (!this.logService.LogMatchesUser(logItem, req.payload.userInfo.id))
         return this.statusCode(401); // May not be necessary
 
-      // await this.logRepository.Delete(+req.params.id);
       const task = await this.taskRepository.GetById(logItem.TaskId);
       if (!task) return this.badRequest(); // new Alert something
 
       await this.logRepository.Delete(logItem);
-      // await this.logRepository.GetByTaskId(taskId);
+
       const log = await this.logRepository.GetByTaskId(logItem.TaskId);
-      // await this.taskRepository.Get(req.payload.userInfo.id);
-
-      // const task = await this.taskRepository.GetById(logItem.TaskId);
       const hoursWorked = await this.logService.GetHoursWorked(log);
+
       task.hoursWorked = hoursWorked;
-
-      console.log(hoursWorked);
-
       this.taskRepository.Save(task);
 
       return this.statusCode(204);
