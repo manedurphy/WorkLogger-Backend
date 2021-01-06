@@ -1,7 +1,7 @@
 import { UserReadDto } from '../data/dtos/UserReadDto';
 import { IUserLoginResponseObject } from './interfaces/interfaces';
 
-export class UserLoginResponseObject implements IUserLoginResponseObject {
+export class UserLoginResponse implements IUserLoginResponseObject {
   public jwt: string;
   public refreshToken: string;
   public id: number;

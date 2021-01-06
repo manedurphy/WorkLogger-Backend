@@ -1,8 +1,7 @@
 import { UserReadDto } from '../data/dtos/UserReadDto';
 import { IUserTokenValidResponseObject } from './interfaces/interfaces';
 
-export class UserTokenValidResponseObject
-  implements IUserTokenValidResponseObject {
+export class UserTokenValidResponse implements IUserTokenValidResponseObject {
   public id: number;
   public firstName: string;
   public lastName: string;

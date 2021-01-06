@@ -4,9 +4,9 @@ import { ValidationMessages } from '../constants/ValidationMessages';
 import { compare, hash } from 'bcrypt';
 import { UserReadDto } from '../data/dtos/UserReadDto';
 import { User } from '../models';
-import { UserLoginResponseObject } from '../responseObjects/UserLoginResponse';
-import { UserTokenValidResponseObject } from '../responseObjects/UserTokenValidResponseObject';
-import { UserRefreshTokenResponseObject } from '../responseObjects/UserRefreshTokenResponseObject';
+import { UserLoginResponse } from '../responseObjects/UserLoginResponse';
+import { UserTokenValidResponse } from '../responseObjects/UserTokenValidResponse';
+import { UserRefreshTokenResponse } from '../responseObjects/UserRefreshTokenResponse';
 import { ValidationService } from './ValidationService';
 
 @injectable()
@@ -44,7 +44,7 @@ export class UserService extends ValidationService {
     refreshToken: string,
     user: UserReadDto
   ) {
-    return new UserLoginResponseObject(token, refreshToken, user);
+    return new UserLoginResponse(token, refreshToken, user);
   }
 
   public GetRefreshTokenResponse(
@@ -52,10 +52,10 @@ export class UserService extends ValidationService {
     refreshToken: string,
     user: UserReadDto
   ) {
-    return new UserRefreshTokenResponseObject(token, refreshToken, user);
+    return new UserRefreshTokenResponse(token, refreshToken, user);
   }
 
   public GetTokenValidResponse(user: UserReadDto) {
-    return new UserTokenValidResponseObject(user);
+    return new UserTokenValidResponse(user);
   }
 }

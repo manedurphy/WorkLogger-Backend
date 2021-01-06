@@ -1,5 +1,5 @@
 export interface IRepository<TEntity> {
-  Get(): Promise<void>;
-  GetById(id: number): TEntity | undefined;
+  Get(): Promise<TEntity[]>;
+  GetById(id: number): Promise<TEntity | null>;
   Add(entity: TEntity): Promise<TEntity>;
 }

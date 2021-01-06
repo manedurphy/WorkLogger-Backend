@@ -1,7 +1,7 @@
-import * as express from 'express';
-import jwtMiddleware from 'express-jwt';
 import './data/SQLDatabase';
 import './controllers';
+import * as express from 'express';
+import jwtMiddleware from 'express-jwt';
 import { Container } from 'inversify';
 import { InversifyExpressServer } from 'inversify-express-utils';
 import { UserRepository } from './data/repositories/UserRepository';
@@ -38,7 +38,11 @@ server.setConfig((app) => {
       algorithms: ['HS256'],
       requestProperty: 'payload',
     }).unless({
-      path: ['/api/users/login', '/api/users/register'],
+      path: [
+        '/api/users/login',
+        '/api/users/register',
+        { url: /^\/api\/activation\/.*/ },
+      ],
     })
   );
 });

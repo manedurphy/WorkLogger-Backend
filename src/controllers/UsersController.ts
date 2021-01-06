@@ -4,6 +4,7 @@ import { inject } from 'inversify';
 import { Logger } from '@overnightjs/logger';
 import { body } from 'express-validator';
 import { UserService } from '../services/UserService';
+import { Alert } from '../responseObjects/Alert';
 import { LoggerMiddleware } from '../middleware/LoggerMiddleware';
 import { HttpResponse } from '../constants/HttpResponse';
 import { Types } from '../constants/Types';
@@ -44,10 +45,10 @@ export class UsersController extends BaseHttpController {
   @httpGet('/', LoggerMiddleware)
   private async GetUsers(@request() req: Request, @response() res: Response) {
     try {
-      await this.userRepository.Get();
-      return this.ok(this.userRepository.users);
+      const users = await this.userRepository.Get();
+      return this.ok(users);
     } catch (error) {
-      Logger.Err(error);
+      Logger.Err('ERROR IN USERS ROUTE', error);
       return this.internalServerError();
     }
   }
@@ -76,7 +77,7 @@ export class UsersController extends BaseHttpController {
       if (registrationFormErrorsPresent || !passordsMatch)
         return this.badRequest(this.userService.errorMessage);
 
-      const existingUser = this.userRepository.GetByEmail(req.body.email);
+      const existingUser = await this.userRepository.GetByEmail(req.body.email);
       if (existingUser) return this.badRequest(HttpResponse.USER_EXISTS);
 
       await this.userService.HashPassword(req);
@@ -88,7 +89,7 @@ export class UsersController extends BaseHttpController {
 
       this.authService.sendVerificationEmail(activationPassword);
 
-      return this.created('/register', { message: 'User created' }); //come back to this
+      return this.created('/register', new Alert(HttpResponse.USER_CREATED));
     } catch (error) {
       Logger.Err('ERROR IN REGISTER ROUTE', error);
       return this.internalServerError();
@@ -111,9 +112,7 @@ export class UsersController extends BaseHttpController {
       if (loginFormsPresent)
         return this.badRequest(this.userService.errorMessage);
 
-      await this.userRepository.Get();
-
-      const existingUser = this.userRepository.GetByEmail(req.body.email);
+      const existingUser = await this.userRepository.GetByEmail(req.body.email);
       if (!existingUser) return this.notFound();
 
       if (!existingUser.active)
@@ -153,6 +152,7 @@ export class UsersController extends BaseHttpController {
         this.userService.GetTokenValidResponse(req.payload.userInfo)
       );
     } catch (error) {
+      Logger.Err('ERROR IN VERIFY-TOKEN ROUTE', error);
       return this.internalServerError();
     }
   }
@@ -176,6 +176,7 @@ export class UsersController extends BaseHttpController {
 
       return this.ok(refreshTokenResponse);
     } catch (error) {
+      Logger.Err('ERROR IN REFRESH ROUTE', error);
       return this.internalServerError();
     }
   }

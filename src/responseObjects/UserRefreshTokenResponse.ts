@@ -1,7 +1,7 @@
 import { UserReadDto } from '../data/dtos/UserReadDto';
 import { IUserRefreshTokenResponseObject } from './interfaces/interfaces';
 
-export class UserRefreshTokenResponseObject
+export class UserRefreshTokenResponse
   implements IUserRefreshTokenResponseObject {
   public jwt: string;
   public refreshToken: string;

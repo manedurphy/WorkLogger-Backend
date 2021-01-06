@@ -4,23 +4,25 @@ import { IUserRepository } from '../interfaces/IUserRepository';
 
 @injectable()
 export class UserRepository implements IUserRepository {
-  private _users: User[] = [];
+  // private _users: User[] = [];
 
-  get users() {
-    return this._users;
+  // get users() {
+  //   return this._users;
+  // }
+
+  public GetById(id: number): Promise<User | null> {
+    // return this._users.find((user) => user.id === id);
+    return User.findByPk(id);
   }
 
-  public GetById(id: number): User | undefined {
-    return this._users.find((user) => user.id === id);
+  public async GetByEmail(email: string): Promise<User | null> {
+    return User.findOne({ where: { email } });
   }
 
-  public GetByEmail(email: string): User | undefined {
-    return this._users.find((user) => user.email === email);
-  }
-
-  public async Get(): Promise<void> {
-    const users = await User.findAll();
-    this._users = users;
+  public async Get(): Promise<User[]> {
+    // const users = await User.findAll();
+    // this._users = users;
+    return User.findAll();
   }
 
   public async Add(user: User): Promise<User> {
