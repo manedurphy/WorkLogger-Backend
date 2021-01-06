@@ -1,7 +1,7 @@
 import { Response } from 'express';
 import { inject } from 'inversify';
 import { Types } from '../constants/Types';
-import { LogRepository } from '../data/repositories/LogRepository';
+import { ILogRepository } from '../data/interfaces/ILogRepository';
 import { AuthenticatedRequest } from './interfaces/interfaces';
 import { Logger } from '@overnightjs/logger';
 import { LoggerMiddleware } from '../middleware/LoggerMiddleware';
@@ -12,19 +12,19 @@ import {
   controller,
   httpDelete,
   httpGet,
+  httpPut,
   request,
   response,
 } from 'inversify-express-utils';
-import { Log } from '../models';
 
 @controller('/api/logs')
 export class LogsController extends BaseHttpController {
-  private readonly logRepository: LogRepository; // see if this can be replaced with ILogRepository
+  private readonly logRepository: ILogRepository;
   private readonly logService: LogService;
   private readonly taskRepository: TaskRepository;
 
   public constructor(
-    @inject(Types.LogRepository) logRepository: LogRepository,
+    @inject(Types.LogRepository) logRepository: ILogRepository,
     @inject(Types.LogService) logService: LogService,
     @inject(Types.TaskRepository) taskRepository: TaskRepository
   ) {
@@ -59,9 +59,6 @@ export class LogsController extends BaseHttpController {
       const logItem = await this.logRepository.GetById(+req.params.id);
       if (!logItem) return this.notFound();
 
-      if (!this.logService.LogMatchesUser(logItem, req.payload.userInfo.id))
-        return this.statusCode(401); // May not be necessary
-
       return this.ok(logItem);
     } catch (error) {
       Logger.Err(error);
@@ -78,13 +75,37 @@ export class LogsController extends BaseHttpController {
       const logItem = await this.logRepository.GetById(+req.params.id);
       if (!logItem) return this.notFound();
 
-      if (!this.logService.LogMatchesUser(logItem, req.payload.userInfo.id))
-        return this.statusCode(401); // May not be necessary
-
       const task = await this.taskRepository.GetById(logItem.TaskId);
-      if (!task) return this.badRequest(); // new Alert something
+      if (!task) return this.notFound();
 
       await this.logRepository.Delete(logItem);
+
+      const log = await this.logRepository.GetByTaskId(logItem.TaskId);
+      const hoursWorked = await this.logService.GetHoursWorked(log);
+
+      task.hoursWorked = hoursWorked;
+      this.taskRepository.Save(task);
+
+      return this.statusCode(204);
+    } catch (error) {
+      Logger.Err(error);
+      return this.internalServerError();
+    }
+  }
+
+  @httpPut('/log-item/:id')
+  private async UpdateLogItem(
+    @request() req: AuthenticatedRequest,
+    @response() res: Response
+  ) {
+    try {
+      const logItem = await this.logRepository.GetById(+req.params.id);
+      if (!logItem) return this.notFound();
+
+      const task = await this.taskRepository.GetById(logItem.TaskId);
+      if (!task) return this.notFound();
+
+      await this.logRepository.Update(logItem, req.body);
 
       const log = await this.logRepository.GetByTaskId(logItem.TaskId);
       const hoursWorked = await this.logService.GetHoursWorked(log);

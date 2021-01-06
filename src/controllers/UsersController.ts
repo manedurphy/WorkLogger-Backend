@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { UserRepository } from '../data/repositories/UserRepository';
+import { IUserRepository } from '../data/interfaces/IUserRepository';
 import { inject } from 'inversify';
 import { Logger } from '@overnightjs/logger';
 import { body } from 'express-validator';
@@ -23,13 +23,13 @@ import {
 
 @controller('/api/users')
 export class UsersController extends BaseHttpController {
-  private readonly userRepository: UserRepository;
+  private readonly userRepository: IUserRepository;
   private readonly activationPasswordRepository: ActivationPasswordRepository;
   private readonly userService: UserService;
   private readonly authService: AuthService;
 
   public constructor(
-    @inject(Types.UserRepository) userRepository: UserRepository,
+    @inject(Types.UserRepository) userRepository: IUserRepository,
     @inject(Types.ActivationPasswordRepository)
     activationPasswordRepository: ActivationPasswordRepository,
     @inject(Types.UserService) userService: UserService,

@@ -5,7 +5,7 @@ import { Types } from '../constants/Types';
 import { Logger } from '@overnightjs/logger';
 import { TaskRepository } from '../data/repositories/TaskRepository';
 import { AuthenticatedRequest } from './interfaces/interfaces';
-import { LogRepository } from '../data/repositories/LogRepository';
+import { ILogRepository } from '../data/interfaces/ILogRepository';
 import { LoggerMiddleware } from '../middleware/LoggerMiddleware';
 import { body } from 'express-validator';
 import { TaskService } from '../services/TaskService';
@@ -27,13 +27,13 @@ import {
 @controller('/api/tasks')
 export class TasksController extends BaseHttpController {
   private readonly taskRepository: TaskRepository;
-  private readonly logRepository: LogRepository;
+  private readonly logRepository: ILogRepository;
   private readonly taskService: TaskService;
   private readonly logService: LogService;
 
   public constructor(
     @inject(Types.TaskRepository) taskRepository: TaskRepository,
-    @inject(Types.LogRepository) logRepository: LogRepository,
+    @inject(Types.LogRepository) logRepository: ILogRepository,
     @inject(Types.TaskService) taskService: TaskService,
     @inject(Types.LogService) logService: LogService
   ) {
@@ -163,7 +163,7 @@ export class TasksController extends BaseHttpController {
         await this.logRepository.Add(logCreateDto, newTask);
       }
 
-      return this.created('/', new Alert(HttpResponse.TASK_CREATED)); // come back to this
+      return this.created('/', new Alert(HttpResponse.TASK_CREATED));
     } catch (error) {
       Logger.Err(error);
       return this.internalServerError();

@@ -39,9 +39,10 @@ export class LogRepository implements ILogRepository {
     });
   }
 
-  public async Update(log: Log) {
-    const updatedLog = await this._logItem?.update(log);
-    this._logItem = updatedLog || null;
+  public async Update(log: Log, logCreateDto: LogCreateDto): Promise<void> {
+    // const updatedLog = await this._logItem?.update(log);
+    // this._logItem = updatedLog || null;
+    log.update(logCreateDto);
   }
 
   public async Delete(logItem: Log) {

@@ -13,12 +13,14 @@ import { TaskRepository } from './data/repositories/TaskRepository';
 import { LogRepository } from './data/repositories/LogRepository';
 import { TaskService } from './services/TaskService';
 import { LogService } from './services/LogService';
+import { ILogRepository } from './data/interfaces/ILogRepository';
+import { IUserRepository } from './data/interfaces/IUserRepository';
 
 const container = new Container();
 
-container.bind<UserRepository>(Types.UserRepository).to(UserRepository);
+container.bind<IUserRepository>(Types.UserRepository).to(UserRepository);
 container.bind<TaskRepository>(Types.TaskRepository).to(TaskRepository);
-container.bind<LogRepository>(Types.LogRepository).to(LogRepository);
+container.bind<ILogRepository>(Types.LogRepository).to(LogRepository);
 container.bind<UserService>(Types.UserService).to(UserService);
 container.bind<AuthService>(Types.AuthService).to(AuthService);
 container.bind<TaskService>(Types.TaskService).to(TaskService);
