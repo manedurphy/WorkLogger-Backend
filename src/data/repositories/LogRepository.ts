@@ -16,18 +16,18 @@ export class LogRepository implements ILogRepository {
     return this._logItem;
   }
 
-  public async GetByTaskId(taskId: number): Promise<void> {
-    const log = await Log.findAll({
+  public async GetByTaskId(taskId: number): Promise<Log[]> {
+    return Log.findAll({
       where: { TaskId: taskId },
       order: [['id', 'DESC']],
     });
-    this._log = log;
   }
 
-  public async GetById(id: number) {
-    const logItem = await Log.findByPk(id);
-    console.log(logItem);
-    this._logItem = logItem || null;
+  public async GetById(id: number): Promise<Log | null> {
+    // const logItem = await Log.findByPk(id);
+    // console.log(logItem);
+    // this._logItem = logItem || null;
+    return Log.findByPk(id);
   }
 
   public async Add(logCreateDto: LogCreateDto, task: Task): Promise<void> {
@@ -44,8 +44,9 @@ export class LogRepository implements ILogRepository {
     this._logItem = updatedLog || null;
   }
 
-  public async Delete(id: number) {
-    await this._logItem?.destroy();
-    this._logItem = null;
+  public async Delete(logItem: Log) {
+    // await this._logItem?.destroy();
+    // this._logItem = null;
+    logItem.destroy();
   }
 }

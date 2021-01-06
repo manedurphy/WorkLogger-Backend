@@ -5,20 +5,21 @@ import { ITaskRepository } from '../interfaces/ITaskRepository';
 
 @injectable()
 export class TaskRepository implements ITaskRepository {
-  private _tasks: Task[] = [];
-  private _task: Task | null = null;
+  // private _tasks: Task[] = [];
+  // private _task: Task | null = null;
 
-  get tasks() {
-    return this._tasks;
-  }
+  // get tasks() {
+  //   return this._tasks;
+  // }
 
-  get task() {
-    return this._task;
-  }
+  // get task() {
+  //   return this._task;
+  // }
 
-  public async Get(userId: number): Promise<void> {
-    const tasks = await Task.findAll({ where: { UserId: userId } });
-    this._tasks = tasks;
+  public async Get(userId: number): Promise<Task[]> {
+    // const tasks = await Task.findAll({ where: { UserId: userId } });
+    // this._tasks = tasks;
+    return Task.findAll({ where: { UserId: userId } });
   }
 
   public async GetById(id: number): Promise<Task | null> {
@@ -55,7 +56,7 @@ export class TaskRepository implements ITaskRepository {
   }
 
   public async UpdateHours(hoursWorked: number): Promise<void> {
-    this._task?.update({ hoursWorked });
+    // this._task?.update({ hoursWorked });
   }
 
   public async Complete(task: Task): Promise<void> {
@@ -64,5 +65,9 @@ export class TaskRepository implements ITaskRepository {
 
   public async InComplete(task: Task): Promise<void> {
     task.update({ complete: false });
+  }
+
+  public async Save(task: Task) {
+    task.save();
   }
 }

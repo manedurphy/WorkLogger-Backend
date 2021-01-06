@@ -1,5 +1,6 @@
 import { Response } from 'express';
 import { inject } from 'inversify';
+import { Alert } from '../responseObjects/Alert';
 import { Types } from '../constants/Types';
 import { Logger } from '@overnightjs/logger';
 import { TaskRepository } from '../data/repositories/TaskRepository';
@@ -22,7 +23,6 @@ import {
   request,
   response,
 } from 'inversify-express-utils';
-import { Alert } from '../responseObjects/Alert';
 
 @controller('/api/tasks')
 export class TasksController extends BaseHttpController {

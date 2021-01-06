@@ -39,10 +39,10 @@ export class LogsController extends BaseHttpController {
     @response() res: Response
   ) {
     try {
-      await this.logRepository.GetByTaskId(+req.params.taskId);
-      if (!this.logRepository.log.length) return this.notFound();
+      const log = await this.logRepository.GetByTaskId(+req.params.taskId);
+      if (!log.length) return this.notFound();
 
-      return this.ok(this.logRepository.log);
+      return this.ok(log);
     } catch (error) {
       Logger.Err(error);
       return this.internalServerError();
@@ -55,15 +55,14 @@ export class LogsController extends BaseHttpController {
     @response() res: Response
   ) {
     try {
-      await this.logRepository.GetById(+req.params.id);
-      const logItem = this.logRepository.logItem;
-
+      const logItem = await this.logRepository.GetById(+req.params.id);
       if (!logItem) return this.notFound();
 
       if (!this.logService.LogMatchesUser(logItem, req.payload.userInfo.id))
+        // May not be necessary
         return this.statusCode(401);
 
-      return this.ok(this.logRepository.logItem);
+      return this.ok(logItem);
     } catch (error) {
       Logger.Err(error);
       return this.internalServerError();
@@ -76,25 +75,29 @@ export class LogsController extends BaseHttpController {
     @response() res: Response
   ) {
     try {
-      await this.logRepository.GetById(+req.params.id);
-      const logItem = this.logRepository.logItem;
-      const taskId = logItem?.TaskId;
+      const logItem = await this.logRepository.GetById(+req.params.id);
+      if (!logItem) return this.notFound();
 
-      if (!logItem || !taskId) return this.notFound();
-
+      // const taskId = logItem?.TaskId;
       if (!this.logService.LogMatchesUser(logItem, req.payload.userInfo.id))
-        return this.statusCode(401);
+        return this.statusCode(401); // May not be necessary
 
-      await this.logRepository.Delete(+req.params.id);
-      await this.logRepository.GetByTaskId(taskId);
-      await this.taskRepository.Get(req.payload.userInfo.id);
+      // await this.logRepository.Delete(+req.params.id);
+      const task = await this.taskRepository.GetById(logItem.TaskId);
+      if (!task) return this.badRequest(); // new Alert something
 
-      this.taskRepository.GetById(taskId);
-      const hoursWorked = await this.logService.GetHoursWorked(
-        this.logRepository.log
-      );
+      await this.logRepository.Delete(logItem);
+      // await this.logRepository.GetByTaskId(taskId);
+      const log = await this.logRepository.GetByTaskId(logItem.TaskId);
+      // await this.taskRepository.Get(req.payload.userInfo.id);
 
-      this.taskRepository.UpdateHours(hoursWorked);
+      // const task = await this.taskRepository.GetById(logItem.TaskId);
+      const hoursWorked = await this.logService.GetHoursWorked(log);
+      task.hoursWorked = hoursWorked;
+
+      console.log(hoursWorked);
+
+      this.taskRepository.Save(task);
 
       return this.statusCode(204);
     } catch (error) {

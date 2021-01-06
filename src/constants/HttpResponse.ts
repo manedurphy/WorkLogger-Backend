@@ -7,6 +7,8 @@ export class HttpResponse {
   public static INVALID_CREDENTIALS = 'Invalid credentials. PLease try again.';
   public static USER_CREATED =
     'User created! Please check your email to verify your account.';
+  public static USER_ACTIVATED =
+    'Your account has been activated. You may not sign in.';
 
   /** ACTIVATION PASSWORDS */
   public static INVALID_PASSWORD =

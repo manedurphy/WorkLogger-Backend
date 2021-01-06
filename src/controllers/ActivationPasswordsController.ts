@@ -1,7 +1,9 @@
-import { Request, Response } from 'express';
 import { inject } from 'inversify';
-import { HttpResponse } from '../constants/HttpResponse';
 import { Types } from '../constants/Types';
+import { Alert } from '../responseObjects/Alert';
+import { Logger } from '@overnightjs/logger';
+import { HttpResponse } from '../constants/HttpResponse';
+import { Request, Response } from 'express';
 import { ActivationPasswordRepository } from '../data/repositories/ActivationPasswordRepository';
 import {
   BaseHttpController,
@@ -38,9 +40,10 @@ export class ActivationPasswordsController extends BaseHttpController {
 
       await this.activationPasswordRepository.Update(activationPassword);
 
-      return this.ok();
+      return this.ok(new Alert(HttpResponse.USER_ACTIVATED));
     } catch (error) {
-      this.internalServerError();
+      Logger.Err('ERROR IN ACTIVATION PASSWORD ROUTE', error);
+      return this.internalServerError();
     }
   }
 }
