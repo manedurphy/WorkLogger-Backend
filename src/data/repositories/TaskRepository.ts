@@ -51,8 +51,6 @@ export class TaskRepository implements ITaskRepository {
     task: Task,
     updatedTask: TaskCreateDto
   ): Promise<Task | null> {
-    // const task = await this._task?.update(updatedTask);
-    // this._task = task || null;
     return task.update(updatedTask);
   }
 
@@ -60,11 +58,11 @@ export class TaskRepository implements ITaskRepository {
     this._task?.update({ hoursWorked });
   }
 
-  public async Complete(): Promise<void> {
-    this._task?.update({ complete: true });
+  public async Complete(task: Task): Promise<void> {
+    task.update({ complete: true });
   }
 
-  public async InComplete(): Promise<void> {
-    this._task?.update({ complete: false });
+  public async InComplete(task: Task): Promise<void> {
+    task.update({ complete: false });
   }
 }

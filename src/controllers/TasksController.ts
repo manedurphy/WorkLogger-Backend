@@ -3,7 +3,6 @@ import { inject } from 'inversify';
 import { Types } from '../constants/Types';
 import { Logger } from '@overnightjs/logger';
 import { TaskRepository } from '../data/repositories/TaskRepository';
-import { UserRepository } from '../data/repositories/UserRepository';
 import { AuthenticatedRequest } from './interfaces/interfaces';
 import { LogRepository } from '../data/repositories/LogRepository';
 import { LoggerMiddleware } from '../middleware/LoggerMiddleware';
@@ -221,13 +220,12 @@ export class TasksController extends BaseHttpController {
     @response() res: Response
   ) {
     try {
-      await this.taskRepository.GetByStatus(req.payload.userInfo.id, false);
-      this.taskRepository.GetById(+req.params.id);
+      const task = await this.taskRepository.GetById(+req.params.id);
 
-      if (!this.taskRepository.task) return this.notFound();
-      await this.taskRepository.Complete();
+      if (!task) return this.notFound();
+      await this.taskRepository.Complete(task);
 
-      return this.ok(HttpResponse.TASK_UPDATE);
+      return this.ok(new Alert(HttpResponse.TASK_UPDATE));
     } catch (error) {
       Logger.Err(error);
       return this.internalServerError();
@@ -240,11 +238,10 @@ export class TasksController extends BaseHttpController {
     @response() res: Response
   ) {
     try {
-      await this.taskRepository.GetByStatus(req.payload.userInfo.id, true);
-      this.taskRepository.GetById(+req.params.id);
+      const task = await this.taskRepository.GetById(+req.params.id);
 
-      if (!this.taskRepository.task) return this.notFound();
-      await this.taskRepository.InComplete();
+      if (!task) return this.notFound();
+      await this.taskRepository.InComplete(task);
 
       return this.ok(HttpResponse.TASK_UPDATE);
     } catch (error) {

@@ -12,6 +12,6 @@ export interface ITaskRepository {
   Add(taskCreateDto: TaskCreateDto): Promise<Task | null>;
   Delete(task: Task): Promise<void>;
   Update(task: Task, updatedTask: TaskCreateDto): Promise<Task | null>;
-  Complete(): Promise<void>;
-  InComplete(): Promise<void>;
+  Complete(task: Task): Promise<void>;
+  InComplete(task: Task): Promise<void>;
 }
