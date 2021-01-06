@@ -7,3 +7,7 @@ export interface AuthenticatedRequest extends Request {
   params: any;
   body: any;
 }
+
+// export interface TaskCreateRequest extends AuthenticatedRequest {
+//   body
+// }

@@ -8,6 +8,7 @@ interface UserValidationRepsonse {
 }
 
 export interface IUserLoginResponseObject extends UserValidationRepsonse {}
+
 export interface IUserRefreshTokenResponseObject
   extends UserValidationRepsonse {}
 

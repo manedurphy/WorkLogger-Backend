@@ -23,10 +23,13 @@ export class LogService {
     return date.getDay();
   }
 
-  public MapProps(body: ILogCreateDto, hoursWorked: number): LogCreateDto {
+  public MapProps(
+    body: ILogCreateDto,
+    hoursWorked: number | null
+  ): LogCreateDto {
     body.weekOf = this.GetSunday();
     body.day = this.GetToday();
-    body.productiveHours = hoursWorked;
+    body.productiveHours = hoursWorked ? hoursWorked : body.hoursWorked;
 
     return new LogCreateDto(body);
   }

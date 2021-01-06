@@ -16,4 +16,5 @@ export class HttpResponse {
   public static TASK_EXISTS = 'Task with that project number already exists.';
   public static TASK_NOT_FOUND = 'Task not found.';
   public static TASK_UPDATE = 'Task updated!';
+  public static TASK_CREATED = 'Task created!';
 }

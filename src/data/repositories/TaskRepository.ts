@@ -1,5 +1,6 @@
 import { injectable } from 'inversify';
 import { Task } from '../../models';
+import { TaskCreateDto } from '../dtos/TaskCreateDto';
 import { ITaskRepository } from '../interfaces/ITaskRepository';
 
 @injectable()
@@ -20,40 +21,39 @@ export class TaskRepository implements ITaskRepository {
     this._tasks = tasks;
   }
 
-  public GetById(id: number): void {
-    const task = this._tasks.find((task) => task.id === id);
-    this._task = task || null;
+  public async GetById(id: number): Promise<Task | null> {
+    return Task.findByPk(id);
   }
 
-  public GetByProjectNumber(projectNumber: number): void {
-    const task = this._tasks.find(
-      (task) => task.projectNumber === projectNumber
-    );
-
-    if (task) this._task = task;
+  public GetByProjectNumber(
+    projectNumber: number,
+    userId: number
+  ): Promise<Task | null> {
+    return Task.findOne({ where: { projectNumber, UserId: userId } });
   }
 
-  public async GetByStatus(userId: number, complete: boolean): Promise<void> {
-    const tasks = await Task.findAll({
+  public async GetByStatus(userId: number, complete: boolean): Promise<Task[]> {
+    return Task.findAll({
       where: { UserId: userId, complete },
       order: [['id', 'DESC']],
     });
-
-    this._tasks = tasks;
   }
 
-  public async Add(task: Task): Promise<void> {
-    const newTask = await Task.create(task);
-    this._task = newTask || null;
+  public async Add(taskCreateDto: TaskCreateDto): Promise<Task | null> {
+    return Task.create(taskCreateDto);
   }
 
-  public async Delete(): Promise<void> {
-    this._task?.destroy();
+  public async Delete(task: Task): Promise<void> {
+    task.destroy();
   }
 
-  public async Update(updatedTask: Task): Promise<void> {
-    const task = await this._task?.update(updatedTask);
-    this._task = task || null;
+  public async Update(
+    task: Task,
+    updatedTask: TaskCreateDto
+  ): Promise<Task | null> {
+    // const task = await this._task?.update(updatedTask);
+    // this._task = task || null;
+    return task.update(updatedTask);
   }
 
   public async UpdateHours(hoursWorked: number): Promise<void> {
