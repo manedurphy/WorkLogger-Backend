@@ -1,3 +1,4 @@
+import { Logger } from '@overnightjs/logger';
 import { DataTypes, Sequelize } from 'sequelize';
 import * as Models from '../models';
 
@@ -241,10 +242,12 @@ Models.Log.belongsTo(Models.User);
 Models.Log.belongsTo(Models.Task);
 
 (async () => {
-  await Models.User.sync();
-  await Models.Task.sync();
-  await Models.ActivationPassword.sync();
-  await Models.Log.sync();
+  try {
+    await sequelize.authenticate();
+    await sequelize.sync();
+  } catch (error) {
+    Logger.Err('ERROR IN DB SYNC', error);
+  }
 })();
 
 export default sequelize;

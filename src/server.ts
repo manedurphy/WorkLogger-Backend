@@ -44,6 +44,7 @@ server.setConfig((app) => {
         '/api/users/login',
         '/api/users/register',
         { url: /^\/api\/activation\/.*/ },
+        '/',
       ],
     })
   );

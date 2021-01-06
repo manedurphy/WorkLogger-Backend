@@ -1,8 +1,14 @@
 import { Logger } from '@overnightjs/logger';
+import { Request, Response } from 'express';
 import 'reflect-metadata';
 import app from './server';
 
 const port = process.env.PORT || 5000;
+
+// Test route
+app.get('/', async (req: Request, res: Response) => {
+  return res.status(200).json({ message: 'Good!' });
+});
 
 app.listen(port, () => {
   console.log(`Server started on port ${port}...`);
@@ -17,3 +23,5 @@ app.listen(port, () => {
 
   Logger.Warn(lastSunday.toString().slice(0, 15));
 });
+
+export default app;
