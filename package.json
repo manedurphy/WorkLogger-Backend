@@ -4,6 +4,8 @@
   "description": "",
   "main": "index.js",
   "jest": {
+    "verbose": true,
+    "setupFilesAfterEnv": ["./src/setupTests.ts"],
     "roots": [
       "<rootDir>/src"
     ],
@@ -21,7 +23,7 @@
     ]
   },
   "scripts": {
-    "test": "jest --detectOpenHandles --watchAll",
+    "test": "jest --detectOpenHandles --maxWorkers=1 --watchAll",
     "start": "ts-node-dev src/serverStart.ts"
   },
   "keywords": [],

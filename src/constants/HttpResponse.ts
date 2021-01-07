@@ -4,7 +4,7 @@ export class HttpResponse {
     'User with this email already exists. Please try a different one.';
   public static USER_NOT_FOUND = 'User with this email was not found.';
   public static USER_NOT_VERIFIED = 'This account has not been verified.';
-  public static INVALID_CREDENTIALS = 'Invalid credentials. PLease try again.';
+  public static INVALID_CREDENTIALS = 'Invalid credentials. Please try again.';
   public static USER_CREATED =
     'User created! Please check your email to verify your account.';
   public static USER_ACTIVATED =

@@ -1,16 +1,10 @@
 import { Logger } from '@overnightjs/logger';
-import { Request, Response } from 'express';
 import 'reflect-metadata';
 import app from './server';
 
 const port = process.env.PORT || 5000;
 
-// Test route
-app.get('/', async (req: Request, res: Response) => {
-  return res.status(200).json({ message: 'Good!' });
-});
-
-app.listen(port, () => {
+export const server = app.listen(port, () => {
   console.log(`Server started on port ${port}...`);
   const date = new Date();
   date.setDate(date.getDate() - (date.getDay() || 7));

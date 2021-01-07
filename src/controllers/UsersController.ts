@@ -78,7 +78,7 @@ export class UsersController extends BaseHttpController {
         return this.badRequest(this.userService.errorMessage);
 
       const existingUser = await this.userRepository.GetByEmail(req.body.email);
-      if (existingUser) return this.badRequest(HttpResponse.USER_EXISTS);
+      if (existingUser) return this.badRequest(HttpResponse.USER_EXISTS); // Consider changing all badRequests to alert responses for consistency
 
       await this.userService.HashPassword(req);
 
@@ -87,7 +87,8 @@ export class UsersController extends BaseHttpController {
         newUser.id
       );
 
-      this.authService.sendVerificationEmail(activationPassword);
+      if (process.env.REGISTER !== 'testing')
+        this.authService.sendVerificationEmail(activationPassword); // For testing only. Remove for production.
 
       return this.created('/register', new Alert(HttpResponse.USER_CREATED));
     } catch (error) {
@@ -114,6 +115,9 @@ export class UsersController extends BaseHttpController {
 
       const existingUser = await this.userRepository.GetByEmail(req.body.email);
       if (!existingUser) return this.notFound();
+
+      if (process.env.LOGIN === 'testing')
+        await existingUser.update({ active: true }); // For testing only. Remove for production.
 
       if (!existingUser.active)
         return this.badRequest(HttpResponse.USER_NOT_VERIFIED);
