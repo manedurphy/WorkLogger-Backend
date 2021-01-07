@@ -207,7 +207,7 @@ export class TasksController extends BaseHttpController {
         await this.logRepository.Add(logCreateDto, task);
       }
 
-      return this.ok(HttpResponse.TASK_UPDATE);
+      return this.ok(new Alert(HttpResponse.TASK_UPDATE));
     } catch (error) {
       Logger.Err(error);
       return this.internalServerError();
