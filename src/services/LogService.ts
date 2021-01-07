@@ -38,25 +38,20 @@ export class LogService {
     return logItem.UserId === userId;
   }
 
-  public async GetHoursWorkedAfterDelete(log: Log[], hoursRemoved: number) {
+  public async GetHoursWorkedAfterDelete(log: Log[], logItemRemoved: Log) {
     let sum = 0;
 
-    // if (log.length === 1) {
-    //   sum = log[0].hoursWorked;
-    // } else {
     for (let i = log.length - 1; i >= 0; i--) {
-      if (i === log.length - 1) {
-        log[i].productiveHours = log[i].hoursWorked;
-        sum += log[i].hoursWorked;
-      } else {
-        const diff =
-          log[i].hoursWorked - log[i + 1].hoursWorked; /*- hoursRemoved*/
-        sum += diff;
-        log[i].productiveHours = diff;
-        log[i].hoursWorked = sum;
+      if (log[i].id > logItemRemoved.id) {
+        log[i].hoursWorked -= logItemRemoved.productiveHours;
+        if (log[i + 1]) {
+          log[i].productiveHours = log[i].hoursWorked - log[i + 1].hoursWorked;
+        }
+        await log[i].save();
+        if (i === 0) {
+          sum = log[i].hoursWorked;
+        }
       }
-      await log[i].save();
-      // }
     }
 
     return sum;
