@@ -73,6 +73,7 @@
     "node_modules",
     "dist",
     "src/**/interfaces/**",
-    "src/**/*.test.ts"
+    "src/**/*.test.ts",
+    "src/setupTests.ts"
   ]
 }

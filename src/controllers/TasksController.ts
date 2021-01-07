@@ -197,6 +197,8 @@ export class TasksController extends BaseHttpController {
     try {
       const task = await this.taskRepository.GetById(+req.params.id);
       if (!task) return this.notFound();
+      console.log('TASK:', task);
+      console.log('REQ BODY: ', req.body);
 
       const previouslyWorkedHours = task.hoursWorked;
       const updatedTask = await this.taskRepository.Update(task, req.body);

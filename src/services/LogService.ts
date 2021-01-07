@@ -38,12 +38,37 @@ export class LogService {
     return logItem.UserId === userId;
   }
 
-  public async GetHoursWorked(log: Log[]) {
+  public async GetHoursWorkedAfterDelete(log: Log[], hoursRemoved: number) {
+    let sum = 0;
+
+    // if (log.length === 1) {
+    //   sum = log[0].hoursWorked;
+    // } else {
+    for (let i = log.length - 1; i >= 0; i--) {
+      if (i === log.length - 1) {
+        log[i].productiveHours = log[i].hoursWorked;
+        sum += log[i].hoursWorked;
+      } else {
+        const diff =
+          log[i].hoursWorked - log[i + 1].hoursWorked; /*- hoursRemoved*/
+        sum += diff;
+        log[i].productiveHours = diff;
+        log[i].hoursWorked = sum;
+      }
+      await log[i].save();
+      // }
+    }
+
+    return sum;
+  }
+
+  public async GetHoursWorkedAfterUpdate(log: Log[]) {
     let sum = 0;
 
     for (let i = log.length - 1; i >= 0; i--) {
       if (i === log.length - 1) {
         log[i].productiveHours = log[i].hoursWorked;
+        sum += log[i].hoursWorked;
       } else {
         const diff = log[i].hoursWorked - log[i + 1].hoursWorked;
         sum += diff;

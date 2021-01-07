@@ -75,13 +75,17 @@ export class LogsController extends BaseHttpController {
       const logItem = await this.logRepository.GetById(+req.params.id);
       if (!logItem) return this.notFound();
 
+      const hoursRemoved = logItem.productiveHours;
       const task = await this.taskRepository.GetById(logItem.TaskId);
       if (!task) return this.notFound();
 
       await this.logRepository.Delete(logItem);
 
       const log = await this.logRepository.GetByTaskId(logItem.TaskId);
-      const hoursWorked = await this.logService.GetHoursWorked(log);
+      const hoursWorked = await this.logService.GetHoursWorkedAfterDelete(
+        log,
+        hoursRemoved
+      );
 
       task.hoursWorked = hoursWorked;
       this.taskRepository.Save(task);
@@ -102,13 +106,16 @@ export class LogsController extends BaseHttpController {
       const logItem = await this.logRepository.GetById(+req.params.id);
       if (!logItem) return this.notFound();
 
-      const task = await this.taskRepository.GetById(logItem.TaskId);
-      if (!task) return this.notFound();
+      const task = await this.taskRepository.GetById(req.body.TaskId);
+      console.log('TASK: ', task);
+      if (!task) return this.notFound(); // Consider an Alert
 
+      console.log('REQ BODY BEFORE UPDATE', req.body);
       await this.logRepository.Update(logItem, req.body);
 
       const log = await this.logRepository.GetByTaskId(logItem.TaskId);
-      const hoursWorked = await this.logService.GetHoursWorked(log);
+      console.log('LOG BEFORE GET HOURS WORKED', log);
+      const hoursWorked = await this.logService.GetHoursWorkedAfterUpdate(log);
 
       task.hoursWorked = hoursWorked;
       this.taskRepository.Save(task);

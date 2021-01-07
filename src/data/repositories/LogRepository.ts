@@ -26,7 +26,7 @@ export class LogRepository implements ILogRepository {
   }
 
   public async Update(log: Log, logCreateDto: LogCreateDto): Promise<void> {
-    log.update(logCreateDto);
+    await log.update(logCreateDto); // change to return
   }
 
   public async Delete(logItem: Log) {
