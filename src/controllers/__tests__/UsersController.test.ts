@@ -28,7 +28,23 @@ describe('User registration and login', () => {
     expect(res.text).toEqual('Not Found');
   });
 
-  it('should register a user in the database', async () => {
+  it('should not register a user if passwords do not match', async () => {
+    process.env.REGISTER = 'testing';
+    const testUser = {
+      firstName: 'Test',
+      lastName: 'User',
+      email: 'testuser@mail.com',
+      password: 'password',
+      password2: 'passwordsss',
+    };
+
+    const res = await request(app).post('/api/users/register').send(testUser);
+
+    expect(res.status).toEqual(400);
+    expect(res.text).toEqual('Passwords do not match. Please try again.');
+  });
+
+  it('should register a user', async () => {
     process.env.REGISTER = 'testing';
     const testUser = {
       firstName: 'Test',
@@ -102,5 +118,62 @@ describe('User registration and login', () => {
 
     expect(res.status).toEqual(400);
     expect(res.text).toEqual('Invalid credentials. Please try again.');
+  });
+});
+
+describe('User registration and login form validation', () => {
+  it('should not allow registration with a missing input', async () => {
+    const testUser = {
+      firstName: 'Test',
+      email: 'testuser@mail.com',
+      password: 'password',
+      password2: 'password',
+    };
+
+    const res = await request(app).post('/api/users/register').send(testUser);
+
+    expect(res.status).toEqual(400);
+    expect(res.text).toEqual('Must include last name');
+  });
+
+  it('should not allow registration with an invalid email', async () => {
+    const testUser = {
+      firstName: 'Test',
+      lastName: 'User',
+      email: 'testusermail.com',
+      password: 'password',
+      password2: 'password',
+    };
+
+    const res = await request(app).post('/api/users/register').send(testUser);
+
+    expect(res.status).toEqual(400);
+    expect(res.text).toEqual('Invalid email');
+  });
+
+  it('should not allow registration with a password under 6 characters', async () => {
+    const testUser = {
+      firstName: 'Test',
+      lastName: 'User',
+      email: 'testusers@mail.com',
+      password: 'pass',
+      password2: 'pass',
+    };
+
+    const res = await request(app).post('/api/users/register').send(testUser);
+
+    expect(res.status).toEqual(400);
+    expect(res.text).toEqual('Password must be at least 6 characters long');
+  });
+
+  it('should not allow login with a missing input', async () => {
+    const testUser = {
+      email: 'testuser@mail.com',
+    };
+
+    const res = await request(app).post('/api/users/login').send(testUser);
+
+    expect(res.status).toEqual(400);
+    expect(res.text).toEqual('Please enter your password');
   });
 });
