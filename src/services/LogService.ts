@@ -1,8 +1,7 @@
-import { Logger } from '@overnightjs/logger';
 import { injectable } from 'inversify';
 import { LogCreateDto } from '../data/dtos/LogCreateDto';
 import { ILogCreateDto } from '../data/interfaces/ILogCreateDto';
-import { Log, Task } from '../models';
+import { Log } from '../models';
 
 @injectable()
 export class LogService {
