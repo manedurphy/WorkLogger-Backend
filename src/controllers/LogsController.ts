@@ -107,7 +107,7 @@ export class LogsController extends BaseHttpController {
       if (!logItem) return this.notFound();
 
       const task = await this.taskRepository.GetById(req.body.TaskId);
-      if (!task) return this.notFound(); // Consider an Alert
+      if (!task) return this.notFound();
 
       await this.logRepository.Update(logItem, req.body);
 

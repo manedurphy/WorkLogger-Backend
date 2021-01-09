@@ -78,7 +78,7 @@ export class UsersController extends BaseHttpController {
         return this.badRequest(this.userService.errorMessage);
 
       const existingUser = await this.userRepository.GetByEmail(req.body.email);
-      if (existingUser) return this.badRequest(HttpResponse.USER_EXISTS); // Consider changing all badRequests to alert responses for consistency
+      if (existingUser) return this.badRequest(HttpResponse.USER_EXISTS);
 
       await this.userService.HashPassword(req);
 
