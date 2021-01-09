@@ -13,6 +13,7 @@ import { ValidationMessages } from '../constants/ValidationMessages';
 import { HttpResponse } from '../constants/HttpResponse';
 import { LogService } from '../services/LogService';
 import { MapUserToTask } from '../middleware/MapUserToTask';
+import { CalculateHoursRemaining } from '../middleware/CalculateHoursRemaining';
 import {
   BaseHttpController,
   controller,
@@ -114,6 +115,7 @@ export class TasksController extends BaseHttpController {
     '/',
     LoggerMiddleware,
     MapUserToTask,
+    CalculateHoursRemaining,
     body('name').not().isEmpty().withMessage(ValidationMessages.TASK_NAME),
     body('projectNumber')
       .not()
@@ -188,7 +190,7 @@ export class TasksController extends BaseHttpController {
     }
   }
 
-  @httpPut('/:id', LoggerMiddleware, MapUserToTask)
+  @httpPut('/:id', LoggerMiddleware, MapUserToTask, CalculateHoursRemaining)
   private async Update(
     @request() req: AuthenticatedRequest,
     @response() res: Response

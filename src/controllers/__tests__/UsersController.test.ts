@@ -2,7 +2,10 @@ import app, { server } from '../../serverStart';
 import request from 'supertest';
 import sequelize from '../../data/SQLDatabase';
 
-beforeAll(async () => await sequelize.sync());
+beforeAll(async () => {
+  process.env.REGISTER = 'testing';
+  await sequelize.sync();
+});
 
 afterEach(async () => {
   server.close();
@@ -29,7 +32,6 @@ describe('User registration and login', () => {
   });
 
   it('should not register a user if passwords do not match', async () => {
-    process.env.REGISTER = 'testing';
     const testUser = {
       firstName: 'Test',
       lastName: 'User',
@@ -45,7 +47,6 @@ describe('User registration and login', () => {
   });
 
   it('should register a user', async () => {
-    process.env.REGISTER = 'testing';
     const testUser = {
       firstName: 'Test',
       lastName: 'User',

@@ -1,12 +1,13 @@
 import app, { server } from '../../serverStart';
 import request from 'supertest';
 import sequelize from '../../data/SQLDatabase';
+// import {sampleData} from '../SampleData'
 
 const testTask = {
   name: 'Task 1',
   projectNumber: 1,
   hoursAvailableToWork: 100,
-  hoursWorked: 0,
+  hoursWorked: 5,
   hoursRemaining: 0,
   notes: 'Here are some notes',
   numberOfReviews: 0,
@@ -24,6 +25,7 @@ const existingUser = {
 let token: string;
 
 beforeAll(async () => {
+  process.env.REGISTER = 'testing';
   process.env.LOGIN = 'testing';
   await sequelize.sync();
 
@@ -118,6 +120,14 @@ describe('Task GET, PUT, and DELETE', () => {
     expect(res.body.name).toEqual('Task 1');
   });
 
+  it('should calculate the hoursRemaining property for the user', async () => {
+    const res = await request(app)
+      .get('/api/tasks/incomplete/1')
+      .set('Authorization', `Bearer ${token}`);
+
+    expect(res.body.hoursRemaining).toEqual(81);
+  });
+
   it('should update a task from incomplete to complete', async () => {
     const res = await request(app)
       .put('/api/tasks/incomplete/1')
@@ -181,5 +191,11 @@ describe('Task GET, PUT, and DELETE', () => {
       .set('Authorization', `Bearer ${token}`);
 
     expect(res.status).toEqual(204);
+
+    const task = await request(app)
+      .get('/api/tasks/1')
+      .set('Authorization', `Bearer ${token}`);
+
+    expect(task.status).toEqual(404);
   });
 });

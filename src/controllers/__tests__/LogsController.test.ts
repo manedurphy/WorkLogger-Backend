@@ -12,6 +12,7 @@ const existingUser = {
 let token: string;
 
 beforeAll(async () => {
+  process.env.REGISTER = 'testing';
   process.env.LOGIN = 'testing';
   await sequelize.sync();
 
@@ -138,7 +139,7 @@ describe('Log updates and deletes', () => {
       .send(data)
       .set('Authorization', `Bearer ${token}`);
 
-    for (let i = 0; i < 2; i++) {
+    for (let i = 0; i < hours.length; i++) {
       data.hoursWorked = hours[i];
       await request(app)
         .put('/api/tasks/3')
@@ -163,5 +164,71 @@ describe('Log updates and deletes', () => {
       .set('Authorization', `Bearer ${token}`);
 
     expect(task.body.hoursWorked).toEqual(18 - 5);
+  });
+
+  it("should properly update task's log hours when a log item is deleted", async () => {
+    const data = { ...sampleData[3] };
+    const hours = [0, 5, 12];
+
+    await request(app)
+      .post('/api/tasks')
+      .send(data)
+      .set('Authorization', `Bearer ${token}`);
+
+    for (let i = 0; i < hours.length; i++) {
+      data.hoursWorked = hours[i];
+      await request(app)
+        .put('/api/tasks/4')
+        .send(data)
+        .set('Authorization', `Bearer ${token}`);
+    }
+
+    await request(app)
+      .delete('/api/logs/log-item/16')
+      .set('Authorization', `Bearer ${token}`);
+
+    const log = await request(app)
+      .get('/api/logs/4')
+      .set('Authorization', `Bearer ${token}`);
+
+    const logItems = log.body.reverse();
+    const expectedHoursWorked = [0, 5, 12];
+    const expectedProductiveHours = [0, 5, 7];
+
+    for (let i = 0; i < logItems.length; i++) {
+      expect(logItems[i].hoursWorked).toEqual(expectedHoursWorked[i]);
+      expect(logItems[i].productiveHours).toEqual(expectedProductiveHours[i]);
+    }
+
+    const data2 = { ...sampleData[4] };
+    const hours2 = [2, 5, 8];
+
+    await request(app)
+      .post('/api/tasks')
+      .send(data2)
+      .set('Authorization', `Bearer ${token}`);
+
+    for (let i = 0; i < hours2.length; i++) {
+      data2.hoursWorked = hours2[i];
+      await request(app)
+        .put('/api/tasks/5')
+        .send(data2)
+        .set('Authorization', `Bearer ${token}`);
+    }
+
+    await request(app)
+      .delete('/api/logs/log-item/20')
+      .set('Authorization', `Bearer ${token}`);
+
+    const log2 = await request(app)
+      .get('/api/logs/5')
+      .set('Authorization', `Bearer ${token}`);
+
+    const logItems2 = log2.body.reverse();
+    const expectedHours2 = [2, 5, 8];
+
+    for (let i = 0; i < logItems2.length; i++) {
+      expect(logItems2[i].hoursWorked).toEqual(expectedHours2[i]);
+    }
   });
 });

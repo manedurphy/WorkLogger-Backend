@@ -1,3 +1,4 @@
+import { Logger } from '@overnightjs/logger';
 import { injectable } from 'inversify';
 import { LogCreateDto } from '../data/dtos/LogCreateDto';
 import { ILogCreateDto } from '../data/interfaces/ILogCreateDto';
@@ -42,16 +43,13 @@ export class LogService {
     let sum = 0;
 
     for (let i = log.length - 1; i >= 0; i--) {
-      if (log[i].id > logItemRemoved.id) {
-        log[i].hoursWorked -= logItemRemoved.productiveHours;
-        if (log[i + 1]) {
-          log[i].productiveHours = log[i].hoursWorked - log[i + 1].hoursWorked;
-        }
-        await log[i].save();
-        if (i === 0) {
-          sum = log[i].hoursWorked;
-        }
+      if (log[i].productiveHours > 0) {
+      } else {
+        log[i].productiveHours += logItemRemoved.productiveHours;
       }
+      sum += log[i].productiveHours;
+      log[i].hoursWorked = sum;
+      await log[i].save();
     }
 
     return sum;
