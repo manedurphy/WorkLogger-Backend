@@ -1,7 +1,6 @@
 import app, { server } from '../../serverStart';
 import request from 'supertest';
 import sequelize from '../../data/SQLDatabase';
-// import {sampleData} from '../SampleData'
 
 const testTask = {
   name: 'Task 1',
