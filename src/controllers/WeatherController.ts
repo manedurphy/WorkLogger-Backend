@@ -1,3 +1,5 @@
+import { Types } from '../constants/Types';
+import { WeatherService } from '../services/WeatherService';
 import { Logger } from '@overnightjs/logger';
 import { Request, Response } from 'express';
 import { inject } from 'inversify';
@@ -8,8 +10,6 @@ import {
   request,
   response,
 } from 'inversify-express-utils';
-import { Types } from '../constants/Types';
-import { WeatherService } from '../services/WeatherService';
 
 @controller('/api/weather')
 export class WeatherController extends BaseHttpController {
