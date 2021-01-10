@@ -32,7 +32,7 @@ export class TaskRepository implements ITaskRepository {
   }
 
   public async Delete(task: Task): Promise<void> {
-    task.destroy();
+    return task.destroy();
   }
 
   public async Update(
@@ -43,14 +43,14 @@ export class TaskRepository implements ITaskRepository {
   }
 
   public async Complete(task: Task): Promise<void> {
-    task.update({ complete: true });
+    await task.update({ complete: true });
   }
 
   public async InComplete(task: Task): Promise<void> {
-    task.update({ complete: false });
+    await task.update({ complete: false });
   }
 
   public async Save(task: Task) {
-    task.save();
+    await task.save();
   }
 }
