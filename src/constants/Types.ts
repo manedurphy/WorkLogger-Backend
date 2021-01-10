@@ -8,4 +8,5 @@ export class Types {
   public static AuthService: string = 'AuthService';
   public static TaskService: string = 'TaskService';
   public static LogService: string = 'LogService';
+  public static WeatherService: string = 'WeatherService';
 }
