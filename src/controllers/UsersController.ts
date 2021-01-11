@@ -75,10 +75,11 @@ export class UsersController extends BaseHttpController {
       const passordsMatch = this.userService.ValidatePassordsMatch(req);
 
       if (registrationFormErrorsPresent || !passordsMatch)
-        return this.badRequest(this.userService.errorMessage);
+        return this.json(new Alert(this.userService.errorMessage), 400);
 
       const existingUser = await this.userRepository.GetByEmail(req.body.email);
-      if (existingUser) return this.badRequest(HttpResponse.USER_EXISTS);
+      if (existingUser)
+        return this.json(new Alert(HttpResponse.USER_EXISTS), 400);
 
       await this.userService.HashPassword(req);
 
@@ -111,16 +112,17 @@ export class UsersController extends BaseHttpController {
       const loginFormsPresent = this.userService.ValidateForm(req);
 
       if (loginFormsPresent)
-        return this.badRequest(this.userService.errorMessage);
+        return this.json(new Alert(this.userService.errorMessage), 400);
 
       const existingUser = await this.userRepository.GetByEmail(req.body.email);
-      if (!existingUser) return this.notFound();
+      if (!existingUser)
+        return this.json(new Alert(HttpResponse.USER_NOT_FOUND), 404);
 
       if (process.env.LOGIN === 'testing')
         await existingUser.update({ active: true }); // For testing only. Remove for production.
 
       if (!existingUser.active)
-        return this.badRequest(HttpResponse.USER_NOT_VERIFIED);
+        return this.json(new Alert(HttpResponse.USER_NOT_VERIFIED), 400);
 
       const passwordIsCorrect = await this.userService.VerifyLoginPassword(
         req.body.password,
@@ -128,7 +130,7 @@ export class UsersController extends BaseHttpController {
       );
 
       if (!passwordIsCorrect)
-        return this.badRequest(HttpResponse.INVALID_CREDENTIALS);
+        return this.json(new Alert(HttpResponse.INVALID_CREDENTIALS), 400);
 
       const userReadDto = this.userService.MapUserReadDto(existingUser);
       const token = this.authService.GenerateToken(userReadDto);

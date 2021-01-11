@@ -1,6 +1,7 @@
 import './data/SQLDatabase';
 import './controllers';
 import * as express from 'express';
+import cors from 'cors';
 import jwtMiddleware from 'express-jwt';
 import { Container } from 'inversify';
 import { InversifyExpressServer } from 'inversify-express-utils';
@@ -36,6 +37,7 @@ const server = new InversifyExpressServer(container);
 server.setConfig((app) => {
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
+  app.use(cors({ origin: 'http://localhost:3000' }));
   app.use(
     jwtMiddleware({
       secret: process.env.JWT_SECRET as string,
