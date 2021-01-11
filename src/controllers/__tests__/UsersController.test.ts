@@ -28,7 +28,7 @@ describe('User registration and login', () => {
       .send(nonExistingUser);
 
     expect(res.status).toBe(404);
-    expect(res.text).toEqual('Not Found');
+    expect(res.body.message).toEqual('User with this email was not found.');
   });
 
   it('should not register a user if passwords do not match', async () => {
@@ -43,7 +43,9 @@ describe('User registration and login', () => {
     const res = await request(app).post('/api/users/register').send(testUser);
 
     expect(res.status).toEqual(400);
-    expect(res.text).toEqual('Passwords do not match. Please try again.');
+    expect(res.body.message).toEqual(
+      'Passwords do not match. Please try again.'
+    );
   });
 
   it('should register a user', async () => {
@@ -75,7 +77,7 @@ describe('User registration and login', () => {
     const res = await request(app).post('/api/users/register').send(testUser);
 
     expect(res.status).toEqual(400);
-    expect(res.text).toEqual(
+    expect(res.body.message).toEqual(
       'User with this email already exists. Please try a different one.'
     );
   });
@@ -89,7 +91,7 @@ describe('User registration and login', () => {
     const res = await request(app).post('/api/users/login').send(existingUser);
 
     expect(res.status).toBe(400);
-    expect(res.text).toEqual('This account has not been verified.');
+    expect(res.body.message).toEqual('This account has not been verified.');
   });
 
   it('should login a user with an active account', async () => {
@@ -118,7 +120,7 @@ describe('User registration and login', () => {
     const res = await request(app).post('/api/users/login').send(existingUser);
 
     expect(res.status).toEqual(400);
-    expect(res.text).toEqual('Invalid credentials. Please try again.');
+    expect(res.body.message).toEqual('Invalid credentials. Please try again.');
   });
 });
 
@@ -134,7 +136,7 @@ describe('User registration and login form validation', () => {
     const res = await request(app).post('/api/users/register').send(testUser);
 
     expect(res.status).toEqual(400);
-    expect(res.text).toEqual('Must include last name');
+    expect(res.body.message).toEqual('Must include last name');
   });
 
   it('should not allow registration with an invalid email', async () => {
@@ -149,7 +151,7 @@ describe('User registration and login form validation', () => {
     const res = await request(app).post('/api/users/register').send(testUser);
 
     expect(res.status).toEqual(400);
-    expect(res.text).toEqual('Invalid email');
+    expect(res.body.message).toEqual('Invalid email');
   });
 
   it('should not allow registration with a password under 6 characters', async () => {
@@ -164,7 +166,9 @@ describe('User registration and login form validation', () => {
     const res = await request(app).post('/api/users/register').send(testUser);
 
     expect(res.status).toEqual(400);
-    expect(res.text).toEqual('Password must be at least 6 characters long');
+    expect(res.body.message).toEqual(
+      'Password must be at least 6 characters long'
+    );
   });
 
   it('should not allow login with a missing input', async () => {
@@ -175,6 +179,6 @@ describe('User registration and login form validation', () => {
     const res = await request(app).post('/api/users/login').send(testUser);
 
     expect(res.status).toEqual(400);
-    expect(res.text).toEqual('Please enter your password');
+    expect(res.body.message).toEqual('Please enter your password');
   });
 });

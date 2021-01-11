@@ -1,22 +1,22 @@
-import './data/SQLDatabase';
-import './controllers';
-import * as express from 'express';
-import cors from 'cors';
-import jwtMiddleware from 'express-jwt';
-import { Container } from 'inversify';
-import { InversifyExpressServer } from 'inversify-express-utils';
-import { UserRepository } from './data/repositories/UserRepository';
-import { Types } from './constants/Types';
-import { UserService } from './services/UserService';
-import { AuthService } from './services/AuthService';
-import { ActivationPasswordRepository } from './data/repositories/ActivationPasswordRepository';
-import { TaskRepository } from './data/repositories/TaskRepository';
-import { LogRepository } from './data/repositories/LogRepository';
-import { TaskService } from './services/TaskService';
-import { LogService } from './services/LogService';
-import { ILogRepository } from './data/interfaces/ILogRepository';
-import { IUserRepository } from './data/interfaces/IUserRepository';
-import { WeatherService } from './services/WeatherService';
+import "./data/SQLDatabase";
+import "./controllers";
+import * as express from "express";
+import cors from "cors";
+import jwtMiddleware from "express-jwt";
+import { Container } from "inversify";
+import { InversifyExpressServer } from "inversify-express-utils";
+import { UserRepository } from "./data/repositories/UserRepository";
+import { Types } from "./constants/Types";
+import { UserService } from "./services/UserService";
+import { AuthService } from "./services/AuthService";
+import { ActivationPasswordRepository } from "./data/repositories/ActivationPasswordRepository";
+import { TaskRepository } from "./data/repositories/TaskRepository";
+import { LogRepository } from "./data/repositories/LogRepository";
+import { TaskService } from "./services/TaskService";
+import { LogService } from "./services/LogService";
+import { ILogRepository } from "./data/interfaces/ILogRepository";
+import { IUserRepository } from "./data/interfaces/IUserRepository";
+import { WeatherService } from "./services/WeatherService";
 
 const container = new Container();
 
@@ -37,18 +37,18 @@ const server = new InversifyExpressServer(container);
 server.setConfig((app) => {
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
-  app.use(cors({ origin: 'http://localhost:3000' }));
+  app.use(cors({ origin: "http://localhost:3000" }));
   app.use(
     jwtMiddleware({
       secret: process.env.JWT_SECRET as string,
-      algorithms: ['HS256'],
-      requestProperty: 'payload',
+      algorithms: ["HS256"],
+      requestProperty: "payload",
     }).unless({
       path: [
-        '/api/users/login',
-        '/api/users/register',
+        "/api/users/login",
+        "/api/users/register",
         { url: /^\/api\/activation\/.*/ },
-        '/',
+        "/",
       ],
     })
   );
