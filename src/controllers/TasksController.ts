@@ -180,10 +180,10 @@ export class TasksController extends BaseHttpController {
     try {
       const task = await this.taskRepository.GetById(+req.params.id);
 
-      if (!task) return this.notFound();
+      if (!task) return this.json(new Alert(HttpResponse.TASK_NOT_FOUND), 404);
       await this.taskRepository.Delete(task);
 
-      return this.statusCode(204);
+      return this.ok(new Alert(HttpResponse.TASK_DELETED));
     } catch (error) {
       Logger.Err(error);
       return this.internalServerError();
@@ -224,10 +224,10 @@ export class TasksController extends BaseHttpController {
     try {
       const task = await this.taskRepository.GetById(+req.params.id);
 
-      if (!task) return this.notFound();
+      if (!task) return this.json(new Alert(HttpResponse.TASK_NOT_FOUND), 404);
       await this.taskRepository.Complete(task);
 
-      return this.ok(new Alert(HttpResponse.TASK_UPDATE));
+      return this.ok(new Alert(HttpResponse.TASK_COMPLETE));
     } catch (error) {
       Logger.Err(error);
       return this.internalServerError();
@@ -245,7 +245,7 @@ export class TasksController extends BaseHttpController {
       if (!task) return this.notFound();
       await this.taskRepository.InComplete(task);
 
-      return this.ok(HttpResponse.TASK_UPDATE);
+      return this.ok(new Alert(HttpResponse.TASK_INCOMPLETE));
     } catch (error) {
       Logger.Err(error);
       return this.internalServerError();

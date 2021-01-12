@@ -133,7 +133,7 @@ describe('Task GET, PUT, and DELETE', () => {
       .set('Authorization', `Bearer ${token}`);
 
     expect(res.status).toEqual(200);
-    expect(res.body.message).toEqual('Task updated!');
+    expect(res.body.message).toEqual('Task complete!');
   });
 
   it('should receive an array of all complete tasks', async () => {
@@ -147,11 +147,11 @@ describe('Task GET, PUT, and DELETE', () => {
 
   it('should update a task from complete to incomplete', async () => {
     const res = await request(app)
-      .put('/api/tasks/incomplete/1')
+      .put('/api/tasks/complete/1')
       .set('Authorization', `Bearer ${token}`);
 
     expect(res.status).toEqual(200);
-    expect(res.body.message).toEqual('Task updated!');
+    expect(res.body.message).toEqual('Task marked as incomplete');
   });
 
   it('should update contents of a task by its ID', async () => {
@@ -189,7 +189,8 @@ describe('Task GET, PUT, and DELETE', () => {
       .delete('/api/tasks/1')
       .set('Authorization', `Bearer ${token}`);
 
-    expect(res.status).toEqual(204);
+    expect(res.status).toEqual(200);
+    expect(res.body.message).toEqual('Task deleted!');
 
     const task = await request(app)
       .get('/api/tasks/1')
