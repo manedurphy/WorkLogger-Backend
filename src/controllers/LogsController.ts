@@ -6,7 +6,7 @@ import { AuthenticatedRequest } from './interfaces/interfaces';
 import { Logger } from '@overnightjs/logger';
 import { LoggerMiddleware } from '../middleware/LoggerMiddleware';
 import { LogService } from '../services/LogService';
-import { TaskRepository } from '../data/repositories/TaskRepository';
+import { ITaskRepository } from '../data/interfaces/ITaskRepository';
 import {
     BaseHttpController,
     controller,
@@ -21,12 +21,12 @@ import {
 export class LogsController extends BaseHttpController {
     private readonly logRepository: ILogRepository;
     private readonly logService: LogService;
-    private readonly taskRepository: TaskRepository;
+    private readonly taskRepository: ITaskRepository;
 
     public constructor(
         @inject(Types.LogRepository) logRepository: ILogRepository,
         @inject(Types.LogService) logService: LogService,
-        @inject(Types.TaskRepository) taskRepository: TaskRepository,
+        @inject(Types.TaskRepository) taskRepository: ITaskRepository,
     ) {
         super();
         this.logRepository = logRepository;

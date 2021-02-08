@@ -4,16 +4,16 @@ import { Alert } from '../responseObjects/Alert';
 import { Logger } from '@overnightjs/logger';
 import { HttpResponse } from '../constants/HttpResponse';
 import { Request, Response } from 'express';
-import { ActivationPasswordRepository } from '../data/repositories/ActivationPasswordRepository';
 import { BaseHttpController, controller, httpGet, request, response } from 'inversify-express-utils';
+import { IActivationPasswordRepository } from '../data/interfaces/IActivationPasswordRepository';
 
 @controller('/api/activation')
 export class ActivationPasswordsController extends BaseHttpController {
-    private readonly activationPasswordRepository: ActivationPasswordRepository;
+    private readonly activationPasswordRepository: IActivationPasswordRepository;
 
     public constructor(
         @inject(Types.ActivationPasswordRepository)
-        activationPasswordRepository: ActivationPasswordRepository,
+        activationPasswordRepository: IActivationPasswordRepository,
     ) {
         super();
         this.activationPasswordRepository = activationPasswordRepository;

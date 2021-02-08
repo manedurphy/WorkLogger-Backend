@@ -20,18 +20,20 @@ import { IUserRepository } from './data/interfaces/IUserRepository';
 import { WeatherService } from './services/WeatherService';
 import { Errback, Request, Response, NextFunction } from 'express';
 import { HttpResponse } from './constants/HttpResponse';
+import { ITaskRepository } from './data/interfaces/ITaskRepository';
+import { IActivationPasswordRepository } from './data/interfaces/IActivationPasswordRepository';
 
 const container = new Container();
 
 container.bind<IUserRepository>(Types.UserRepository).to(UserRepository);
-container.bind<TaskRepository>(Types.TaskRepository).to(TaskRepository);
+container.bind<ITaskRepository>(Types.TaskRepository).to(TaskRepository);
 container.bind<ILogRepository>(Types.LogRepository).to(LogRepository);
 container.bind<UserService>(Types.UserService).to(UserService);
 container.bind<AuthService>(Types.AuthService).to(AuthService);
 container.bind<TaskService>(Types.TaskService).to(TaskService);
 container.bind<LogService>(Types.LogService).to(LogService);
 container.bind<WeatherService>(Types.WeatherService).to(WeatherService);
-container.bind<ActivationPasswordRepository>(Types.ActivationPasswordRepository).to(ActivationPasswordRepository);
+container.bind<IActivationPasswordRepository>(Types.ActivationPasswordRepository).to(ActivationPasswordRepository);
 
 const server = new InversifyExpressServer(container);
 

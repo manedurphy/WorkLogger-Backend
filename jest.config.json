@@ -1,0 +1,10 @@
+{
+    "verbose": true,
+    "roots": ["<rootDir>/src"],
+    "preset": "ts-jest",
+    "moduleFileExtensions": ["ts", "js", "node"],
+    "transform": {
+        "^.+\\.ts?$": "ts-jest"
+    },
+    "coveragePathIgnorePatterns": ["/node_modules/"]
+}

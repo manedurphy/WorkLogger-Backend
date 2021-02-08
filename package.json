@@ -3,27 +3,6 @@
     "version": "1.0.0",
     "description": "",
     "main": "index.js",
-    "jest": {
-        "verbose": true,
-        "setupFilesAfterEnv": [
-            "./src/setupTests.ts"
-        ],
-        "roots": [
-            "<rootDir>/src"
-        ],
-        "preset": "ts-jest",
-        "moduleFileExtensions": [
-            "ts",
-            "js",
-            "node"
-        ],
-        "transform": {
-            "^.+\\.ts?$": "ts-jest"
-        },
-        "coveragePathIgnorePatterns": [
-            "/node_modules/"
-        ]
-    },
     "scripts": {
         "test": "jest --detectOpenHandles --maxWorkers=1 --watchAll",
         "start": "ts-node-dev src/serverStart.ts",
