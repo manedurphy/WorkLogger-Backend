@@ -75,5 +75,6 @@
     "src/**/interfaces/**",
     "src/**/*.test.ts",
     "src/setupTests.ts"
-  ]
+  ],
+  "typeAcquisition": {"include": ["jest"]}
 }
