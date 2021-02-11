@@ -1,8 +1,7 @@
 import sequelize from '../data/SQLDatabase';
-import { Model, DataTypes } from 'sequelize';
-import { LogAttributes, LogCreationAttributes } from './interfaces/ILog';
+import {  DataTypes, Model } from 'sequelize';
 
-export class Log extends Model<LogAttributes, LogCreationAttributes> implements LogAttributes {
+export class Log extends Model {
     public id!: number;
     public name!: string;
     public projectNumber!: number;

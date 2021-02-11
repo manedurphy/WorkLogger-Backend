@@ -1,4 +1,5 @@
 import Task from '../../models/Task';
+import Log from '../../models/Log';
 import { injectable } from 'inversify';
 import { TaskCreateDto } from '../dtos/TaskCreateDto';
 import { ITaskRepository } from '../interfaces/ITaskRepository';
@@ -25,6 +26,7 @@ export class TaskRepository implements ITaskRepository {
     return Task.findAll({
       where: { UserId: userId, complete },
       order: [['id', 'DESC']],
+      include: [{ model: Log }]
     });
   }
 

@@ -1,8 +1,8 @@
 import sequelize from '../data/SQLDatabase';
 import { Model, DataTypes } from 'sequelize';
-import { TaskAttributes, TaskCreationAttributes } from './interfaces/ITask';
+// import { TaskAttributes, TaskCreationAttributes } from './interfaces/ITask';
 
-export class Task extends Model<TaskAttributes, TaskCreationAttributes> implements TaskAttributes {
+export class Task extends Model {
     public id!: number;
     public name!: string;
     public projectNumber!: number;
