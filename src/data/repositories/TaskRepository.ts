@@ -1,7 +1,8 @@
+import Task from '../../models/Task';
 import { injectable } from 'inversify';
-import { Task } from '../../models';
 import { TaskCreateDto } from '../dtos/TaskCreateDto';
 import { ITaskRepository } from '../interfaces/ITaskRepository';
+ 
 
 @injectable()
 export class TaskRepository implements ITaskRepository {
