@@ -1,6 +1,5 @@
 import sequelize from '../data/SQLDatabase';
 import { Model, DataTypes } from 'sequelize';
-// import { TaskAttributes, TaskCreationAttributes } from './interfaces/ITask';
 
 export class Task extends Model {
     public id!: number;
