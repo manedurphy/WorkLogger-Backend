@@ -36,7 +36,7 @@ export class TasksController extends BaseHttpController {
         @inject(Types.TaskRepository) taskRepository: ITaskRepository,
         @inject(Types.LogRepository) logRepository: ILogRepository,
         @inject(Types.TaskService) taskService: TaskService,
-        @inject(Types.LogService) logService: LogService,
+        @inject(Types.LogService) logService: LogService
     ) {
         super();
         this.taskRepository = taskRepository;
@@ -46,9 +46,15 @@ export class TasksController extends BaseHttpController {
     }
 
     @httpGet('/incomplete')
-    private async GetIncompleteTasks(@request() req: AuthenticatedRequest, @response() res: Response) {
+    private async GetIncompleteTasks(
+        @request() req: AuthenticatedRequest,
+        @response() res: Response
+    ) {
         try {
-            const incompleteTasks = await this.taskRepository.GetByStatus(req.payload.userInfo.id, false);
+            const incompleteTasks = await this.taskRepository.GetByStatus(
+                req.payload.userInfo.id,
+                false
+            );
             return this.ok(incompleteTasks);
         } catch (error) {
             Logger.Err(error);
@@ -57,7 +63,10 @@ export class TasksController extends BaseHttpController {
     }
 
     @httpGet('/incomplete/:id', LoggerMiddleware)
-    private async GetIncompleteTask(@request() req: AuthenticatedRequest, @response() res: Response) {
+    private async GetIncompleteTask(
+        @request() req: AuthenticatedRequest,
+        @response() res: Response
+    ) {
         try {
             const task = await this.taskRepository.GetById(+req.params.id);
             if (!task) return this.notFound();
@@ -70,9 +79,15 @@ export class TasksController extends BaseHttpController {
     }
 
     @httpGet('/complete', LoggerMiddleware)
-    private async GetCompleteTasks(@request() req: AuthenticatedRequest, @response() res: Response) {
+    private async GetCompleteTasks(
+        @request() req: AuthenticatedRequest,
+        @response() res: Response
+    ) {
         try {
-            const tasks = await this.taskRepository.GetByStatus(req.payload.userInfo.id, true);
+            const tasks = await this.taskRepository.GetByStatus(
+                req.payload.userInfo.id,
+                true
+            );
             return this.ok(tasks);
         } catch (error) {
             Logger.Err(error);
@@ -81,7 +96,10 @@ export class TasksController extends BaseHttpController {
     }
 
     @httpGet('/complete/:id', LoggerMiddleware)
-    private async GetCompleteTask(@request() req: AuthenticatedRequest, @response() res: Response) {
+    private async GetCompleteTask(
+        @request() req: AuthenticatedRequest,
+        @response() res: Response
+    ) {
         try {
             const task = await this.taskRepository.GetById(+req.params.id);
             if (!task) return this.notFound();
@@ -99,22 +117,49 @@ export class TasksController extends BaseHttpController {
         MapUserToTask,
         CalculateHoursRemaining,
         body('name').not().isEmpty().withMessage(ValidationMessages.TASK_NAME),
-        body('projectNumber').not().isEmpty().withMessage(ValidationMessages.PROJECT_NUMBER),
-        body('hoursAvailableToWork').not().isEmpty().withMessage(ValidationMessages.AVAILABLE_HOURS),
-        body('hoursWorked').not().isEmpty().withMessage(ValidationMessages.HOURS_WORKED),
-        body('reviewHours').not().isEmpty().withMessage(ValidationMessages.REVIEW_HOURS),
-        body('numberOfReviews').not().isEmpty().withMessage(ValidationMessages.NUMBER_OF_REVIEWS),
-        body('hoursRequiredByBim').not().isEmpty().withMessage(ValidationMessages.HOURS_BIM),
+        body('projectNumber')
+            .not()
+            .isEmpty()
+            .withMessage(ValidationMessages.PROJECT_NUMBER),
+        body('hoursAvailableToWork')
+            .not()
+            .isEmpty()
+            .withMessage(ValidationMessages.AVAILABLE_HOURS),
+        body('hoursWorked')
+            .not()
+            .isEmpty()
+            .withMessage(ValidationMessages.HOURS_WORKED),
+        body('reviewHours')
+            .not()
+            .isEmpty()
+            .withMessage(ValidationMessages.REVIEW_HOURS),
+        body('numberOfReviews')
+            .not()
+            .isEmpty()
+            .withMessage(ValidationMessages.NUMBER_OF_REVIEWS),
+        body('hoursRequiredByBim')
+            .not()
+            .isEmpty()
+            .withMessage(ValidationMessages.HOURS_BIM),
+        body('dateAssigned')
+            .not()
+            .isEmpty()
+            .withMessage(ValidationMessages.DATE_ASSGINED),
+        body('dueDate').not().isEmpty().withMessage(ValidationMessages.DUE_DATE)
     )
-    public async CreateTask(@request() req: AuthenticatedRequest, @response() res: Response) {
+    public async CreateTask(
+        @request() req: AuthenticatedRequest,
+        @response() res: Response
+    ) {
         Logger.Warn(req.body, true);
         try {
             const taskFormErrorsPresent = this.taskService.ValidateForm(req);
-            if (taskFormErrorsPresent) return this.badRequest(this.taskService.errorMessage);
+            if (taskFormErrorsPresent)
+                return this.badRequest(this.taskService.errorMessage);
 
             const existingTask = await this.taskRepository.GetByProjectNumber(
                 req.body.projectNumber,
-                req.payload.userInfo.id,
+                req.payload.userInfo.id
             );
 
             if (existingTask) return this.badRequest(HttpResponse.TASK_EXISTS);
@@ -133,11 +178,15 @@ export class TasksController extends BaseHttpController {
     }
 
     @httpDelete('/:id', LoggerMiddleware)
-    private async DeleteTask(@request() req: AuthenticatedRequest, @response() res: Response) {
+    private async DeleteTask(
+        @request() req: AuthenticatedRequest,
+        @response() res: Response
+    ) {
         try {
             const task = await this.taskRepository.GetById(+req.params.id);
 
-            if (!task) return this.json(new Alert(HttpResponse.TASK_NOT_FOUND), 404);
+            if (!task)
+                return this.json(new Alert(HttpResponse.TASK_NOT_FOUND), 404);
             await this.taskRepository.Delete(task);
 
             return this.ok(new Alert(HttpResponse.TASK_DELETED));
@@ -148,18 +197,28 @@ export class TasksController extends BaseHttpController {
     }
 
     @httpPut('/:id', LoggerMiddleware, MapUserToTask, CalculateHoursRemaining)
-    private async Update(@request() req: AuthenticatedRequest, @response() res: Response) {
+    private async Update(
+        @request() req: AuthenticatedRequest,
+        @response() res: Response
+    ) {
         Logger.Warn(req.body, true);
         try {
             const task = await this.taskRepository.GetById(+req.params.id);
             if (!task) return this.notFound();
 
             const previouslyWorkedHours = task.hoursWorked;
-            const updatedTask = await this.taskRepository.Update(task, req.body);
+            const updatedTask = await this.taskRepository.Update(
+                task,
+                req.body
+            );
 
             if (updatedTask) {
-                const hoursWorked = updatedTask.hoursWorked - previouslyWorkedHours;
-                const logCreateDto = this.logService.MapProps(req.body, hoursWorked);
+                const hoursWorked =
+                    updatedTask.hoursWorked - previouslyWorkedHours;
+                const logCreateDto = this.logService.MapProps(
+                    req.body,
+                    hoursWorked
+                );
                 await this.logRepository.Add(logCreateDto, task);
             }
 
@@ -171,11 +230,15 @@ export class TasksController extends BaseHttpController {
     }
 
     @httpPut('/incomplete/:id', LoggerMiddleware)
-    private async CompleteTask(@request() req: AuthenticatedRequest, @response() res: Response) {
+    private async CompleteTask(
+        @request() req: AuthenticatedRequest,
+        @response() res: Response
+    ) {
         try {
             const task = await this.taskRepository.GetById(+req.params.id);
 
-            if (!task) return this.json(new Alert(HttpResponse.TASK_NOT_FOUND), 404);
+            if (!task)
+                return this.json(new Alert(HttpResponse.TASK_NOT_FOUND), 404);
             await this.taskRepository.Complete(task);
 
             return this.ok(new Alert(HttpResponse.TASK_COMPLETE));
@@ -186,7 +249,10 @@ export class TasksController extends BaseHttpController {
     }
 
     @httpPut('/complete/:id', LoggerMiddleware)
-    private async InCompleteTask(@request() req: AuthenticatedRequest, @response() res: Response) {
+    private async InCompleteTask(
+        @request() req: AuthenticatedRequest,
+        @response() res: Response
+    ) {
         try {
             const task = await this.taskRepository.GetById(+req.params.id);
 
