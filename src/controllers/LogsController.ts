@@ -26,7 +26,7 @@ export class LogsController extends BaseHttpController {
     public constructor(
         @inject(Types.LogRepository) logRepository: ILogRepository,
         @inject(Types.LogService) logService: LogService,
-        @inject(Types.TaskRepository) taskRepository: ITaskRepository,
+        @inject(Types.TaskRepository) taskRepository: ITaskRepository
     ) {
         super();
         this.logRepository = logRepository;
@@ -35,9 +35,14 @@ export class LogsController extends BaseHttpController {
     }
 
     @httpGet('/:taskId', LoggerMiddleware)
-    private async GetByTaskId(@request() req: AuthenticatedRequest, @response() res: Response) {
+    private async GetByTaskId(
+        @request() req: AuthenticatedRequest,
+        @response() res: Response
+    ) {
         try {
-            const log = await this.logRepository.GetByTaskId(+req.params.taskId);
+            const log = await this.logRepository.GetByTaskId(
+                +req.params.taskId
+            );
             if (!log.length) return this.notFound();
 
             return this.ok(log);
@@ -48,7 +53,10 @@ export class LogsController extends BaseHttpController {
     }
 
     @httpGet('/log-item/:id')
-    private async GetLogItemById(@request() req: AuthenticatedRequest, @response() res: Response) {
+    private async GetLogItemById(
+        @request() req: AuthenticatedRequest,
+        @response() res: Response
+    ) {
         try {
             const logItem = await this.logRepository.GetById(+req.params.id);
             if (!logItem) return this.notFound();
@@ -61,7 +69,10 @@ export class LogsController extends BaseHttpController {
     }
 
     @httpDelete('/log-item/:id')
-    private async DeleteLogItem(@request() req: AuthenticatedRequest, @response() res: Response) {
+    private async DeleteLogItem(
+        @request() req: AuthenticatedRequest,
+        @response() res: Response
+    ) {
         try {
             const logItem = await this.logRepository.GetById(+req.params.id);
             if (!logItem) return this.notFound();
@@ -73,7 +84,10 @@ export class LogsController extends BaseHttpController {
 
             const log = await this.logRepository.GetByTaskId(logItem.TaskId);
 
-            const hoursWorked = await this.logService.GetHoursWorkedAfterDelete(log, logItem);
+            const hoursWorked = await this.logService.GetHoursWorkedAfterDelete(
+                log,
+                logItem
+            );
 
             task.hoursWorked = hoursWorked;
             this.taskRepository.Save(task);
@@ -86,18 +100,23 @@ export class LogsController extends BaseHttpController {
     }
 
     @httpPut('/log-item/:id')
-    private async UpdateLogItem(@request() req: AuthenticatedRequest, @response() res: Response) {
+    private async UpdateLogItem(
+        @request() req: AuthenticatedRequest,
+        @response() res: Response
+    ) {
         try {
             const logItem = await this.logRepository.GetById(+req.params.id);
             if (!logItem) return this.notFound();
 
-            const task = await this.taskRepository.GetById(req.body.TaskId);
+            const task = await this.taskRepository.GetById(logItem.TaskId);
             if (!task) return this.notFound();
 
             await this.logRepository.Update(logItem, req.body);
 
             const log = await this.logRepository.GetByTaskId(logItem.TaskId);
-            const hoursWorked = await this.logService.GetHoursWorkedAfterUpdate(log);
+            const hoursWorked = await this.logService.GetHoursWorkedAfterUpdate(
+                log
+            );
 
             task.hoursWorked = hoursWorked;
             this.taskRepository.Save(task);
