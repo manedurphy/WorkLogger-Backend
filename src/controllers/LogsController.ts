@@ -3,10 +3,12 @@ import { inject } from 'inversify';
 import { Types } from '../constants/Types';
 import { ILogRepository } from '../data/interfaces/ILogRepository';
 import { AuthenticatedRequest } from './interfaces/interfaces';
+import { HttpResponse } from '../constants/HttpResponse';
 import { Logger } from '@overnightjs/logger';
 import { LoggerMiddleware } from '../middleware/LoggerMiddleware';
 import { LogService } from '../services/LogService';
 import { ITaskRepository } from '../data/interfaces/ITaskRepository';
+import { Alert } from '../responseObjects/Alert';
 import {
     BaseHttpController,
     controller,
@@ -121,7 +123,7 @@ export class LogsController extends BaseHttpController {
             task.hoursWorked = hoursWorked;
             this.taskRepository.Save(task);
 
-            return this.statusCode(204);
+            return this.ok(new Alert(HttpResponse.LOG_UPDATED));
         } catch (error) {
             Logger.Err(error);
             return this.internalServerError();
