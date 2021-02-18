@@ -94,7 +94,7 @@ export class LogsController extends BaseHttpController {
             task.hoursWorked = hoursWorked;
             this.taskRepository.Save(task);
 
-            return this.statusCode(204);
+            return this.ok(new Alert(HttpResponse.LOG_ITEM_DELETED));
         } catch (error) {
             Logger.Err(error);
             return this.internalServerError();
