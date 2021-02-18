@@ -8,4 +8,5 @@ export interface ILogRepository {
     Update(log: Log, logCreateDto: LogCreateDto): Promise<Log | null>;
     GetById(id: number): Promise<Log | null>;
     Delete(logItem: Log): Promise<void>;
+    CompleteLatest(taskId: number): Promise<void>;
 }

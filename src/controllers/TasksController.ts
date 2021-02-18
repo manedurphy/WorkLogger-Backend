@@ -239,7 +239,9 @@ export class TasksController extends BaseHttpController {
 
             if (!task)
                 return this.json(new Alert(HttpResponse.TASK_NOT_FOUND), 404);
+
             await this.taskRepository.Complete(task);
+            await this.logRepository.CompleteLatest(task.id);
 
             return this.ok(new Alert(HttpResponse.TASK_COMPLETE));
         } catch (error) {
