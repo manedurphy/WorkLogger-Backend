@@ -3,6 +3,7 @@ import seedAdmin from './mock/user';
 import seedTask from './mock/task';
 import seedActivationPassword from './mock/activationPassword';
 import seedLog from './mock/log';
+import '../../models/Relationships';
 
 const connection = mysql.createConnection({
     host: process.env.DATABASE_HOST,
@@ -12,7 +13,9 @@ const connection = mysql.createConnection({
 
 (async () => {
     try {
-        await connection.promise().execute('DROP DATABASE IF EXISTS `workLogger`');
+        await connection
+            .promise()
+            .execute('DROP DATABASE IF EXISTS `workLogger`');
         await connection.promise().execute('CREATE DATABASE `workLogger`');
         connection.destroy();
 

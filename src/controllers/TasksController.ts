@@ -19,6 +19,7 @@ import {
     controller,
     httpDelete,
     httpGet,
+    httpPatch,
     httpPost,
     httpPut,
     request,
@@ -262,6 +263,25 @@ export class TasksController extends BaseHttpController {
             await this.taskRepository.InComplete(task);
 
             return this.ok(new Alert(HttpResponse.TASK_INCOMPLETE));
+        } catch (error) {
+            Logger.Err(error);
+            return this.internalServerError();
+        }
+    }
+
+    @httpPatch('/add-hours/:id', LoggerMiddleware)
+    private async AddHours(
+        @request() req: AuthenticatedRequest,
+        @response() res: Response
+    ) {
+        try {
+            const task = await this.taskRepository.GetById(req.params.id);
+
+            if (!task)
+                return this.json(new Alert(HttpResponse.TASK_NOT_FOUND), 404);
+
+            await this.taskRepository.AddHours(task, +req.body.hours);
+            return this.ok(new Alert(HttpResponse.TASK_UPDATE));
         } catch (error) {
             Logger.Err(error);
             return this.internalServerError();

@@ -33,7 +33,9 @@ container.bind<AuthService>(Types.AuthService).to(AuthService);
 container.bind<TaskService>(Types.TaskService).to(TaskService);
 container.bind<LogService>(Types.LogService).to(LogService);
 container.bind<WeatherService>(Types.WeatherService).to(WeatherService);
-container.bind<IActivationPasswordRepository>(Types.ActivationPasswordRepository).to(ActivationPasswordRepository);
+container
+    .bind<IActivationPasswordRepository>(Types.ActivationPasswordRepository)
+    .to(ActivationPasswordRepository);
 
 const server = new InversifyExpressServer(container);
 
@@ -47,11 +49,17 @@ server.setConfig((app) => {
             algorithms: ['HS256'],
             requestProperty: 'payload',
         }).unless({
-            path: ['/api/users/login', '/api/users/register', { url: /^\/api\/activation\/.*/ }, '/'],
-        }),
+            path: [
+                '/api/users/login',
+                '/api/users/register',
+                { url: /^\/api\/activation\/.*/ },
+                '/',
+            ],
+        })
     );
     app.use((err: Errback, req: Request, res: Response, next: NextFunction) => {
-        if (err.name === 'UnauthorizedError') return res.status(401).json({ message: HttpResponse.UNAUTHORIZED });
+        if (err.name === 'UnauthorizedError')
+            return res.status(401).json({ message: HttpResponse.UNAUTHORIZED });
         next();
     });
 });
