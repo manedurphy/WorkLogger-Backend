@@ -31,7 +31,8 @@ export class LogService {
     ): LogCreateDto {
         body.weekOf = this.GetSunday();
         body.day = this.GetToday();
-        body.productiveHours = hoursWorked ? hoursWorked : body.hoursWorked;
+        body.productiveHours =
+            hoursWorked !== null ? hoursWorked : body.hoursWorked;
 
         return new LogCreateDto(body);
     }
