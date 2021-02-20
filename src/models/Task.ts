@@ -38,15 +38,15 @@ Task.init(
             allowNull: false,
         },
         hoursAvailableToWork: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.DECIMAL(10, 2),
             allowNull: false,
         },
         hoursWorked: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.DECIMAL(10, 2),
             allowNull: false,
         },
         hoursRemaining: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.DECIMAL(10, 2),
             allowNull: false,
         },
         notes: {
@@ -58,11 +58,11 @@ Task.init(
             allowNull: false,
         },
         reviewHours: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.DECIMAL(10, 2),
             allowNull: false,
         },
         hoursRequiredByBim: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.DECIMAL(10, 2),
             allowNull: false,
         },
         complete: {
@@ -87,7 +87,7 @@ Task.init(
         sequelize,
         timestamps: true,
         modelName: 'Task',
-    },
+    }
 );
 
 export default Task;

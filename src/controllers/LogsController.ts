@@ -82,6 +82,12 @@ export class LogsController extends BaseHttpController {
             const task = await this.taskRepository.GetById(logItem.TaskId);
             if (!task) return this.notFound();
 
+            const logBeforeDelete = await this.logRepository.GetByTaskId(
+                logItem.TaskId
+            );
+            if (logBeforeDelete.length === 1)
+                return this.json(new Alert(HttpResponse.LOG_NO_DELETE), 400);
+
             await this.logRepository.Delete(logItem);
 
             const log = await this.logRepository.GetByTaskId(logItem.TaskId);
@@ -92,6 +98,7 @@ export class LogsController extends BaseHttpController {
             );
 
             task.hoursWorked = hoursWorked;
+            task.hoursRemaining = log[0].hoursRemaining;
             this.taskRepository.Save(task);
 
             return this.ok(new Alert(HttpResponse.LOG_ITEM_DELETED));
@@ -120,7 +127,15 @@ export class LogsController extends BaseHttpController {
                 log
             );
 
+            task.name = log[0].name;
             task.hoursWorked = hoursWorked;
+            task.hoursRemaining = log[0].hoursRemaining;
+            task.hoursRequiredByBim = log[0].hoursRequiredByBim;
+            task.reviewHours = log[0].reviewHours;
+            task.notes = log[0].notes;
+            task.hoursAvailableToWork = log[0].hoursAvailableToWork;
+            task.numberOfReviews = log[0].numberOfReviews;
+
             this.taskRepository.Save(task);
 
             return this.ok(new Alert(HttpResponse.LOG_UPDATED));

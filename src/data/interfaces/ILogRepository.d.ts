@@ -9,4 +9,5 @@ export interface ILogRepository {
     GetById(id: number): Promise<Log | null>;
     Delete(logItem: Log): Promise<void>;
     CompleteLatest(taskId: number): Promise<void>;
+    AddHours(log: Log, hours: number): Promise<void>;
 }

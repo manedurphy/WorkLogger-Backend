@@ -44,12 +44,17 @@ export class LogService {
         let sum = 0;
 
         for (let i = log.length - 1; i >= 0; i--) {
-            if (log[i].productiveHours > 0) {
-            } else {
-                log[i].productiveHours += logItemRemoved.productiveHours;
+            if (log[i].productiveHours < 0) {
+                log[i].productiveHours =
+                    +log[i].productiveHours + +logItemRemoved.productiveHours;
             }
-            sum += log[i].productiveHours;
+            sum += +log[i].productiveHours;
             log[i].hoursWorked = sum;
+            log[i].hoursRemaining =
+                log[i].hoursAvailableToWork -
+                log[i].hoursWorked -
+                log[i].hoursRequiredByBim -
+                log[i].reviewHours;
             await log[i].save();
         }
 
@@ -61,13 +66,18 @@ export class LogService {
 
         for (let i = log.length - 1; i >= 0; i--) {
             if (i === log.length - 1) {
-                log[i].productiveHours = log[i].hoursWorked;
-                sum += log[i].hoursWorked;
+                log[i].productiveHours = +log[i].hoursWorked;
+                sum += +log[i].hoursWorked;
             } else {
-                const diff = log[i].hoursWorked - log[i + 1].hoursWorked;
+                const diff = +log[i].hoursWorked - +log[i + 1].hoursWorked;
                 sum += diff;
                 log[i].productiveHours = diff;
             }
+            log[i].hoursRemaining =
+                log[i].hoursAvailableToWork -
+                log[i].hoursWorked -
+                log[i].hoursRequiredByBim -
+                log[i].reviewHours;
             await log[i].save();
         }
 

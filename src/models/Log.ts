@@ -1,5 +1,5 @@
 import sequelize from '../data/SQLDatabase';
-import {  DataTypes, Model } from 'sequelize';
+import { DataTypes, Model } from 'sequelize';
 
 export class Log extends Model {
     public id!: number;
@@ -40,15 +40,15 @@ Log.init(
             allowNull: false,
         },
         hoursAvailableToWork: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.DECIMAL(10, 2),
             allowNull: false,
         },
         hoursWorked: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.DECIMAL(10, 2),
             allowNull: false,
         },
         hoursRemaining: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.DECIMAL(10, 2),
             allowNull: false,
         },
         notes: {
@@ -60,11 +60,11 @@ Log.init(
             allowNull: false,
         },
         reviewHours: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.DECIMAL(10, 2),
             allowNull: false,
         },
         hoursRequiredByBim: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.DECIMAL(10, 2),
             allowNull: false,
         },
         complete: {
@@ -81,7 +81,7 @@ Log.init(
             allowNull: false,
         },
         productiveHours: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.DECIMAL(10, 2),
             allowNull: false,
             defaultValue: 0,
         },
@@ -103,7 +103,7 @@ Log.init(
         createdAt: true,
         updatedAt: false,
         modelName: 'Log',
-    },
+    }
 );
 
 export default Log;

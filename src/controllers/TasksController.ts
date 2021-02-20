@@ -269,7 +269,7 @@ export class TasksController extends BaseHttpController {
         }
     }
 
-    @httpPatch('/add-hours/:id', LoggerMiddleware)
+    @httpPatch('/add-hours/:id', LoggerMiddleware, CalculateHoursRemaining)
     private async AddHours(
         @request() req: AuthenticatedRequest,
         @response() res: Response
@@ -280,7 +280,12 @@ export class TasksController extends BaseHttpController {
             if (!task)
                 return this.json(new Alert(HttpResponse.TASK_NOT_FOUND), 404);
 
+            const log = await this.logRepository.GetByTaskId(task.id);
+
             await this.taskRepository.AddHours(task, +req.body.hours);
+            if (log[0])
+                await this.logRepository.AddHours(log[0], +req.body.hours);
+
             return this.ok(new Alert(HttpResponse.TASK_UPDATE));
         } catch (error) {
             Logger.Err(error);

@@ -66,6 +66,9 @@ export class TaskRepository implements ITaskRepository {
     }
 
     public async AddHours(task: Task, hours: number): Promise<void> {
-        await task.update({ hoursWorked: task.hoursWorked + hours });
+        await task.update({
+            hoursWorked: +task.hoursWorked + hours,
+            hoursRemaining: +task.hoursRemaining - hours,
+        });
     }
 }

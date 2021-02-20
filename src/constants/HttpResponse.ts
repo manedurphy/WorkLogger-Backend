@@ -27,6 +27,7 @@ export class HttpResponse {
     /** LOG */
     public static LOG_UPDATED = 'Log updated!';
     public static LOG_ITEM_DELETED = 'Log item deleted!';
+    public static LOG_NO_DELETE = 'Cannot delete only log item';
 
     /** UNAUTHORIZED */
     public static UNAUTHORIZED = 'Unauthorized access. Please log in.';
