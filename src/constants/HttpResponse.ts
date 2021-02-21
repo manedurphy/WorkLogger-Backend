@@ -32,4 +32,7 @@ export class HttpResponse {
 
     /** UNAUTHORIZED */
     public static UNAUTHORIZED = 'Unauthorized access. Please log in.';
+
+    /** SERVER ERROR */
+    public static SERVER_ERROR = 'Internal server error';
 }

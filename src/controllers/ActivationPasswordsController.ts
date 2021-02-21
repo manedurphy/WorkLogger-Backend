@@ -3,9 +3,13 @@ import { Types } from '../constants/Types';
 import { Alert } from '../responseObjects/Alert';
 import { Logger } from '@overnightjs/logger';
 import { HttpResponse } from '../constants/HttpResponse';
-import { Request, Response } from 'express';
-import { BaseHttpController, controller, httpGet, request, response } from 'inversify-express-utils';
 import { IActivationPasswordRepository } from '../data/interfaces/IActivationPasswordRepository';
+import {
+    BaseHttpController,
+    controller,
+    httpGet,
+    requestParam,
+} from 'inversify-express-utils';
 
 @controller('/api/activation')
 export class ActivationPasswordsController extends BaseHttpController {
@@ -13,25 +17,27 @@ export class ActivationPasswordsController extends BaseHttpController {
 
     public constructor(
         @inject(Types.ActivationPasswordRepository)
-        activationPasswordRepository: IActivationPasswordRepository,
+        activationPasswordRepository: IActivationPasswordRepository
     ) {
         super();
         this.activationPasswordRepository = activationPasswordRepository;
     }
 
     @httpGet('/:password')
-    public async ActivateAccount(@request() req: Request, @response() res: Response) {
+    public async activateAccount(@requestParam('password') password: string) {
         try {
-            const activationPassword = await this.activationPasswordRepository.Get(req.params.password);
+            const activationPassword = await this.activationPasswordRepository.get(
+                password
+            );
 
-            if (!activationPassword) return this.badRequest(HttpResponse.INVALID_PASSWORD);
+            if (!activationPassword)
+                return this.json(new Alert(HttpResponse.INVALID_PASSWORD), 400);
 
-            await this.activationPasswordRepository.Update(activationPassword);
-
+            await this.activationPasswordRepository.update(activationPassword);
             return this.ok(new Alert(HttpResponse.USER_ACTIVATED));
         } catch (error) {
             Logger.Err('ERROR IN ACTIVATION PASSWORD ROUTE', error);
-            return this.internalServerError();
+            return this.json(new Alert(HttpResponse.SERVER_ERROR), 500);
         }
     }
 }

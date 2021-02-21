@@ -4,32 +4,35 @@ import { IActivationPasswordRepository } from '../interfaces/IActivationPassword
 
 @injectable()
 export class ActivationPasswordRepository
-  implements IActivationPasswordRepository {
-  public async Get(password: string): Promise<ActivationPassword | null> {
-    const activationPassword = await ActivationPassword.findOne({
-      where: { password },
-    });
-    return activationPassword;
-  }
-
-  public Add(userId: number): string {
-    const activationPassword = this.GenerateActivationPassword();
-    ActivationPassword.create({ password: activationPassword, UserId: userId });
-    return activationPassword;
-  }
-
-  public GenerateActivationPassword(): string {
-    return require('crypto').randomBytes(80).toString('hex');
-  }
-
-  public async Update(activationPassword: ActivationPassword): Promise<void> {
-    const user = await User.findOne({
-      where: { id: activationPassword.UserId },
-    });
-
-    if (user) {
-      user.update({ active: true });
-      activationPassword.destroy();
+    implements IActivationPasswordRepository {
+    public async get(password: string): Promise<ActivationPassword | null> {
+        const activationPassword = await ActivationPassword.findOne({
+            where: { password },
+        });
+        return activationPassword;
     }
-  }
+
+    public Add(userId: number): string {
+        const activationPassword = this.GenerateActivationPassword();
+        ActivationPassword.create({
+            password: activationPassword,
+            UserId: userId,
+        });
+        return activationPassword;
+    }
+
+    public GenerateActivationPassword(): string {
+        return require('crypto').randomBytes(80).toString('hex');
+    }
+
+    public async update(activationPassword: ActivationPassword): Promise<void> {
+        const user = await User.findOne({
+            where: { id: activationPassword.UserId },
+        });
+
+        if (user) {
+            user.update({ active: true });
+            activationPassword.destroy();
+        }
+    }
 }
