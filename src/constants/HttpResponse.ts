@@ -18,6 +18,7 @@ export class HttpResponse {
     /** TASKS */
     public static TASK_EXISTS = 'Task with that project number already exists.';
     public static TASK_NOT_FOUND = 'Task not found.';
+    public static TASKS_NOT_FOUND = 'Tasks not found';
     public static TASK_UPDATE = 'Task updated!';
     public static TASK_COMPLETE = 'Task complete!';
     public static TASK_INCOMPLETE = 'Task marked as incomplete';

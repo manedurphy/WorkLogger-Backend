@@ -46,6 +46,31 @@ export class TasksController extends BaseHttpController {
         this.logService = logService;
     }
 
+    @httpGet('')
+    private async GetTasks(
+        @request() req: AuthenticatedRequest,
+        @response() res: Response
+    ) {
+        try {
+            const incompleteTasks = await this.taskRepository.GetByStatus(
+                req.payload.userInfo.id,
+                false
+            );
+
+            const completeTasks = await this.taskRepository.GetByStatus(
+                req.payload.userInfo.id,
+                true
+            );
+
+            if (!incompleteTasks || !completeTasks)
+                return this.json(new Alert(HttpResponse.TASKS_NOT_FOUND), 404);
+
+            return this.ok({ incompleteTasks, completeTasks });
+        } catch (error) {
+            return this.internalServerError();
+        }
+    }
+
     @httpGet('/incomplete')
     private async GetIncompleteTasks(
         @request() req: AuthenticatedRequest,
@@ -104,6 +129,23 @@ export class TasksController extends BaseHttpController {
         try {
             const task = await this.taskRepository.GetById(+req.params.id);
             if (!task) return this.notFound();
+
+            return this.ok(task);
+        } catch (error) {
+            Logger.Err(error);
+            return this.internalServerError();
+        }
+    }
+
+    @httpGet('/:id', LoggerMiddleware)
+    private async GetById(
+        @request() req: AuthenticatedRequest,
+        @response() res: Response
+    ) {
+        try {
+            const task = await this.taskRepository.GetById(+req.params.id);
+            if (!task)
+                return this.json(new Alert(HttpResponse.TASK_NOT_FOUND), 404);
 
             return this.ok(task);
         } catch (error) {

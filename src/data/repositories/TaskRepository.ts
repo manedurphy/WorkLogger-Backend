@@ -11,7 +11,9 @@ export class TaskRepository implements ITaskRepository {
     }
 
     public async GetById(id: number): Promise<Task | null> {
-        return Task.findByPk(id);
+        return Task.findByPk(id, {
+            include: { model: Log, separate: true, order: [['id', 'DESC']] },
+        });
     }
 
     public GetByProjectNumber(
