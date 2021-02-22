@@ -12,11 +12,9 @@ beforeAll(async () => {
     await ActivationPassword.create(activationPasswordData.create);
 });
 
-afterAll(async () => {
-    server.close();
-});
+afterAll(() => server.close());
 
-describe('/api/activation', () => {
+describe('Activation Password Controller /api/activation', () => {
     test('/GET /:password', async () => {
         const res = await request(app).get('/api/activation/12345');
         expect(res.status).toBe(200);

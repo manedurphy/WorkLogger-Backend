@@ -5,7 +5,6 @@ import { ILogRepository } from '../data/interfaces/ILogRepository';
 import { AuthenticatedRequest } from './interfaces/interfaces';
 import { HttpResponse } from '../constants/HttpResponse';
 import { Logger } from '@overnightjs/logger';
-import { LoggerMiddleware } from '../middleware/LoggerMiddleware';
 import { LogService } from '../services/LogService';
 import { ITaskRepository } from '../data/interfaces/ITaskRepository';
 import { Alert } from '../responseObjects/Alert';
@@ -13,11 +12,9 @@ import {
     BaseHttpController,
     controller,
     httpDelete,
-    httpGet,
     httpPut,
     request,
     requestParam,
-    response,
 } from 'inversify-express-utils';
 
 @controller('/api/logs')
@@ -37,39 +34,19 @@ export class LogsController extends BaseHttpController {
         this.taskRepository = taskRepository;
     }
 
-    @httpGet('/log-item/:id')
-    private async GetLogItemById(@requestParam('id') id: number) {
+    @httpDelete('/log-item/:id')
+    private async deleteLogItem(@requestParam('id') id: number) {
         try {
-            const logItem = await this.logRepository.GetById(+id);
+            const logItem = await this.logRepository.getById(id);
             if (!logItem)
                 return this.json(
                     new Alert(HttpResponse.LOG_ITEM_NOT_FOUND),
                     404
                 );
 
-            return this.ok(logItem);
-        } catch (error) {
-            Logger.Err(error);
-            return this.internalServerError();
-        }
-    }
-
-    @httpDelete('/log-item/:id')
-    private async DeleteLogItem(
-        @request() req: AuthenticatedRequest,
-        @response() res: Response
-    ) {
-        try {
-            const logItem = await this.logRepository.GetById(+req.params.id);
-            if (!logItem)
-                if (!logItem)
-                    return this.json(
-                        new Alert(HttpResponse.LOG_ITEM_NOT_FOUND),
-                        404
-                    );
-
-            const task = await this.taskRepository.GetById(logItem.TaskId);
-            if (!task) return this.notFound();
+            const task = await this.taskRepository.getById(logItem.TaskId);
+            if (!task)
+                return this.json(new Alert(HttpResponse.TASKS_NOT_FOUND), 404);
 
             const logBeforeDelete = await this.logRepository.getByTaskId(
                 logItem.TaskId
@@ -77,18 +54,22 @@ export class LogsController extends BaseHttpController {
             if (logBeforeDelete.length === 1)
                 return this.json(new Alert(HttpResponse.LOG_NO_DELETE), 400);
 
-            await this.logRepository.Delete(logItem);
+            this.logRepository.delete(logItem);
 
-            const log = await this.logRepository.getByTaskId(logItem.TaskId);
+            const log = logBeforeDelete.filter((item) => item.id != id);
+            const hours = +logItem.productiveHours;
 
-            const hoursWorked = await this.logService.GetHoursWorkedAfterDelete(
-                log,
-                logItem
-            );
+            await this.logService.getHoursWorkedAfterDelete(log, hours);
 
-            task.hoursWorked = hoursWorked;
+            task.name = log[0].name;
+            task.hoursWorked = log[0].hoursWorked;
             task.hoursRemaining = log[0].hoursRemaining;
-            this.taskRepository.Save(task);
+            task.hoursRequiredByBim = log[0].hoursRequiredByBim;
+            task.reviewHours = log[0].reviewHours;
+            task.notes = log[0].notes;
+            task.hoursAvailableToWork = log[0].hoursAvailableToWork;
+            task.numberOfReviews = log[0].numberOfReviews;
+            this.taskRepository.save(task);
 
             return this.ok(new Alert(HttpResponse.LOG_ITEM_DELETED));
         } catch (error) {
@@ -98,21 +79,23 @@ export class LogsController extends BaseHttpController {
     }
 
     @httpPut('/log-item/:id')
-    private async UpdateLogItem(
-        @request() req: AuthenticatedRequest,
-        @response() res: Response
-    ) {
+    private async updateLogItem(@request() req: AuthenticatedRequest) {
         try {
-            const logItem = await this.logRepository.GetById(+req.params.id);
-            if (!logItem) return this.notFound();
+            const logItem = await this.logRepository.getById(+req.params.id);
+            if (!logItem)
+                return this.json(
+                    new Alert(HttpResponse.LOG_ITEM_NOT_FOUND),
+                    404
+                );
 
-            const task = await this.taskRepository.GetById(logItem.TaskId);
-            if (!task) return this.notFound();
+            const task = await this.taskRepository.getById(logItem.TaskId);
+            if (!task)
+                return this.json(new Alert(HttpResponse.TASKS_NOT_FOUND), 404);
 
             await this.logRepository.Update(logItem, req.body);
 
             const log = await this.logRepository.getByTaskId(logItem.TaskId);
-            const hoursWorked = await this.logService.GetHoursWorkedAfterUpdate(
+            const hoursWorked = await this.logService.getHoursWorkedAfterUpdate(
                 log
             );
 
@@ -125,7 +108,7 @@ export class LogsController extends BaseHttpController {
             task.hoursAvailableToWork = log[0].hoursAvailableToWork;
             task.numberOfReviews = log[0].numberOfReviews;
 
-            this.taskRepository.Save(task);
+            this.taskRepository.save(task);
 
             return this.ok(new Alert(HttpResponse.LOG_UPDATED));
         } catch (error) {

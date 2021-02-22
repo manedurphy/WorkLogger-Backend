@@ -5,7 +5,18 @@ const userData = {
         lastName: 'User',
         email: 'testuser@mail.com',
         password: 'password',
-        active: false,
+        active: true,
+    },
+    login: {
+        email: 'testuser@mail.com',
+        password: 'password',
+    },
+    register: {
+        firstName: 'Test',
+        lastName: 'User',
+        email: 'testuser@mail.com',
+        password: 'password',
+        password2: 'password',
     },
 };
 

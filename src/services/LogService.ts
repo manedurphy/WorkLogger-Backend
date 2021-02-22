@@ -1,10 +1,18 @@
-import { injectable } from 'inversify';
+import { inject, injectable } from 'inversify';
+import { Types } from '../constants/Types';
 import { LogCreateDto } from '../data/dtos/LogCreateDto';
 import { ILogCreateDto } from '../data/interfaces/ILogCreateDto';
+import { ILogRepository } from '../data/interfaces/ILogRepository';
 import { Log } from '../models';
 
 @injectable()
 export class LogService {
+    private readonly logRepository: ILogRepository;
+
+    constructor(@inject(Types.LogRepository) logRepository: ILogRepository) {
+        this.logRepository = logRepository;
+    }
+
     private GetSunday() {
         const date = new Date();
         date.setDate(date.getDate() - (date.getDay() || 7));
@@ -41,13 +49,12 @@ export class LogService {
         return logItem.UserId === userId;
     }
 
-    public async GetHoursWorkedAfterDelete(log: Log[], logItemRemoved: Log) {
+    public async getHoursWorkedAfterDelete(log: Log[], hours: number) {
         let sum = 0;
 
         for (let i = log.length - 1; i >= 0; i--) {
             if (log[i].productiveHours < 0) {
-                log[i].productiveHours =
-                    +log[i].productiveHours + +logItemRemoved.productiveHours;
+                log[i].productiveHours = +log[i].productiveHours + hours;
             }
             sum += +log[i].productiveHours;
             log[i].hoursWorked = sum;
@@ -56,13 +63,13 @@ export class LogService {
                 log[i].hoursWorked -
                 log[i].hoursRequiredByBim -
                 log[i].reviewHours;
-            await log[i].save();
+            await this.logRepository.save(log[i]);
         }
 
         return sum;
     }
 
-    public async GetHoursWorkedAfterUpdate(log: Log[]) {
+    public async getHoursWorkedAfterUpdate(log: Log[]) {
         let sum = 0;
 
         for (let i = log.length - 1; i >= 0; i--) {
@@ -79,7 +86,7 @@ export class LogService {
                 log[i].hoursWorked -
                 log[i].hoursRequiredByBim -
                 log[i].reviewHours;
-            await log[i].save();
+            await this.logRepository.save(log[i]);
         }
 
         return sum;

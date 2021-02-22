@@ -94,7 +94,7 @@ export class TasksController extends BaseHttpController {
         @response() res: Response
     ) {
         try {
-            const task = await this.taskRepository.GetById(+req.params.id);
+            const task = await this.taskRepository.getById(+req.params.id);
             if (!task) return this.notFound();
 
             return this.ok(task);
@@ -127,7 +127,7 @@ export class TasksController extends BaseHttpController {
         @response() res: Response
     ) {
         try {
-            const task = await this.taskRepository.GetById(+req.params.id);
+            const task = await this.taskRepository.getById(+req.params.id);
             if (!task) return this.notFound();
 
             return this.ok(task);
@@ -138,12 +138,12 @@ export class TasksController extends BaseHttpController {
     }
 
     @httpGet('/:id', LoggerMiddleware)
-    private async GetById(
+    private async getById(
         @request() req: AuthenticatedRequest,
         @response() res: Response
     ) {
         try {
-            const task = await this.taskRepository.GetById(+req.params.id);
+            const task = await this.taskRepository.getById(+req.params.id);
             if (!task)
                 return this.json(new Alert(HttpResponse.TASK_NOT_FOUND), 404);
 
@@ -226,7 +226,7 @@ export class TasksController extends BaseHttpController {
         @response() res: Response
     ) {
         try {
-            const task = await this.taskRepository.GetById(+req.params.id);
+            const task = await this.taskRepository.getById(+req.params.id);
 
             if (!task)
                 return this.json(new Alert(HttpResponse.TASK_NOT_FOUND), 404);
@@ -246,7 +246,7 @@ export class TasksController extends BaseHttpController {
     ) {
         Logger.Warn(req.body, true);
         try {
-            const task = await this.taskRepository.GetById(+req.params.id);
+            const task = await this.taskRepository.getById(+req.params.id);
             if (!task) return this.notFound();
 
             const previouslyWorkedHours = task.hoursWorked;
@@ -278,7 +278,7 @@ export class TasksController extends BaseHttpController {
         @response() res: Response
     ) {
         try {
-            const task = await this.taskRepository.GetById(+req.params.id);
+            const task = await this.taskRepository.getById(+req.params.id);
 
             if (!task)
                 return this.json(new Alert(HttpResponse.TASK_NOT_FOUND), 404);
@@ -299,7 +299,7 @@ export class TasksController extends BaseHttpController {
         @response() res: Response
     ) {
         try {
-            const task = await this.taskRepository.GetById(+req.params.id);
+            const task = await this.taskRepository.getById(+req.params.id);
 
             if (!task) return this.notFound();
             await this.taskRepository.InComplete(task);
@@ -317,7 +317,7 @@ export class TasksController extends BaseHttpController {
         @response() res: Response
     ) {
         try {
-            const task = await this.taskRepository.GetById(req.params.id);
+            const task = await this.taskRepository.getById(req.params.id);
 
             if (!task)
                 return this.json(new Alert(HttpResponse.TASK_NOT_FOUND), 404);

@@ -12,7 +12,7 @@ export class LogRepository implements ILogRepository {
         });
     }
 
-    public async GetById(id: number): Promise<Log | null> {
+    public async getById(id: number): Promise<Log | null> {
         return Log.findByPk(id);
     }
 
@@ -32,8 +32,12 @@ export class LogRepository implements ILogRepository {
         return log.update(logCreateDto);
     }
 
-    public async Delete(logItem: Log) {
-        logItem.destroy();
+    public async delete(logItem: Log) {
+        await logItem.destroy();
+    }
+
+    public async save(logItem: Log) {
+        await logItem.save();
     }
 
     public async CompleteLatest(taskId: number): Promise<void> {

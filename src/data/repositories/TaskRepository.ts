@@ -10,7 +10,7 @@ export class TaskRepository implements ITaskRepository {
         return Task.findAll({ where: { UserId: userId } });
     }
 
-    public async GetById(id: number): Promise<Task | null> {
+    public async getById(id: number): Promise<Task | null> {
         return Task.findByPk(id, {
             include: { model: Log, separate: true, order: [['id', 'DESC']] },
         });
@@ -63,7 +63,7 @@ export class TaskRepository implements ITaskRepository {
         await task.update({ complete: false });
     }
 
-    public async Save(task: Task) {
+    public async save(task: Task) {
         await task.save();
     }
 
