@@ -38,13 +38,14 @@ export class LogsController extends BaseHttpController {
     }
 
     @httpGet('/log-item/:id')
-    private async GetLogItemById(
-        @request() req: AuthenticatedRequest,
-        @response() res: Response
-    ) {
+    private async GetLogItemById(@requestParam('id') id: number) {
         try {
-            const logItem = await this.logRepository.GetById(+req.params.id);
-            if (!logItem) return this.notFound();
+            const logItem = await this.logRepository.GetById(+id);
+            if (!logItem)
+                return this.json(
+                    new Alert(HttpResponse.LOG_ITEM_NOT_FOUND),
+                    404
+                );
 
             return this.ok(logItem);
         } catch (error) {
@@ -60,7 +61,12 @@ export class LogsController extends BaseHttpController {
     ) {
         try {
             const logItem = await this.logRepository.GetById(+req.params.id);
-            if (!logItem) return this.notFound();
+            if (!logItem)
+                if (!logItem)
+                    return this.json(
+                        new Alert(HttpResponse.LOG_ITEM_NOT_FOUND),
+                        404
+                    );
 
             const task = await this.taskRepository.GetById(logItem.TaskId);
             if (!task) return this.notFound();

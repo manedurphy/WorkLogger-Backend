@@ -30,6 +30,7 @@ export class HttpResponse {
     public static LOG_ITEM_DELETED = 'Log item deleted!';
     public static LOG_NO_DELETE = 'Cannot delete only log item';
     public static LOG_NOT_FOUND = 'Log for this task not found';
+    public static LOG_ITEM_NOT_FOUND = 'Log item not found';
 
     /** UNAUTHORIZED */
     public static UNAUTHORIZED = 'Unauthorized access. Please log in.';
