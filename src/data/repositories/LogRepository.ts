@@ -5,7 +5,7 @@ import { ILogRepository } from '../interfaces/ILogRepository';
 
 @injectable()
 export class LogRepository implements ILogRepository {
-    public async GetByTaskId(taskId: number): Promise<Log[]> {
+    public async getByTaskId(taskId: number): Promise<Log[]> {
         return Log.findAll({
             where: { TaskId: taskId },
             order: [['id', 'DESC']],
@@ -37,7 +37,7 @@ export class LogRepository implements ILogRepository {
     }
 
     public async CompleteLatest(taskId: number): Promise<void> {
-        const log = await this.GetByTaskId(taskId);
+        const log = await this.getByTaskId(taskId);
         if (log.length > 0) await log[0].update({ complete: true });
     }
 

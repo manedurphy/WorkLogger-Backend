@@ -322,7 +322,7 @@ export class TasksController extends BaseHttpController {
             if (!task)
                 return this.json(new Alert(HttpResponse.TASK_NOT_FOUND), 404);
 
-            const log = await this.logRepository.GetByTaskId(task.id);
+            const log = await this.logRepository.getByTaskId(task.id);
 
             await this.taskRepository.AddHours(task, +req.body.hours);
             if (log[0])

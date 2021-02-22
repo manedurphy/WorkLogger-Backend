@@ -16,6 +16,7 @@ import {
     httpGet,
     httpPut,
     request,
+    requestParam,
     response,
 } from 'inversify-express-utils';
 
@@ -34,24 +35,6 @@ export class LogsController extends BaseHttpController {
         this.logRepository = logRepository;
         this.logService = logService;
         this.taskRepository = taskRepository;
-    }
-
-    @httpGet('/:taskId', LoggerMiddleware)
-    private async GetByTaskId(
-        @request() req: AuthenticatedRequest,
-        @response() res: Response
-    ) {
-        try {
-            const log = await this.logRepository.GetByTaskId(
-                +req.params.taskId
-            );
-            if (!log.length) return this.notFound();
-
-            return this.ok(log);
-        } catch (error) {
-            Logger.Err(error);
-            return this.internalServerError();
-        }
     }
 
     @httpGet('/log-item/:id')
@@ -82,7 +65,7 @@ export class LogsController extends BaseHttpController {
             const task = await this.taskRepository.GetById(logItem.TaskId);
             if (!task) return this.notFound();
 
-            const logBeforeDelete = await this.logRepository.GetByTaskId(
+            const logBeforeDelete = await this.logRepository.getByTaskId(
                 logItem.TaskId
             );
             if (logBeforeDelete.length === 1)
@@ -90,7 +73,7 @@ export class LogsController extends BaseHttpController {
 
             await this.logRepository.Delete(logItem);
 
-            const log = await this.logRepository.GetByTaskId(logItem.TaskId);
+            const log = await this.logRepository.getByTaskId(logItem.TaskId);
 
             const hoursWorked = await this.logService.GetHoursWorkedAfterDelete(
                 log,
@@ -122,7 +105,7 @@ export class LogsController extends BaseHttpController {
 
             await this.logRepository.Update(logItem, req.body);
 
-            const log = await this.logRepository.GetByTaskId(logItem.TaskId);
+            const log = await this.logRepository.getByTaskId(logItem.TaskId);
             const hoursWorked = await this.logService.GetHoursWorkedAfterUpdate(
                 log
             );
