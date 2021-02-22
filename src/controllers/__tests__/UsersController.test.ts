@@ -4,7 +4,7 @@ import sequelize from '../../data/SQLDatabase';
 
 beforeAll(async () => {
     process.env.REGISTER = 'testing';
-    await sequelize.sync();
+    await sequelize.sync({ force: true });
 });
 
 afterEach(async () => {
@@ -23,7 +23,9 @@ describe('User registration and login', () => {
             password: 'password',
         };
 
-        const res = await request(app).post('/api/users/login').send(nonExistingUser);
+        const res = await request(app)
+            .post('/api/users/login')
+            .send(nonExistingUser);
 
         expect(res.status).toBe(404);
         expect(res.body.message).toEqual('User with this email was not found.');
@@ -38,10 +40,14 @@ describe('User registration and login', () => {
             password2: 'passwordsss',
         };
 
-        const res = await request(app).post('/api/users/register').send(testUser);
+        const res = await request(app)
+            .post('/api/users/register')
+            .send(testUser);
 
         expect(res.status).toEqual(400);
-        expect(res.body.message).toEqual('Passwords do not match. Please try again.');
+        expect(res.body.message).toEqual(
+            'Passwords do not match. Please try again.'
+        );
     });
 
     it('should register a user', async () => {
@@ -53,10 +59,14 @@ describe('User registration and login', () => {
             password2: 'password',
         };
 
-        const res = await request(app).post('/api/users/register').send(testUser);
+        const res = await request(app)
+            .post('/api/users/register')
+            .send(testUser);
 
         expect(res.status).toEqual(201);
-        expect(res.body.message).toEqual('User created! Please check your email to verify your account.');
+        expect(res.body.message).toEqual(
+            'User created! Please check your email to verify your account.'
+        );
     });
 
     it('should not register a user that already exists', async () => {
@@ -68,10 +78,14 @@ describe('User registration and login', () => {
             password2: 'password',
         };
 
-        const res = await request(app).post('/api/users/register').send(testUser);
+        const res = await request(app)
+            .post('/api/users/register')
+            .send(testUser);
 
         expect(res.status).toEqual(400);
-        expect(res.body.message).toEqual('User with this email already exists. Please try a different one.');
+        expect(res.body.message).toEqual(
+            'User with this email already exists. Please try a different one.'
+        );
     });
 
     it('should not be able to login without having verified account', async () => {
@@ -80,7 +94,9 @@ describe('User registration and login', () => {
             password: 'password',
         };
 
-        const res = await request(app).post('/api/users/login').send(existingUser);
+        const res = await request(app)
+            .post('/api/users/login')
+            .send(existingUser);
 
         expect(res.status).toBe(400);
         expect(res.body.message).toEqual('This account has not been verified.');
@@ -93,7 +109,9 @@ describe('User registration and login', () => {
             password: 'password',
         };
 
-        const res = await request(app).post('/api/users/login').send(existingUser);
+        const res = await request(app)
+            .post('/api/users/login')
+            .send(existingUser);
 
         expect(res.status).toEqual(200);
         expect(res.body.jwt).toBeTruthy();
@@ -109,10 +127,14 @@ describe('User registration and login', () => {
             password: 'passwor',
         };
 
-        const res = await request(app).post('/api/users/login').send(existingUser);
+        const res = await request(app)
+            .post('/api/users/login')
+            .send(existingUser);
 
         expect(res.status).toEqual(400);
-        expect(res.body.message).toEqual('Invalid credentials. Please try again.');
+        expect(res.body.message).toEqual(
+            'Invalid credentials. Please try again.'
+        );
     });
 });
 
@@ -125,7 +147,9 @@ describe('User registration and login form validation', () => {
             password2: 'password',
         };
 
-        const res = await request(app).post('/api/users/register').send(testUser);
+        const res = await request(app)
+            .post('/api/users/register')
+            .send(testUser);
 
         expect(res.status).toEqual(400);
         expect(res.body.message).toEqual('Must include last name');
@@ -140,7 +164,9 @@ describe('User registration and login form validation', () => {
             password2: 'password',
         };
 
-        const res = await request(app).post('/api/users/register').send(testUser);
+        const res = await request(app)
+            .post('/api/users/register')
+            .send(testUser);
 
         expect(res.status).toEqual(400);
         expect(res.body.message).toEqual('Invalid email');
@@ -155,10 +181,14 @@ describe('User registration and login form validation', () => {
             password2: 'pass',
         };
 
-        const res = await request(app).post('/api/users/register').send(testUser);
+        const res = await request(app)
+            .post('/api/users/register')
+            .send(testUser);
 
         expect(res.status).toEqual(400);
-        expect(res.body.message).toEqual('Password must be at least 6 characters long');
+        expect(res.body.message).toEqual(
+            'Password must be at least 6 characters long'
+        );
     });
 
     it('should not allow login with a missing input', async () => {

@@ -12,8 +12,8 @@ export class ActivationPasswordRepository
         return activationPassword;
     }
 
-    public Add(userId: number): string {
-        const activationPassword = this.GenerateActivationPassword();
+    public add(userId: number): string {
+        const activationPassword = this.generateActivationPassword();
         ActivationPassword.create({
             password: activationPassword,
             UserId: userId,
@@ -21,7 +21,7 @@ export class ActivationPasswordRepository
         return activationPassword;
     }
 
-    public GenerateActivationPassword(): string {
+    public generateActivationPassword(): string {
         return require('crypto').randomBytes(80).toString('hex');
     }
 

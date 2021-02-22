@@ -16,7 +16,7 @@ export class ValidationService {
         this._errorMessage = message;
     }
 
-    public ValidateForm(req: Request | AuthenticatedRequest): boolean {
+    public validateForm(req: Request | AuthenticatedRequest): boolean {
         const errors = validationResult(req);
         const errorsPresent = !errors.isEmpty();
 

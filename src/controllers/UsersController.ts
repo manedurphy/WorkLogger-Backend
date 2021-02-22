@@ -45,7 +45,7 @@ export class UsersController extends BaseHttpController {
     @httpGet('/', LoggerMiddleware)
     private async GetUsers(@request() req: Request, @response() res: Response) {
         try {
-            const users = await this.userRepository.Get();
+            const users = await this.userRepository.get();
             return this.ok(users);
         } catch (error) {
             Logger.Err('ERROR IN USERS ROUTE', error);
@@ -74,7 +74,7 @@ export class UsersController extends BaseHttpController {
     private async Register(@request() req: Request, @response() res: Response) {
         Logger.Warn(req.body, true);
         try {
-            const registrationFormErrorsPresent = this.userService.ValidateForm(
+            const registrationFormErrorsPresent = this.userService.validateForm(
                 req
             );
             const passordsMatch = this.userService.ValidatePassordsMatch(req);
@@ -82,7 +82,7 @@ export class UsersController extends BaseHttpController {
             if (registrationFormErrorsPresent || !passordsMatch)
                 return this.json(new Alert(this.userService.errorMessage), 400);
 
-            const existingUser = await this.userRepository.GetByEmail(
+            const existingUser = await this.userRepository.getByEmail(
                 req.body.email
             );
             if (existingUser)
@@ -90,8 +90,8 @@ export class UsersController extends BaseHttpController {
 
             await this.userService.HashPassword(req);
 
-            const newUser = await this.userRepository.Add(req.body);
-            const activationPassword = this.activationPasswordRepository.Add(
+            const newUser = await this.userRepository.add(req.body);
+            const activationPassword = this.activationPasswordRepository.add(
                 newUser.id
             );
 
@@ -119,12 +119,12 @@ export class UsersController extends BaseHttpController {
     )
     private async Login(@request() req: Request, @response() res: Response) {
         try {
-            const loginFormsPresent = this.userService.ValidateForm(req);
+            const loginFormsPresent = this.userService.validateForm(req);
 
             if (loginFormsPresent)
                 return this.json(new Alert(this.userService.errorMessage), 400);
 
-            const existingUser = await this.userRepository.GetByEmail(
+            const existingUser = await this.userRepository.getByEmail(
                 req.body.email
             );
             if (!existingUser)
