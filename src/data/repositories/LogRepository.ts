@@ -16,7 +16,7 @@ export class LogRepository implements ILogRepository {
         return Log.findByPk(id);
     }
 
-    public async Add(logCreateDto: LogCreateDto, task: Task): Promise<void> {
+    public async add(logCreateDto: LogCreateDto, task: Task): Promise<void> {
         Log.create({
             ...logCreateDto,
             loggedAt: new Date(),
@@ -25,7 +25,7 @@ export class LogRepository implements ILogRepository {
         });
     }
 
-    public async Update(
+    public async update(
         log: Log,
         logCreateDto: LogCreateDto
     ): Promise<Log | null> {
@@ -40,12 +40,12 @@ export class LogRepository implements ILogRepository {
         await logItem.save();
     }
 
-    public async CompleteLatest(taskId: number): Promise<void> {
+    public async completeLatest(taskId: number): Promise<void> {
         const log = await this.getByTaskId(taskId);
         if (log.length > 0) await log[0].update({ complete: true });
     }
 
-    public async AddHours(log: any, hours: number): Promise<void> {
+    public async addHours(log: any, hours: number): Promise<void> {
         await Log.create({
             name: log.dataValues.name,
             projectNumber: log.dataValues.projectNumber,

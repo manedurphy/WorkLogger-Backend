@@ -7,6 +7,7 @@ import userData from '../../mock/user/userData';
 import activationPasswordData from '../../mock/activationPassword/activationPasswordData';
 
 beforeAll(async () => {
+    process.env.NODE_ENV = 'testing';
     await sequelize.sync({ force: true });
     await User.create(userData.create.active);
     await ActivationPassword.create(activationPasswordData.create);

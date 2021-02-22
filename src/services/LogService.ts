@@ -33,7 +33,7 @@ export class LogService {
         return date.getDay();
     }
 
-    public MapProps(
+    public mapProps(
         body: ILogCreateDto,
         hoursWorked: number | null
     ): LogCreateDto {

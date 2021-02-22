@@ -26,19 +26,9 @@ export class TaskRepository implements ITaskRepository {
         });
     }
 
-    public GetByProjectNumber(
-        projectNumber: number,
-        userId: number
-    ): Promise<Task | null> {
-        return Task.findOne({ where: { projectNumber, UserId: userId } });
-    }
-
-    public async GetByStatus(
-        userId: number,
-        complete: boolean
-    ): Promise<Task[]> {
+    public async getComplete(userId: number): Promise<Task[]> {
         return Task.findAll({
-            where: { UserId: userId, complete },
+            where: { UserId: userId, complete: true },
             order: [['id', 'DESC']],
             include: [
                 {
@@ -50,22 +40,29 @@ export class TaskRepository implements ITaskRepository {
         });
     }
 
-    public async Add(taskCreateDto: TaskCreateDto): Promise<Task | null> {
+    public getByProjectNumber(
+        projectNumber: number,
+        userId: number
+    ): Promise<Task | null> {
+        return Task.findOne({ where: { projectNumber, UserId: userId } });
+    }
+
+    public async add(taskCreateDto: TaskCreateDto): Promise<Task | null> {
         return Task.create(taskCreateDto);
     }
 
-    public async Delete(task: Task): Promise<void> {
+    public async delete(task: Task): Promise<void> {
         return task.destroy();
     }
 
-    public async Update(
+    public async update(
         task: Task,
         updatedTask: TaskCreateDto
     ): Promise<Task | null> {
         return task.update(updatedTask);
     }
 
-    public async Complete(task: Task): Promise<void> {
+    public async complete(task: Task): Promise<void> {
         await task.update({ complete: true });
     }
 
@@ -77,7 +74,7 @@ export class TaskRepository implements ITaskRepository {
         await task.save();
     }
 
-    public async AddHours(task: Task, hours: number): Promise<void> {
+    public async addHours(task: Task, hours: number): Promise<void> {
         await task.update({
             hoursWorked: +task.hoursWorked + hours,
             hoursRemaining: +task.hoursRemaining - hours,

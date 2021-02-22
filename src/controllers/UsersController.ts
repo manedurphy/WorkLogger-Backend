@@ -5,7 +5,7 @@ import { Logger } from '@overnightjs/logger';
 import { body } from 'express-validator';
 import { UserService } from '../services/UserService';
 import { Alert } from '../responseObjects/Alert';
-import { LoggerMiddleware } from '../middleware/LoggerMiddleware';
+import { logRoute } from '../middleware/LoggerMiddleware';
 import { HttpResponse } from '../constants/HttpResponse';
 import { Types } from '../constants/Types';
 import { IActivationPasswordRepository } from '../data/interfaces/IActivationPasswordRepository';
@@ -17,7 +17,6 @@ import {
     controller,
     httpGet,
     request,
-    response,
     httpPost,
     BaseHttpController,
 } from 'inversify-express-utils';
@@ -45,7 +44,7 @@ export class UsersController extends BaseHttpController {
 
     @httpPost(
         '/register',
-        LoggerMiddleware,
+        logRoute,
         body('firstName')
             .not()
             .isEmpty()
@@ -95,7 +94,7 @@ export class UsersController extends BaseHttpController {
 
     @httpPost(
         '/login',
-        LoggerMiddleware,
+        logRoute,
         body('email').not().isEmpty().withMessage(ValidationMessages.EMAIL),
         body('password')
             .not()

@@ -1,8 +1,8 @@
 import { NextFunction, Request, Response } from 'express';
 
-export const CalculateHoursRemaining = (
+export const calculateHoursRemaining = (
     req: Request,
-    res: Response,
+    _res: Response,
     next: NextFunction
 ) => {
     const hoursRemaining =

@@ -1,9 +1,9 @@
 import { NextFunction, Response } from 'express';
 import { AuthenticatedRequest } from '../controllers/interfaces/authenticatedReq';
 
-export const MapUserToTask = (
+export const mapUserToTask = (
     req: AuthenticatedRequest,
-    res: Response,
+    _res: Response,
     next: NextFunction
 ) => {
     req.body.UserId = req.payload.userInfo.id;

@@ -1,4 +1,3 @@
-import { Response } from 'express';
 import { inject } from 'inversify';
 import { Types } from '../constants/Types';
 import { ILogRepository } from '../data/interfaces/ILogRepository';
@@ -92,7 +91,7 @@ export class LogsController extends BaseHttpController {
             if (!task)
                 return this.json(new Alert(HttpResponse.TASKS_NOT_FOUND), 404);
 
-            await this.logRepository.Update(logItem, req.body);
+            await this.logRepository.update(logItem, req.body);
 
             const log = await this.logRepository.getByTaskId(logItem.TaskId);
             const hoursWorked = await this.logService.getHoursWorkedAfterUpdate(
