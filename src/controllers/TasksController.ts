@@ -46,58 +46,12 @@ export class TasksController extends BaseHttpController {
         this.logService = logService;
     }
 
-    @httpGet('')
-    private async GetTasks(
-        @request() req: AuthenticatedRequest,
-        @response() res: Response
-    ) {
-        try {
-            const incompleteTasks = await this.taskRepository.GetByStatus(
-                req.payload.userInfo.id,
-                false
-            );
-
-            const completeTasks = await this.taskRepository.GetByStatus(
-                req.payload.userInfo.id,
-                true
-            );
-
-            if (!incompleteTasks || !completeTasks)
-                return this.json(new Alert(HttpResponse.TASKS_NOT_FOUND), 404);
-
-            return this.ok({ incompleteTasks, completeTasks });
-        } catch (error) {
-            return this.internalServerError();
-        }
-    }
-
     @httpGet('/incomplete')
-    private async GetIncompleteTasks(
-        @request() req: AuthenticatedRequest,
-        @response() res: Response
-    ) {
+    private async getIncompleteTasks(@request() req: AuthenticatedRequest) {
         try {
-            const incompleteTasks = await this.taskRepository.GetByStatus(
-                req.payload.userInfo.id,
-                false
-            );
+            const { id } = req.payload.userInfo;
+            const incompleteTasks = await this.taskRepository.getIncomplete(id);
             return this.ok(incompleteTasks);
-        } catch (error) {
-            Logger.Err(error);
-            return this.internalServerError();
-        }
-    }
-
-    @httpGet('/incomplete/:id', LoggerMiddleware)
-    private async GetIncompleteTask(
-        @request() req: AuthenticatedRequest,
-        @response() res: Response
-    ) {
-        try {
-            const task = await this.taskRepository.getById(+req.params.id);
-            if (!task) return this.notFound();
-
-            return this.ok(task);
         } catch (error) {
             Logger.Err(error);
             return this.internalServerError();

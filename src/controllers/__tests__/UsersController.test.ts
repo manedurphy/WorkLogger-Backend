@@ -11,9 +11,7 @@ beforeAll(async () => {
     await sequelize.sync({ force: true });
 });
 
-afterEach(async () => {
-    server.close();
-});
+afterEach(async () => server.close());
 
 describe('Users Controller /api/users', () => {
     test('/POST /register fails on invalid form data', async () => {

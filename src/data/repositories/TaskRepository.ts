@@ -6,13 +6,23 @@ import { ITaskRepository } from '../interfaces/ITaskRepository';
 
 @injectable()
 export class TaskRepository implements ITaskRepository {
-    public async Get(userId: number): Promise<Task[]> {
-        return Task.findAll({ where: { UserId: userId } });
-    }
-
     public async getById(id: number): Promise<Task | null> {
         return Task.findByPk(id, {
             include: { model: Log, separate: true, order: [['id', 'DESC']] },
+        });
+    }
+
+    public async getIncomplete(userId: number): Promise<Task[]> {
+        return Task.findAll({
+            where: { UserId: userId, complete: false },
+            order: [['id', 'DESC']],
+            include: [
+                {
+                    model: Log,
+                    separate: true,
+                    order: [['id', 'DESC']],
+                },
+            ],
         });
     }
 

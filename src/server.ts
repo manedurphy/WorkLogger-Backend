@@ -17,7 +17,6 @@ import { TaskService } from './services/TaskService';
 import { LogService } from './services/LogService';
 import { ILogRepository } from './data/interfaces/ILogRepository';
 import { IUserRepository } from './data/interfaces/IUserRepository';
-import { WeatherService } from './services/WeatherService';
 import { Errback, Request, Response, NextFunction } from 'express';
 import { HttpResponse } from './constants/HttpResponse';
 import { ITaskRepository } from './data/interfaces/ITaskRepository';
@@ -32,7 +31,6 @@ container.bind<UserService>(Types.UserService).to(UserService);
 container.bind<AuthService>(Types.AuthService).to(AuthService);
 container.bind<TaskService>(Types.TaskService).to(TaskService);
 container.bind<LogService>(Types.LogService).to(LogService);
-container.bind<WeatherService>(Types.WeatherService).to(WeatherService);
 container
     .bind<IActivationPasswordRepository>(Types.ActivationPasswordRepository)
     .to(ActivationPasswordRepository);

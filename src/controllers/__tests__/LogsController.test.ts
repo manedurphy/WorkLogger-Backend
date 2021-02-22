@@ -10,6 +10,7 @@ import logData from '../../mock/log/logData';
 import { HttpResponse } from '../../constants/HttpResponse';
 
 beforeAll(async () => {
+    process.env.NODE_ENV = 'testing';
     await sequelize.sync({ force: true });
     await request(app)
         .post('/api/users/register')

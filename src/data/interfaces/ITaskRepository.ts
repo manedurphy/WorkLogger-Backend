@@ -2,7 +2,7 @@ import { Task } from '../../models/Task';
 import { TaskCreateDto } from '../dtos/TaskCreateDto';
 
 export interface ITaskRepository {
-    Get(userId: number): Promise<Task[]>;
+    getIncomplete(userId: number): Promise<Task[]>;
     GetByStatus(userId: number, complete: boolean): Promise<Task[]>;
     getById(id: number): Promise<Task | null>;
     GetByProjectNumber(

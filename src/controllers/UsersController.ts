@@ -152,7 +152,7 @@ export class UsersController extends BaseHttpController {
     }
 
     @httpGet('/verify-token')
-    private async VerifyToken(@request() req: AuthenticatedRequest) {
+    private async verifyToken(@request() req: AuthenticatedRequest) {
         try {
             const { userInfo } = req.payload;
             return this.ok(this.userService.getTokenValidResponse(userInfo));
@@ -163,7 +163,7 @@ export class UsersController extends BaseHttpController {
     }
 
     @httpGet('/refresh')
-    private async GetNewToken(@request() req: AuthenticatedRequest) {
+    private async getNewToken(@request() req: AuthenticatedRequest) {
         try {
             const { userInfo } = req.payload;
             const token = this.authService.generateToken(userInfo);
