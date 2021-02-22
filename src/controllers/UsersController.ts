@@ -12,6 +12,7 @@ import { IActivationPasswordRepository } from '../data/interfaces/IActivationPas
 import { AuthService } from '../services/AuthService';
 import { ValidationMessages } from '../constants/ValidationMessages';
 import { AuthenticatedRequest } from './interfaces/authenticatedReq';
+import { LoginRequest } from './interfaces/loginReq';
 import {
     controller,
     httpGet,
@@ -101,21 +102,17 @@ export class UsersController extends BaseHttpController {
             .isEmpty()
             .withMessage(ValidationMessages.PASSWORD_MISSING)
     )
-    private async login(@request() req: Request, @response() res: Response) {
+    private async login(@request() req: LoginRequest) {
         try {
             const loginFormsPresent = this.userService.validateForm(req);
 
             if (loginFormsPresent)
                 return this.json(new Alert(this.userService.errorMessage), 400);
 
-            const existingUser = await this.userRepository.getByEmail(
-                req.body.email
-            );
+            const { email } = req.body;
+            const existingUser = await this.userRepository.getByEmail(email);
             if (!existingUser)
                 return this.json(new Alert(HttpResponse.USER_NOT_FOUND), 404);
-
-            if (process.env.NODE_ENV === 'testing')
-                await existingUser.update({ active: true });
 
             if (!existingUser.active)
                 return this.json(
@@ -134,12 +131,14 @@ export class UsersController extends BaseHttpController {
                     400
                 );
 
-            const userReadDto = this.userService.MapUserReadDto(existingUser);
-            const token = this.authService.GenerateToken(userReadDto);
-            const refreshToken = this.authService.GenerateRefreshToken(
+            const userReadDto = this.userService.getReadDto(existingUser);
+            const token = this.authService.generateToken(userReadDto);
+
+            const refreshToken = this.authService.generateRefreshToken(
                 userReadDto
             );
-            const userLoginResponseObject = this.userService.GetLoginResponse(
+
+            const userLoginResponseObject = this.userService.getLoginResponse(
                 token,
                 refreshToken,
                 userReadDto
@@ -148,46 +147,40 @@ export class UsersController extends BaseHttpController {
             return this.ok(userLoginResponseObject);
         } catch (error) {
             Logger.Err('ERROR IN LOGIN ROUTE', error);
-            return this.internalServerError();
+            return this.json(new Alert(HttpResponse.SERVER_ERROR), 500);
         }
     }
 
     @httpGet('/verify-token')
-    private async VerifyToken(
-        @request() req: AuthenticatedRequest,
-        @response() res: Response
-    ) {
+    private async VerifyToken(@request() req: AuthenticatedRequest) {
         try {
-            return this.ok(
-                this.userService.GetTokenValidResponse(req.payload.userInfo)
-            );
+            const { userInfo } = req.payload;
+            return this.ok(this.userService.getTokenValidResponse(userInfo));
         } catch (error) {
             Logger.Err('ERROR IN VERIFY-TOKEN ROUTE', error);
-            return this.internalServerError();
+            return this.json(new Alert(HttpResponse.SERVER_ERROR), 500);
         }
     }
 
     @httpGet('/refresh')
-    private async GetNewToken(
-        @request() req: AuthenticatedRequest,
-        @response() res: Response
-    ) {
+    private async GetNewToken(@request() req: AuthenticatedRequest) {
         try {
-            const token = this.authService.GenerateToken(req.payload.userInfo);
-            const refreshToken = this.authService.GenerateRefreshToken(
-                req.payload.userInfo
+            const { userInfo } = req.payload;
+            const token = this.authService.generateToken(userInfo);
+            const refreshToken = this.authService.generateRefreshToken(
+                userInfo
             );
 
-            const refreshTokenResponse = this.userService.GetRefreshTokenResponse(
+            const refreshTokenResponse = this.userService.getRefreshTokenResponse(
                 token,
                 refreshToken,
-                req.payload.userInfo
+                userInfo
             );
 
             return this.ok(refreshTokenResponse);
         } catch (error) {
             Logger.Err('ERROR IN REFRESH ROUTE', error);
-            return this.internalServerError();
+            return this.json(new Alert(HttpResponse.SERVER_ERROR), 500);
         }
     }
 }

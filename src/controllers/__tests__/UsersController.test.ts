@@ -4,6 +4,7 @@ import sequelize from '../../data/SQLDatabase';
 import userData from '../../mock/user/userData';
 import { HttpResponse } from '../../constants/HttpResponse';
 import { ValidationMessages } from '../../constants/ValidationMessages';
+import { User } from '../../models';
 
 beforeAll(async () => {
     process.env.NODE_ENV = 'testing';
@@ -25,7 +26,7 @@ describe('Users Controller /api/users', () => {
             ValidationMessages.PASSWORDS_DO_NOT_MATCH
         );
     });
-    test('/POST /register sucess', async () => {
+    test('/POST /register success', async () => {
         const res = await request(app)
             .post('/api/users/register')
             .send(userData.register.success);
@@ -43,9 +44,13 @@ describe('Users Controller /api/users', () => {
         expect(res.body.message).toBe(HttpResponse.USER_EXISTS);
     });
     test('/POST /login fails with invalid credentials', async () => {
+        const user = await User.findByPk(1);
+        if (user) await user.update({ active: true });
+
         const res = await request(app)
             .post('/api/users/login')
             .send(userData.login.fail);
+
         expect(res.status).toBe(400);
         expect(res.body.message).toBe(HttpResponse.INVALID_CREDENTIALS);
     });
@@ -62,7 +67,6 @@ describe('Users Controller /api/users', () => {
         expect(res.body.email).toBe('testuser@mail.com');
     });
     test('/POST /login fail on active property', async () => {
-        process.env.NODE_ENV = 'regFail';
         await request(app)
             .post('/api/users/register')
             .send(userData.register.inactive);
@@ -73,5 +77,37 @@ describe('Users Controller /api/users', () => {
 
         expect(res.status).toBe(400);
         expect(res.body.message).toBe(HttpResponse.USER_NOT_VERIFIED);
+    });
+    test('/GET /verify-token', async () => {
+        const loginRes = await request(app)
+            .post('/api/users/login')
+            .send(userData.login.success);
+
+        const res = await request(app)
+            .get('/api/users/verify-token')
+            .set('Authorization', `Bearer ${loginRes.body.jwt}`);
+
+        expect(res.status).toBe(200);
+        expect(res.body).toHaveProperty('id');
+        expect(res.body).toHaveProperty('firstName');
+        expect(res.body).toHaveProperty('lastName');
+        expect(res.body).toHaveProperty('email');
+    });
+    test('/GET /refresh', async () => {
+        const loginRes = await request(app)
+            .post('/api/users/login')
+            .send(userData.login.success);
+
+        const res = await request(app)
+            .get('/api/users/refresh')
+            .set('Authorization', `Bearer ${loginRes.body.refreshToken}`);
+
+        expect(res.status).toBe(200);
+        expect(res.body).toHaveProperty('jwt');
+        expect(res.body).toHaveProperty('refreshToken');
+        expect(res.body).toHaveProperty('id');
+        expect(res.body).toHaveProperty('firstName');
+        expect(res.body).toHaveProperty('lastName');
+        expect(res.body).toHaveProperty('email');
     });
 });

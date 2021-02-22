@@ -35,7 +35,7 @@ export class UserService extends ValidationService {
         return passwordsMatch;
     }
 
-    public MapUserReadDto(user: User): UserReadDto {
+    public getReadDto(user: User): UserReadDto {
         return new UserReadDto(
             user.id,
             user.firstName,
@@ -44,7 +44,7 @@ export class UserService extends ValidationService {
         );
     }
 
-    public GetLoginResponse(
+    public getLoginResponse(
         token: string,
         refreshToken: string,
         user: UserReadDto
@@ -52,7 +52,7 @@ export class UserService extends ValidationService {
         return new UserLoginResponse(token, refreshToken, user);
     }
 
-    public GetRefreshTokenResponse(
+    public getRefreshTokenResponse(
         token: string,
         refreshToken: string,
         user: UserReadDto
@@ -60,7 +60,7 @@ export class UserService extends ValidationService {
         return new UserRefreshTokenResponse(token, refreshToken, user);
     }
 
-    public GetTokenValidResponse(user: UserReadDto) {
+    public getTokenValidResponse(user: UserReadDto) {
         return new UserTokenValidResponse(user);
     }
 }
