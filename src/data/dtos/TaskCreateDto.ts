@@ -14,6 +14,6 @@ export class TaskCreateDto implements ITaskCreateDto {
         public hoursRequiredByBim: number,
         public dateAssigned: Date,
         public dueDate: Date,
-        public UserId: number,
+        public UserId: number
     ) {}
 }

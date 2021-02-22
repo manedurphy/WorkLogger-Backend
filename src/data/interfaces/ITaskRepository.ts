@@ -13,7 +13,6 @@ export interface ITaskRepository {
     delete(task: Task): Promise<void>;
     update(task: Task, updatedTask: TaskCreateDto): Promise<Task | null>;
     complete(task: Task): Promise<void>;
-    InComplete(task: Task): Promise<void>;
     save(task: Task): Promise<void>;
     addHours(task: Task, hours: number): Promise<void>;
 }

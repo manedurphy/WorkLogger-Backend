@@ -24,7 +24,7 @@ export class ActivationPasswordsController extends BaseHttpController {
     }
 
     @httpGet('/:password')
-    public async activateAccount(@requestParam('password') password: string) {
+    private async activateAccount(@requestParam('password') password: string) {
         try {
             const activationPassword = await this.activationPasswordRepository.get(
                 password

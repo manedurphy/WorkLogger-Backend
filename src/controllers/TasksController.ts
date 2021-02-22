@@ -217,29 +217,8 @@ export class TasksController extends BaseHttpController {
         }
     }
 
-    @httpPut('/complete/:id', logRoute)
-    private async InCompleteTask(
-        @request() req: AuthenticatedRequest,
-        @response() res: Response
-    ) {
-        try {
-            const task = await this.taskRepository.getById(+req.params.id);
-
-            if (!task) return this.notFound();
-            await this.taskRepository.InComplete(task);
-
-            return this.ok(new Alert(HttpResponse.TASK_INCOMPLETE));
-        } catch (error) {
-            Logger.Err(error);
-            return this.json(new Alert(HttpResponse.SERVER_ERROR), 500);
-        }
-    }
-
     @httpPatch('/add-hours/:id', logRoute, calculateHoursRemaining)
-    private async addHours(
-        @request() req: AuthenticatedRequest,
-        @response() res: Response
-    ) {
+    private async addHours(@request() req: AuthenticatedRequest) {
         try {
             const task = await this.taskRepository.getById(req.params.id);
 

@@ -66,10 +66,6 @@ export class TaskRepository implements ITaskRepository {
         await task.update({ complete: true });
     }
 
-    public async InComplete(task: Task): Promise<void> {
-        await task.update({ complete: false });
-    }
-
     public async save(task: Task) {
         await task.save();
     }
