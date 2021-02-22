@@ -3,7 +3,7 @@ import { inject } from 'inversify';
 import { Alert } from '../responseObjects/Alert';
 import { Types } from '../constants/Types';
 import { Logger } from '@overnightjs/logger';
-import { AuthenticatedRequest } from './interfaces/interfaces';
+import { AuthenticatedRequest } from './interfaces/authenticatedReq';
 import { ILogRepository } from '../data/interfaces/ILogRepository';
 import { LoggerMiddleware } from '../middleware/LoggerMiddleware';
 import { body } from 'express-validator';
@@ -196,7 +196,7 @@ export class TasksController extends BaseHttpController {
     ) {
         Logger.Warn(req.body, true);
         try {
-            const taskFormErrorsPresent = this.taskService.ValidateForm(req);
+            const taskFormErrorsPresent = this.taskService.validateForm(req);
             if (taskFormErrorsPresent)
                 return this.badRequest(this.taskService.errorMessage);
 

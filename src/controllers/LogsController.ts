@@ -2,7 +2,7 @@ import { Response } from 'express';
 import { inject } from 'inversify';
 import { Types } from '../constants/Types';
 import { ILogRepository } from '../data/interfaces/ILogRepository';
-import { AuthenticatedRequest } from './interfaces/interfaces';
+import { AuthenticatedRequest } from './interfaces/authenticatedReq';
 import { HttpResponse } from '../constants/HttpResponse';
 import { Logger } from '@overnightjs/logger';
 import { LogService } from '../services/LogService';

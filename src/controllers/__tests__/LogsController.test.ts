@@ -11,7 +11,9 @@ import { HttpResponse } from '../../constants/HttpResponse';
 
 beforeAll(async () => {
     await sequelize.sync({ force: true });
-    await request(app).post('/api/users/register').send(userData.register);
+    await request(app)
+        .post('/api/users/register')
+        .send(userData.register.success);
 
     const user = await User.findByPk(1);
     user.update({ active: true });
@@ -27,7 +29,7 @@ describe('Log Controller /api/logs', () => {
     test('/PUT /log-item/:id', async () => {
         const user = await request(app)
             .post('/api/users/login')
-            .send(userData.login);
+            .send(userData.login.success);
 
         const res = await request(app)
             .put('/api/logs/log-item/1')
@@ -41,7 +43,7 @@ describe('Log Controller /api/logs', () => {
     test('/DELETE /log-item/:id', async () => {
         const user = await request(app)
             .post('/api/users/login')
-            .send(userData.login);
+            .send(userData.login.success);
 
         const res = await request(app)
             .delete('/api/logs/log-item/1')
@@ -54,7 +56,7 @@ describe('Log Controller /api/logs', () => {
     test('/DELETE /log-item/:id after deleting item', async () => {
         const user = await request(app)
             .post('/api/users/login')
-            .send(userData.login);
+            .send(userData.login.success);
 
         const res = await request(app)
             .delete('/api/logs/log-item/1')
@@ -67,7 +69,7 @@ describe('Log Controller /api/logs', () => {
     test('/DELETE /log-item/:id with 1 item in db', async () => {
         const user = await request(app)
             .post('/api/users/login')
-            .send(userData.login);
+            .send(userData.login.success);
         const res = await request(app)
             .delete('/api/logs/log-item/2')
             .set('Authorization', `Bearer ${user.body.jwt}`);

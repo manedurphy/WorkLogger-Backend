@@ -11,51 +11,56 @@ import { ValidationService } from './ValidationService';
 
 @injectable()
 export class UserService extends ValidationService {
-  public constructor() {
-    super();
-  }
-
-  public ValidatePassordsMatch(req: Request): boolean {
-    const passwordsMatch = req.body.password === req.body.password2;
-
-    if (!passwordsMatch) {
-      this.errorMessage = ValidationMessages.PASSWORDS_DO_NOT_MATCH;
+    public constructor() {
+        super();
     }
 
-    return passwordsMatch;
-  }
+    public verifyPassordsMatch(req: Request): boolean {
+        const passwordsMatch = req.body.password === req.body.password2;
 
-  public async HashPassword(req: Request): Promise<void> {
-    const hashPassword = await hash(req.body.password, 12);
-    req.body.password = hashPassword;
-  }
+        if (!passwordsMatch) {
+            this.errorMessage = ValidationMessages.PASSWORDS_DO_NOT_MATCH;
+        }
 
-  public async VerifyLoginPassword(password: string, hashPassword: string) {
-    const passwordsMatch = await compare(password, hashPassword);
-    return passwordsMatch;
-  }
+        return passwordsMatch;
+    }
 
-  public MapUserReadDto(user: User): UserReadDto {
-    return new UserReadDto(user.id, user.firstName, user.lastName, user.email);
-  }
+    public async hashPassword(req: Request): Promise<void> {
+        const hashPassword = await hash(req.body.password, 12);
+        req.body.password = hashPassword;
+    }
 
-  public GetLoginResponse(
-    token: string,
-    refreshToken: string,
-    user: UserReadDto
-  ) {
-    return new UserLoginResponse(token, refreshToken, user);
-  }
+    public async verifyLoginPassword(password: string, hashPassword: string) {
+        const passwordsMatch = await compare(password, hashPassword);
+        return passwordsMatch;
+    }
 
-  public GetRefreshTokenResponse(
-    token: string,
-    refreshToken: string,
-    user: UserReadDto
-  ) {
-    return new UserRefreshTokenResponse(token, refreshToken, user);
-  }
+    public MapUserReadDto(user: User): UserReadDto {
+        return new UserReadDto(
+            user.id,
+            user.firstName,
+            user.lastName,
+            user.email
+        );
+    }
 
-  public GetTokenValidResponse(user: UserReadDto) {
-    return new UserTokenValidResponse(user);
-  }
+    public GetLoginResponse(
+        token: string,
+        refreshToken: string,
+        user: UserReadDto
+    ) {
+        return new UserLoginResponse(token, refreshToken, user);
+    }
+
+    public GetRefreshTokenResponse(
+        token: string,
+        refreshToken: string,
+        user: UserReadDto
+    ) {
+        return new UserRefreshTokenResponse(token, refreshToken, user);
+    }
+
+    public GetTokenValidResponse(user: UserReadDto) {
+        return new UserTokenValidResponse(user);
+    }
 }

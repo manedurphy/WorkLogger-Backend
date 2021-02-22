@@ -11,7 +11,7 @@ import { Types } from '../constants/Types';
 import { IActivationPasswordRepository } from '../data/interfaces/IActivationPasswordRepository';
 import { AuthService } from '../services/AuthService';
 import { ValidationMessages } from '../constants/ValidationMessages';
-import { AuthenticatedRequest } from './interfaces/interfaces';
+import { AuthenticatedRequest } from './interfaces/authenticatedReq';
 import {
     controller,
     httpGet,
@@ -42,17 +42,6 @@ export class UsersController extends BaseHttpController {
         this.authService = authService;
     }
 
-    @httpGet('/', LoggerMiddleware)
-    private async GetUsers(@request() req: Request, @response() res: Response) {
-        try {
-            const users = await this.userRepository.get();
-            return this.ok(users);
-        } catch (error) {
-            Logger.Err('ERROR IN USERS ROUTE', error);
-            return this.internalServerError();
-        }
-    }
-
     @httpPost(
         '/register',
         LoggerMiddleware,
@@ -71,40 +60,35 @@ export class UsersController extends BaseHttpController {
             .isLength({ min: 6 })
             .withMessage(ValidationMessages.PASSWORD)
     )
-    private async Register(@request() req: Request, @response() res: Response) {
+    private async register(@request() req: Request) {
         Logger.Warn(req.body, true);
         try {
-            const registrationFormErrorsPresent = this.userService.validateForm(
-                req
-            );
-            const passordsMatch = this.userService.ValidatePassordsMatch(req);
+            const errorsPresent = this.userService.validateForm(req);
+            const passordsMatch = this.userService.verifyPassordsMatch(req);
 
-            if (registrationFormErrorsPresent || !passordsMatch)
+            if (errorsPresent || !passordsMatch)
                 return this.json(new Alert(this.userService.errorMessage), 400);
 
-            const existingUser = await this.userRepository.getByEmail(
-                req.body.email
-            );
+            const { email } = req.body;
+            const existingUser = await this.userRepository.getByEmail(email);
+
             if (existingUser)
                 return this.json(new Alert(HttpResponse.USER_EXISTS), 400);
 
-            await this.userService.HashPassword(req);
+            await this.userService.hashPassword(req);
 
             const newUser = await this.userRepository.add(req.body);
             const activationPassword = this.activationPasswordRepository.add(
                 newUser.id
             );
 
-            if (process.env.REGISTER !== 'testing')
-                this.authService.sendVerificationEmail(activationPassword); // For testing only. Remove for production.
+            if (process.env.NODE_ENV !== 'testing')
+                this.authService.sendVerificationEmail(activationPassword);
 
-            return this.created(
-                '/register',
-                new Alert(HttpResponse.USER_CREATED)
-            );
+            return this.json(new Alert(HttpResponse.USER_CREATED), 201);
         } catch (error) {
             Logger.Err('ERROR IN REGISTER ROUTE', error);
-            return this.internalServerError();
+            return this.json(new Alert(HttpResponse.SERVER_ERROR), 500);
         }
     }
 
@@ -117,7 +101,7 @@ export class UsersController extends BaseHttpController {
             .isEmpty()
             .withMessage(ValidationMessages.PASSWORD_MISSING)
     )
-    private async Login(@request() req: Request, @response() res: Response) {
+    private async login(@request() req: Request, @response() res: Response) {
         try {
             const loginFormsPresent = this.userService.validateForm(req);
 
@@ -130,8 +114,8 @@ export class UsersController extends BaseHttpController {
             if (!existingUser)
                 return this.json(new Alert(HttpResponse.USER_NOT_FOUND), 404);
 
-            if (process.env.LOGIN === 'testing')
-                await existingUser.update({ active: true }); // For testing only. Remove for production.
+            if (process.env.NODE_ENV === 'testing')
+                await existingUser.update({ active: true });
 
             if (!existingUser.active)
                 return this.json(
@@ -139,7 +123,7 @@ export class UsersController extends BaseHttpController {
                     400
                 );
 
-            const passwordIsCorrect = await this.userService.VerifyLoginPassword(
+            const passwordIsCorrect = await this.userService.verifyLoginPassword(
                 req.body.password,
                 existingUser.password
             );

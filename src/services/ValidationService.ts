@@ -2,7 +2,7 @@
 import { Request } from 'express';
 import { validationResult } from 'express-validator';
 import { injectable } from 'inversify';
-import { AuthenticatedRequest } from '../controllers/interfaces/interfaces';
+import { AuthenticatedRequest } from '../controllers/interfaces/authenticatedReq';
 
 @injectable()
 export class ValidationService {

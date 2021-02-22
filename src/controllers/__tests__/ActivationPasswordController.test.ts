@@ -8,7 +8,7 @@ import activationPasswordData from '../../mock/activationPassword/activationPass
 
 beforeAll(async () => {
     await sequelize.sync({ force: true });
-    await User.create(userData.create);
+    await User.create(userData.create.active);
     await ActivationPassword.create(activationPasswordData.create);
 });
 
