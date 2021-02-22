@@ -1,11 +1,10 @@
-import { Response } from 'express';
 import { inject } from 'inversify';
 import { Alert } from '../responseObjects/Alert';
 import { Types } from '../constants/Types';
 import { Logger } from '@overnightjs/logger';
 import { AuthenticatedRequest } from './interfaces/authenticatedReq';
 import { ILogRepository } from '../data/interfaces/ILogRepository';
-import { logRoute } from '../middleware/LoggerMiddleware';
+import { logRoute } from '../middleware/logRoute';
 import { body } from 'express-validator';
 import { TaskService } from '../services/TaskService';
 import { ITaskRepository } from '../data/interfaces/ITaskRepository';
@@ -23,7 +22,6 @@ import {
     httpPost,
     httpPut,
     request,
-    response,
 } from 'inversify-express-utils';
 
 @controller('/api/tasks')
@@ -46,7 +44,7 @@ export class TasksController extends BaseHttpController {
         this.logService = logService;
     }
 
-    @httpGet('/incomplete')
+    @httpGet('/incomplete', logRoute)
     private async getIncompleteTasks(@request() req: AuthenticatedRequest) {
         try {
             const { id } = req.payload.userInfo;
@@ -121,7 +119,7 @@ export class TasksController extends BaseHttpController {
         body('dueDate').not().isEmpty().withMessage(ValidationMessages.DUE_DATE)
     )
     private async createTask(@request() req: AuthenticatedRequest) {
-        Logger.Warn(req.body, true);
+        Logger.Warn(req.body, false);
         try {
             const taskFormErrorsPresent = this.taskService.validateForm(req);
             if (taskFormErrorsPresent)
@@ -170,7 +168,7 @@ export class TasksController extends BaseHttpController {
 
     @httpPut('/:id', logRoute, mapUserToTask, calculateHoursRemaining)
     private async update(@request() req: AuthenticatedRequest) {
-        Logger.Warn(req.body, true);
+        Logger.Warn(req.body, false);
         try {
             const task = await this.taskRepository.getById(+req.params.id);
             if (!task)

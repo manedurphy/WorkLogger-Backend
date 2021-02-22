@@ -6,7 +6,8 @@
     "scripts": {
         "test": "jest --detectOpenHandles --maxWorkers=1 --watchAll",
         "start": "ts-node-dev src/serverStart.ts",
-        "seed": "ts-node ./src/data/seeding/seedScript.ts"
+        "seed": "ts-node ./src/data/seeding/seedScript.ts",
+        "compile": "tsc"
     },
     "keywords": [],
     "author": "",

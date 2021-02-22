@@ -5,7 +5,7 @@ import { Logger } from '@overnightjs/logger';
 import { body } from 'express-validator';
 import { UserService } from '../services/UserService';
 import { Alert } from '../responseObjects/Alert';
-import { logRoute } from '../middleware/LoggerMiddleware';
+import { logRoute } from '../middleware/logRoute';
 import { HttpResponse } from '../constants/HttpResponse';
 import { Types } from '../constants/Types';
 import { IActivationPasswordRepository } from '../data/interfaces/IActivationPasswordRepository';
@@ -61,7 +61,7 @@ export class UsersController extends BaseHttpController {
             .withMessage(ValidationMessages.PASSWORD)
     )
     private async register(@request() req: Request) {
-        Logger.Warn(req.body, true);
+        Logger.Warn(req.body, false);
         try {
             const errorsPresent = this.userService.validateForm(req);
             const passordsMatch = this.userService.verifyPassordsMatch(req);

@@ -7,6 +7,7 @@ import { Logger } from '@overnightjs/logger';
 import { LogService } from '../services/LogService';
 import { ITaskRepository } from '../data/interfaces/ITaskRepository';
 import { Alert } from '../responseObjects/Alert';
+import { logRoute } from '../middleware/logRoute';
 import {
     BaseHttpController,
     controller,
@@ -16,7 +17,7 @@ import {
     requestParam,
 } from 'inversify-express-utils';
 
-@controller('/api/logs')
+@controller('/api/logs', logRoute)
 export class LogsController extends BaseHttpController {
     private readonly logRepository: ILogRepository;
     private readonly logService: LogService;
@@ -33,7 +34,7 @@ export class LogsController extends BaseHttpController {
         this.taskRepository = taskRepository;
     }
 
-    @httpDelete('/log-item/:id')
+    @httpDelete('/log-item/:id', logRoute)
     private async deleteLogItem(@requestParam('id') id: number) {
         try {
             const logItem = await this.logRepository.getById(id);
@@ -73,11 +74,11 @@ export class LogsController extends BaseHttpController {
             return this.ok(new Alert(HttpResponse.LOG_ITEM_DELETED));
         } catch (error) {
             Logger.Err(error);
-            return this.internalServerError();
+            return this.json(new Alert(HttpResponse.SERVER_ERROR), 500);
         }
     }
 
-    @httpPut('/log-item/:id')
+    @httpPut('/log-item/:id', logRoute)
     private async updateLogItem(@request() req: AuthenticatedRequest) {
         try {
             const logItem = await this.logRepository.getById(+req.params.id);
@@ -112,7 +113,7 @@ export class LogsController extends BaseHttpController {
             return this.ok(new Alert(HttpResponse.LOG_UPDATED));
         } catch (error) {
             Logger.Err(error);
-            return this.internalServerError();
+            return this.json(new Alert(HttpResponse.SERVER_ERROR), 500);
         }
     }
 }

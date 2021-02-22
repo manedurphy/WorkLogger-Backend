@@ -10,6 +10,7 @@ import {
     httpGet,
     requestParam,
 } from 'inversify-express-utils';
+import { logRoute } from '../middleware/logRoute';
 
 @controller('/api/activation')
 export class ActivationPasswordsController extends BaseHttpController {
@@ -23,7 +24,7 @@ export class ActivationPasswordsController extends BaseHttpController {
         this.activationPasswordRepository = activationPasswordRepository;
     }
 
-    @httpGet('/:password')
+    @httpGet('/:password', logRoute)
     private async activateAccount(@requestParam('password') password: string) {
         try {
             const activationPassword = await this.activationPasswordRepository.get(
