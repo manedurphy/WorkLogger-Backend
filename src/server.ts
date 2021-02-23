@@ -2,7 +2,6 @@ import './data/SQLDatabase';
 import './controllers';
 import './models/Relationships';
 import * as express from 'express';
-import cors from 'cors';
 import jwtMiddleware from 'express-jwt';
 import { Container } from 'inversify';
 import { InversifyExpressServer } from 'inversify-express-utils';
@@ -21,6 +20,7 @@ import { Errback, Request, Response, NextFunction } from 'express';
 import { HttpResponse } from './constants/HttpResponse';
 import { ITaskRepository } from './data/interfaces/ITaskRepository';
 import { IActivationPasswordRepository } from './data/interfaces/IActivationPasswordRepository';
+import { join } from 'path';
 
 const container = new Container();
 
@@ -31,33 +31,24 @@ container.bind<UserService>(Types.UserService).to(UserService);
 container.bind<AuthService>(Types.AuthService).to(AuthService);
 container.bind<TaskService>(Types.TaskService).to(TaskService);
 container.bind<LogService>(Types.LogService).to(LogService);
-container
-    .bind<IActivationPasswordRepository>(Types.ActivationPasswordRepository)
-    .to(ActivationPasswordRepository);
+container.bind<IActivationPasswordRepository>(Types.ActivationPasswordRepository).to(ActivationPasswordRepository);
 
 const server = new InversifyExpressServer(container);
 
 server.setConfig((app) => {
     app.use(express.json());
     app.use(express.urlencoded({ extended: true }));
-    app.use(cors({ origin: 'http://localhost:3000' }));
     app.use(
         jwtMiddleware({
             secret: process.env.JWT_SECRET as string,
             algorithms: ['HS256'],
             requestProperty: 'payload',
         }).unless({
-            path: [
-                '/api/users/login',
-                '/api/users/register',
-                { url: /^\/api\/activation\/.*/ },
-                '/',
-            ],
+            path: ['/api/users/login', '/api/users/register', { url: /^\/api\/activation\/.*/ }, '/'],
         })
     );
     app.use((err: Errback, req: Request, res: Response, next: NextFunction) => {
-        if (err.name === 'UnauthorizedError')
-            return res.status(401).json({ message: HttpResponse.UNAUTHORIZED });
+        if (err.name === 'UnauthorizedError') return res.status(401).json({ message: HttpResponse.UNAUTHORIZED });
         next();
     });
 });
