@@ -11,8 +11,6 @@ const log = {
     hoursRequiredByBim: 0,
     hoursRemaining: 100,
     complete: false,
-    day: 1,
-    weekOf: '20201-03-27',
     productiveHours: 0,
     loggedAt: new Date(),
     createdAt: new Date(),

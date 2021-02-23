@@ -8,14 +8,7 @@ import { LogService } from '../services/LogService';
 import { ITaskRepository } from '../data/interfaces/ITaskRepository';
 import { Alert } from '../responseObjects/Alert';
 import { logRoute } from '../middleware/logRoute';
-import {
-    BaseHttpController,
-    controller,
-    httpDelete,
-    httpPut,
-    request,
-    requestParam,
-} from 'inversify-express-utils';
+import { BaseHttpController, controller, httpDelete, httpPut, request, requestParam } from 'inversify-express-utils';
 
 @controller('/api/logs', logRoute)
 export class LogsController extends BaseHttpController {
@@ -38,21 +31,13 @@ export class LogsController extends BaseHttpController {
     private async deleteLogItem(@requestParam('id') id: number) {
         try {
             const logItem = await this.logRepository.getById(id);
-            if (!logItem)
-                return this.json(
-                    new Alert(HttpResponse.LOG_ITEM_NOT_FOUND),
-                    404
-                );
+            if (!logItem) return this.json(new Alert(HttpResponse.LOG_ITEM_NOT_FOUND), 404);
 
             const task = await this.taskRepository.getById(logItem.TaskId);
-            if (!task)
-                return this.json(new Alert(HttpResponse.TASKS_NOT_FOUND), 404);
+            if (!task) return this.json(new Alert(HttpResponse.TASKS_NOT_FOUND), 404);
 
-            const logBeforeDelete = await this.logRepository.getByTaskId(
-                logItem.TaskId
-            );
-            if (logBeforeDelete.length === 1)
-                return this.json(new Alert(HttpResponse.LOG_NO_DELETE), 400);
+            const logBeforeDelete = await this.logRepository.getByTaskId(logItem.TaskId);
+            if (logBeforeDelete.length === 1) return this.json(new Alert(HttpResponse.LOG_NO_DELETE), 400);
 
             this.logRepository.delete(logItem);
 
@@ -82,22 +67,15 @@ export class LogsController extends BaseHttpController {
     private async updateLogItem(@request() req: AuthenticatedRequest) {
         try {
             const logItem = await this.logRepository.getById(+req.params.id);
-            if (!logItem)
-                return this.json(
-                    new Alert(HttpResponse.LOG_ITEM_NOT_FOUND),
-                    404
-                );
+            if (!logItem) return this.json(new Alert(HttpResponse.LOG_ITEM_NOT_FOUND), 404);
 
             const task = await this.taskRepository.getById(logItem.TaskId);
-            if (!task)
-                return this.json(new Alert(HttpResponse.TASKS_NOT_FOUND), 404);
+            if (!task) return this.json(new Alert(HttpResponse.TASKS_NOT_FOUND), 404);
 
             await this.logRepository.update(logItem, req.body);
 
             const log = await this.logRepository.getByTaskId(logItem.TaskId);
-            const hoursWorked = await this.logService.getHoursWorkedAfterUpdate(
-                log
-            );
+            const hoursWorked = await this.logService.getHoursWorkedAfterUpdate(log);
 
             task.name = log[0].name;
             task.hoursWorked = hoursWorked;

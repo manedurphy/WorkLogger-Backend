@@ -13,8 +13,6 @@ export class Log extends Model {
     public reviewHours!: number;
     public hoursRequiredByBim!: number;
     public complete!: boolean;
-    public day!: number;
-    public weekOf!: string;
     public productiveHours!: number;
     public loggedAt!: Date;
     public TaskId!: number;
@@ -71,14 +69,6 @@ Log.init(
             type: DataTypes.BOOLEAN,
             allowNull: false,
             defaultValue: false,
-        },
-        day: {
-            type: DataTypes.INTEGER,
-            allowNull: false,
-        },
-        weekOf: {
-            type: DataTypes.STRING,
-            allowNull: false,
         },
         productiveHours: {
             type: DataTypes.DECIMAL(10, 2),

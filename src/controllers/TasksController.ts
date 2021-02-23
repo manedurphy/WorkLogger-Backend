@@ -72,8 +72,7 @@ export class TasksController extends BaseHttpController {
     private async getById(@request() req: AuthenticatedRequest) {
         try {
             const task = await this.taskRepository.getById(+req.params.id);
-            if (!task)
-                return this.json(new Alert(HttpResponse.TASK_NOT_FOUND), 404);
+            if (!task) return this.json(new Alert(HttpResponse.TASK_NOT_FOUND), 404);
 
             return this.ok(task);
         } catch (error) {
@@ -88,58 +87,31 @@ export class TasksController extends BaseHttpController {
         mapUserToTask,
         calculateHoursRemaining,
         body('name').not().isEmpty().withMessage(ValidationMessages.TASK_NAME),
-        body('projectNumber')
-            .not()
-            .isEmpty()
-            .withMessage(ValidationMessages.PROJECT_NUMBER),
-        body('hoursAvailableToWork')
-            .not()
-            .isEmpty()
-            .withMessage(ValidationMessages.AVAILABLE_HOURS),
-        body('hoursWorked')
-            .not()
-            .isEmpty()
-            .withMessage(ValidationMessages.HOURS_WORKED),
-        body('reviewHours')
-            .not()
-            .isEmpty()
-            .withMessage(ValidationMessages.REVIEW_HOURS),
-        body('numberOfReviews')
-            .not()
-            .isEmpty()
-            .withMessage(ValidationMessages.NUMBER_OF_REVIEWS),
-        body('hoursRequiredByBim')
-            .not()
-            .isEmpty()
-            .withMessage(ValidationMessages.HOURS_BIM),
-        body('dateAssigned')
-            .not()
-            .isEmpty()
-            .withMessage(ValidationMessages.DATE_ASSGINED),
+        body('projectNumber').not().isEmpty().withMessage(ValidationMessages.PROJECT_NUMBER),
+        body('hoursAvailableToWork').not().isEmpty().withMessage(ValidationMessages.AVAILABLE_HOURS),
+        body('hoursWorked').not().isEmpty().withMessage(ValidationMessages.HOURS_WORKED),
+        body('reviewHours').not().isEmpty().withMessage(ValidationMessages.REVIEW_HOURS),
+        body('numberOfReviews').not().isEmpty().withMessage(ValidationMessages.NUMBER_OF_REVIEWS),
+        body('hoursRequiredByBim').not().isEmpty().withMessage(ValidationMessages.HOURS_BIM),
+        body('dateAssigned').not().isEmpty().withMessage(ValidationMessages.DATE_ASSGINED),
         body('dueDate').not().isEmpty().withMessage(ValidationMessages.DUE_DATE)
     )
     private async createTask(@request() req: AuthenticatedRequest) {
-        Logger.Warn(req.body, false);
         try {
             const taskFormErrorsPresent = this.taskService.validateForm(req);
-            if (taskFormErrorsPresent)
-                return this.json(new Alert(this.taskService.errorMessage), 400);
+            if (taskFormErrorsPresent) return this.json(new Alert(this.taskService.errorMessage), 400);
 
             const { projectNumber } = req.body;
             const { id } = req.payload.userInfo;
 
-            const existingTask = await this.taskRepository.getByProjectNumber(
-                projectNumber,
-                id
-            );
+            const existingTask = await this.taskRepository.getByProjectNumber(projectNumber, id);
 
-            if (existingTask)
-                return this.json(new Alert(HttpResponse.TASK_EXISTS), 400);
+            if (existingTask) return this.json(new Alert(HttpResponse.TASK_EXISTS), 400);
 
             const newTask = await this.taskRepository.add(req.body);
 
             if (newTask) {
-                const logCreateDto = this.logService.mapProps(req.body, null);
+                const logCreateDto = this.logService.getCreateDto(req.body);
                 await this.logRepository.add(logCreateDto, newTask);
             }
 
@@ -155,8 +127,7 @@ export class TasksController extends BaseHttpController {
         try {
             const task = await this.taskRepository.getById(+req.params.id);
 
-            if (!task)
-                return this.json(new Alert(HttpResponse.TASK_NOT_FOUND), 404);
+            if (!task) return this.json(new Alert(HttpResponse.TASK_NOT_FOUND), 404);
 
             await this.taskRepository.delete(task);
             return this.ok(new Alert(HttpResponse.TASK_DELETED));
@@ -168,25 +139,15 @@ export class TasksController extends BaseHttpController {
 
     @httpPut('/:id', logRoute, mapUserToTask, calculateHoursRemaining)
     private async update(@request() req: AuthenticatedRequest) {
-        Logger.Warn(req.body, false);
         try {
             const task = await this.taskRepository.getById(+req.params.id);
-            if (!task)
-                return this.json(new Alert(HttpResponse.TASK_NOT_FOUND), 404);
+            if (!task) return this.json(new Alert(HttpResponse.TASK_NOT_FOUND), 404);
 
-            const previouslyWorkedHours = task.hoursWorked;
-            const updatedTask = await this.taskRepository.update(
-                task,
-                req.body
-            );
+            const updatedTask = await this.taskRepository.update(task, req.body);
 
             if (updatedTask) {
-                const hoursWorked =
-                    updatedTask.hoursWorked - previouslyWorkedHours;
-                const logCreateDto = this.logService.mapProps(
-                    req.body,
-                    hoursWorked
-                );
+                const productivity = updatedTask.hoursWorked - task.hoursWorked;
+                const logCreateDto = this.logService.getCreateDto(req.body, productivity);
                 await this.logRepository.add(logCreateDto, task);
             }
 
@@ -202,8 +163,7 @@ export class TasksController extends BaseHttpController {
         try {
             const task = await this.taskRepository.getById(+req.params.id);
 
-            if (!task)
-                return this.json(new Alert(HttpResponse.TASK_NOT_FOUND), 404);
+            if (!task) return this.json(new Alert(HttpResponse.TASK_NOT_FOUND), 404);
 
             await this.taskRepository.complete(task);
             await this.logRepository.completeLatest(task.id);
@@ -220,14 +180,12 @@ export class TasksController extends BaseHttpController {
         try {
             const task = await this.taskRepository.getById(req.params.id);
 
-            if (!task)
-                return this.json(new Alert(HttpResponse.TASK_NOT_FOUND), 404);
+            if (!task) return this.json(new Alert(HttpResponse.TASK_NOT_FOUND), 404);
 
             const log = await this.logRepository.getByTaskId(task.id);
 
             await this.taskRepository.addHours(task, +req.body.hours);
-            if (log[0])
-                await this.logRepository.addHours(log[0], +req.body.hours);
+            if (log[0]) await this.logRepository.addHours(log[0], +req.body.hours);
 
             return this.ok(new Alert(HttpResponse.TASK_UPDATE));
         } catch (error) {

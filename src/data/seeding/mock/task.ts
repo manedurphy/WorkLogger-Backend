@@ -9,7 +9,7 @@ const task: TaskCreateDto = {
     notes: 'First task for seeding',
     numberOfReviews: 0,
     reviewHours: 0,
-    hoursRequiredByBim: 2,
+    hoursRequiredByBim: 0,
     hoursRemaining: 100,
     complete: false,
     dateAssigned: new Date(),

@@ -4,6 +4,7 @@ import { LogCreateDto } from '../data/dtos/LogCreateDto';
 import { ILogCreateDto } from '../data/interfaces/ILogCreateDto';
 import { ILogRepository } from '../data/interfaces/ILogRepository';
 import { Log } from '../models';
+import { TaskCreateDto } from '../data/dtos/TaskCreateDto';
 
 @injectable()
 export class LogService {
@@ -13,40 +14,20 @@ export class LogService {
         this.logRepository = logRepository;
     }
 
-    private GetSunday() {
-        const date = new Date();
-        date.setDate(date.getDate() - (date.getDay() || 7));
-        return date.toString().slice(0, 15);
-    }
+    public getCreateDto(taskFormData: TaskCreateDto, hours: number = 0): ILogCreateDto {
+        const dto: any = {};
+        dto.name = taskFormData.name;
+        dto.projectNumber = taskFormData.projectNumber;
+        dto.hoursAvailableToWork = taskFormData.hoursAvailableToWork;
+        dto.hoursWorked = taskFormData.hoursWorked;
+        dto.notes = taskFormData.notes;
+        dto.numberOfReviews = taskFormData.numberOfReviews;
+        dto.hoursRequiredByBim = taskFormData.hoursRequiredByBim;
+        dto.productiveHours = hours > 0 ? hours : taskFormData.hoursWorked;
+        dto.hoursRemaining = taskFormData.hoursRemaining;
+        dto.reviewHours = taskFormData.reviewHours;
 
-    private GetLastSunday() {
-        const lastSunday = new Date();
-        lastSunday.setDate(
-            lastSunday.getDate() - (lastSunday.getDay() || 7) - 7
-        );
-
-        return lastSunday.toString().slice(0, 15);
-    }
-
-    private GetToday() {
-        const date = new Date();
-        return date.getDay();
-    }
-
-    public mapProps(
-        body: ILogCreateDto,
-        hoursWorked: number | null
-    ): LogCreateDto {
-        body.weekOf = this.GetSunday();
-        body.day = this.GetToday();
-        body.productiveHours =
-            hoursWorked !== null ? hoursWorked : body.hoursWorked;
-
-        return new LogCreateDto(body);
-    }
-
-    public LogMatchesUser(logItem: Log, userId: number): boolean {
-        return logItem.UserId === userId;
+        return new LogCreateDto(dto);
     }
 
     public async getHoursWorkedAfterDelete(log: Log[], hours: number) {
@@ -59,10 +40,7 @@ export class LogService {
             sum += +log[i].productiveHours;
             log[i].hoursWorked = sum;
             log[i].hoursRemaining =
-                log[i].hoursAvailableToWork -
-                log[i].hoursWorked -
-                log[i].hoursRequiredByBim -
-                log[i].reviewHours;
+                log[i].hoursAvailableToWork - log[i].hoursWorked - log[i].hoursRequiredByBim - log[i].reviewHours;
             await this.logRepository.save(log[i]);
         }
 
@@ -82,10 +60,7 @@ export class LogService {
                 log[i].productiveHours = diff;
             }
             log[i].hoursRemaining =
-                log[i].hoursAvailableToWork -
-                log[i].hoursWorked -
-                log[i].hoursRequiredByBim -
-                log[i].reviewHours;
+                log[i].hoursAvailableToWork - log[i].hoursWorked - log[i].hoursRequiredByBim - log[i].reviewHours;
             await this.logRepository.save(log[i]);
         }
 

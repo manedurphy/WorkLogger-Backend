@@ -6,10 +6,10 @@ export const calculateHoursRemaining = (
     next: NextFunction
 ) => {
     const hoursRemaining =
-        req.body.hoursAvailableToWork -
-        req.body.hoursWorked -
-        req.body.hoursRequiredByBim -
-        req.body.reviewHours;
+        +req.body.hoursAvailableToWork -
+        +req.body.hoursWorked -
+        +req.body.hoursRequiredByBim -
+        +req.body.reviewHours;
     req.body.hoursRemaining = hoursRemaining;
     next();
 };

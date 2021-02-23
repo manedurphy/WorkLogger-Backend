@@ -16,8 +16,8 @@ export class LogRepository implements ILogRepository {
         return Log.findByPk(id);
     }
 
-    public async add(logCreateDto: LogCreateDto, task: Task): Promise<void> {
-        Log.create({
+    public async add(logCreateDto: LogCreateDto, task: Task): Promise<Log> {
+        return Log.create({
             ...logCreateDto,
             loggedAt: new Date(),
             TaskId: task.id,
@@ -25,10 +25,7 @@ export class LogRepository implements ILogRepository {
         });
     }
 
-    public async update(
-        log: Log,
-        logCreateDto: LogCreateDto
-    ): Promise<Log | null> {
+    public async update(log: Log, logCreateDto: LogCreateDto): Promise<Log | null> {
         return log.update(logCreateDto);
     }
 
@@ -63,7 +60,6 @@ export class LogRepository implements ILogRepository {
             loggedAt: log.dataValues.loggedAt,
             TaskId: log.dataValues.TaskId,
             UserId: log.dataValues.UserId,
-            createdAt: log.dataValues.createdAt,
         });
     }
 }
