@@ -48,7 +48,8 @@ export class LogsController extends BaseHttpController {
             const log = logBeforeDelete.filter((item) => item.id != id);
             const hours = +logItem.productiveHours;
 
-            this.logService.updateHoursAfterDelete(log, hours);
+            await this.logService.updateHoursAfterDelete(log, hours);
+
             this.taskService.matchLatestLog(task, log[0]);
             this.taskRepository.save(task);
 
