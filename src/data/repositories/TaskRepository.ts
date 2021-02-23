@@ -40,10 +40,7 @@ export class TaskRepository implements ITaskRepository {
         });
     }
 
-    public getByProjectNumber(
-        projectNumber: number,
-        userId: number
-    ): Promise<Task | null> {
+    public getByProjectNumber(projectNumber: number, userId: number): Promise<Task | null> {
         return Task.findOne({ where: { projectNumber, UserId: userId } });
     }
 
@@ -55,10 +52,7 @@ export class TaskRepository implements ITaskRepository {
         return task.destroy();
     }
 
-    public async update(
-        task: Task,
-        updatedTask: TaskCreateDto
-    ): Promise<Task | null> {
+    public async update(task: Task, updatedTask: TaskCreateDto): Promise<Task | null> {
         return task.update(updatedTask);
     }
 

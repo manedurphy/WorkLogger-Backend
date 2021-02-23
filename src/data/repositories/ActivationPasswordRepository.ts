@@ -3,8 +3,7 @@ import { ActivationPassword, User } from '../../models';
 import { IActivationPasswordRepository } from '../interfaces/IActivationPasswordRepository';
 
 @injectable()
-export class ActivationPasswordRepository
-    implements IActivationPasswordRepository {
+export class ActivationPasswordRepository implements IActivationPasswordRepository {
     public async get(password: string): Promise<ActivationPassword | null> {
         const activationPassword = await ActivationPassword.findOne({
             where: { password },

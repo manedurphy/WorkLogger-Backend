@@ -42,7 +42,7 @@ export class UsersController extends BaseHttpController {
         body('firstName').not().isEmpty().withMessage(ValidationMessages.FIRST_NAME),
         body('lastName').not().isEmpty().withMessage(ValidationMessages.LAST_NAME),
         body('email').isEmail().withMessage(ValidationMessages.EMAIL),
-        body('password').not().isEmpty().isLength({ min: 6 }).withMessage(ValidationMessages.PASSWORD)
+        body('password').isLength({ min: 6 }).withMessage(ValidationMessages.PASSWORD)
     )
     private async register(@request() req: Request) {
         try {
@@ -78,31 +78,24 @@ export class UsersController extends BaseHttpController {
     )
     private async login(@request() req: LoginRequest) {
         try {
-            const loginFormsPresent = this.userService.validateForm(req);
+            const errorsPresent = this.userService.validateForm(req);
+            if (errorsPresent) return this.json(new Alert(this.userService.errorMessage), 400);
 
-            if (loginFormsPresent) return this.json(new Alert(this.userService.errorMessage), 400);
-
-            const { email } = req.body;
+            const { email, password } = req.body;
             const existingUser = await this.userRepository.getByEmail(email);
-            if (!existingUser) return this.json(new Alert(HttpResponse.USER_NOT_FOUND), 404);
 
+            if (!existingUser) return this.json(new Alert(HttpResponse.USER_NOT_FOUND), 404);
             if (!existingUser.active) return this.json(new Alert(HttpResponse.USER_NOT_VERIFIED), 400);
 
-            const passwordIsCorrect = await this.userService.verifyLoginPassword(
-                req.body.password,
-                existingUser.password
-            );
-
+            const passwordIsCorrect = await this.userService.verifyLoginPassword(password, existingUser.password);
             if (!passwordIsCorrect) return this.json(new Alert(HttpResponse.INVALID_CREDENTIALS), 400);
 
             const userReadDto = this.userService.getReadDto(existingUser);
             const token = this.authService.generateToken(userReadDto);
-
             const refreshToken = this.authService.generateRefreshToken(userReadDto);
 
-            const userLoginResponseObject = this.userService.getLoginResponse(token, refreshToken, userReadDto);
-
-            return this.ok(userLoginResponseObject);
+            const userLoginResponse = this.userService.getLoginResponse(token, refreshToken, userReadDto);
+            return this.ok(userLoginResponse);
         } catch (error) {
             Logger.Err('ERROR IN LOGIN ROUTE', error);
             return this.json(new Alert(HttpResponse.SERVER_ERROR), 500);

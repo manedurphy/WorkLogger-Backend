@@ -13,6 +13,20 @@ const taskData = {
         dueDate: '2022-08-01 15:00:00',
         UserId: 1,
     },
+    put: {
+        name: 'Task 1',
+        projectNumber: 1,
+        hoursAvailableToWork: 100,
+        hoursWorked: 20,
+        hoursRemaining: 80,
+        notes: 'Here are some notes',
+        numberOfReviews: 0,
+        reviewHours: 5,
+        hoursRequiredByBim: 5,
+        dateAssigned: '2021-08-01 15:00:00',
+        dueDate: '2022-08-01 15:00:00',
+        UserId: 1,
+    },
     success: {
         name: 'Task 2',
         projectNumber: 2,
@@ -50,6 +64,9 @@ const taskData = {
         dateAssigned: '2021-08-01 15:00:00',
         dueDate: '2022-08-01 15:00:00',
         UserId: 1,
+    },
+    addHours: {
+        hours: 10,
     },
 };
 

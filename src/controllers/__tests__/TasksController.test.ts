@@ -15,11 +15,11 @@ beforeAll(async () => {
     await sequelize.sync({ force: true });
 
     await request(app).post('/api/users/register').send(userData.register.success);
+
     const user = await User.findByPk(1);
     if (user) await user.update({ active: true });
 
     const loginRes = await request(app).post('/api/users/login').send(userData.login.success);
-
     token = loginRes.body.jwt;
 
     await request(app).post('/api/tasks').send(taskData.create).set('Authorization', `Bearer ${token}`);
@@ -39,6 +39,44 @@ describe('Tasks Controller /api/tasks', () => {
 
         expect(res.status).toBe(200);
         expect(res.body).toHaveLength(0);
+    });
+    test('/PATCH /add-hours/:id should add hoursWorked to task', async () => {
+        const res = await request(app)
+            .patch('/api/tasks/add-hours/1')
+            .set('Authorization', `Bearer ${token}`)
+            .send(taskData.addHours);
+
+        expect(res.status).toBe(200);
+        expect(res.body.message).toBe(HttpResponse.TASK_UPDATE);
+    });
+    test('task data should have been updated based on the hours added', async () => {
+        const task = await Task.findByPk(1);
+
+        expect(task.hoursWorked).toBe('20.00');
+        expect(task.hoursRemaining).toBe('80.00');
+    });
+    test('/PUT /:id changes to reviewHours and hoursRequiredByBim should be reflected in hoursRemaining', async () => {
+        const res = await request(app).put('/api/tasks/1').set('Authorization', `Bearer ${token}`).send(taskData.put);
+
+        expect(res.status).toBe(200);
+        expect(res.body.message).toBe(HttpResponse.TASK_UPDATE);
+
+        const task = await Task.findByPk(1);
+
+        expect(task.hoursRemaining).toBe('70.00');
+    });
+    test('/PUT /incomplete/:id should update a task from incomplete to complete', async () => {
+        const res = await request(app).put('/api/tasks/incomplete/1').set('Authorization', `Bearer ${token}`);
+
+        expect(res.status).toBe(200);
+        expect(res.body.message).toBe(HttpResponse.TASK_COMPLETE);
+    });
+    test('database should have no incomplete tasks and one complete task for this user', async () => {
+        const incomplete = await Task.findAll({ where: { complete: false } });
+        const complete = await Task.findAll({ where: { complete: true } });
+
+        expect(incomplete).toHaveLength(0);
+        expect(complete).toHaveLength(1);
     });
     test('/GET /:id', async () => {
         const res = await request(app).get('/api/tasks/1').set('Authorization', `Bearer ${token}`);
@@ -113,5 +151,14 @@ describe('Tasks Controller /api/tasks', () => {
 
         expect(res.status).toBe(404);
         expect(res.body.message).toBe(HttpResponse.TASK_NOT_FOUND);
+    });
+    test('/DELETE /:id should delete a task by its id', async () => {
+        const res = await request(app).delete('/api/tasks/1').set('Authorization', `Bearer ${token}`);
+
+        expect(res.status).toBe(200);
+        expect(res.body.message).toBe(HttpResponse.TASK_DELETED);
+
+        const task = await Task.findByPk(1);
+        expect(task).toBeNull();
     });
 });

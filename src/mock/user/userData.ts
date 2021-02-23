@@ -14,7 +14,7 @@ const userData = {
             lastName: 'Active',
             email: 'notactive@mail.com',
             password: 'password',
-            active: true,
+            active: false,
         },
     },
     login: {
@@ -52,6 +52,33 @@ const userData = {
             email: 'notactive@mail.com',
             password: 'password',
             password2: 'password',
+        },
+        invalid: {
+            firstName: {
+                lastName: 'User',
+                email: 'testuser@mail.com',
+                password: 'password',
+                password2: 'password',
+            },
+            lastName: {
+                firstName: 'Test',
+                email: 'testuser@mail.com',
+                password: 'password',
+                password2: 'password',
+            },
+            email: {
+                firstName: 'Test',
+                lastName: 'User',
+                password: 'password',
+                password2: 'password',
+            },
+            password: {
+                firstName: 'Test',
+                lastName: 'User',
+                email: 'testuser@mail.com',
+                password: 'pass',
+                password2: 'pass',
+            },
         },
     },
 };

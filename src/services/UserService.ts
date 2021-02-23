@@ -36,27 +36,14 @@ export class UserService extends ValidationService {
     }
 
     public getReadDto(user: User): UserReadDto {
-        return new UserReadDto(
-            user.id,
-            user.firstName,
-            user.lastName,
-            user.email
-        );
+        return new UserReadDto(user.id, user.firstName, user.lastName, user.email);
     }
 
-    public getLoginResponse(
-        token: string,
-        refreshToken: string,
-        user: UserReadDto
-    ) {
+    public getLoginResponse(token: string, refreshToken: string, user: UserReadDto) {
         return new UserLoginResponse(token, refreshToken, user);
     }
 
-    public getRefreshTokenResponse(
-        token: string,
-        refreshToken: string,
-        user: UserReadDto
-    ) {
+    public getRefreshTokenResponse(token: string, refreshToken: string, user: UserReadDto) {
         return new UserRefreshTokenResponse(token, refreshToken, user);
     }
 

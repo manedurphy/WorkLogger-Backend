@@ -26,10 +26,7 @@ export class AuthService {
     }
 
     public sendVerificationEmail(activationPassword: string) {
-        const verificationLink =
-            process.env.NODE_ENV === 'production'
-                ? `https://work-log-connor-app.herokuapp.com/verify/${activationPassword}`
-                : `http://localhost:5000/api/activation/${activationPassword}`;
+        const verificationLink = `http://localhost:3000/verify/${activationPassword}`;
 
         sgMail.setApiKey(process.env.SENDGRID_API as string);
         const msg = {
