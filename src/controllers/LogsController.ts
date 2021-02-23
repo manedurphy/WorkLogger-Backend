@@ -9,22 +9,26 @@ import { ITaskRepository } from '../data/interfaces/ITaskRepository';
 import { Alert } from '../responseObjects/Alert';
 import { logRoute } from '../middleware/logRoute';
 import { BaseHttpController, controller, httpDelete, httpPut, request, requestParam } from 'inversify-express-utils';
+import { TaskService } from '../services/TaskService';
 
 @controller('/api/logs', logRoute)
 export class LogsController extends BaseHttpController {
     private readonly logRepository: ILogRepository;
     private readonly logService: LogService;
     private readonly taskRepository: ITaskRepository;
+    private readonly taskService: TaskService;
 
     public constructor(
         @inject(Types.LogRepository) logRepository: ILogRepository,
         @inject(Types.LogService) logService: LogService,
-        @inject(Types.TaskRepository) taskRepository: ITaskRepository
+        @inject(Types.TaskRepository) taskRepository: ITaskRepository,
+        @inject(Types.TaskService) taskService: TaskService
     ) {
         super();
         this.logRepository = logRepository;
         this.logService = logService;
         this.taskRepository = taskRepository;
+        this.taskService = taskService;
     }
 
     @httpDelete('/log-item/:id', logRoute)
@@ -44,16 +48,8 @@ export class LogsController extends BaseHttpController {
             const log = logBeforeDelete.filter((item) => item.id != id);
             const hours = +logItem.productiveHours;
 
-            await this.logService.getHoursWorkedAfterDelete(log, hours);
-
-            task.name = log[0].name;
-            task.hoursWorked = log[0].hoursWorked;
-            task.hoursRemaining = log[0].hoursRemaining;
-            task.hoursRequiredByBim = log[0].hoursRequiredByBim;
-            task.reviewHours = log[0].reviewHours;
-            task.notes = log[0].notes;
-            task.hoursAvailableToWork = log[0].hoursAvailableToWork;
-            task.numberOfReviews = log[0].numberOfReviews;
+            this.logService.updateHoursAfterDelete(log, hours);
+            this.taskService.matchLatestLog(task, log[0]);
             this.taskRepository.save(task);
 
             return this.ok(new Alert(HttpResponse.LOG_ITEM_DELETED));
@@ -73,19 +69,10 @@ export class LogsController extends BaseHttpController {
             if (!task) return this.json(new Alert(HttpResponse.TASKS_NOT_FOUND), 404);
 
             await this.logRepository.update(logItem, req.body);
-
             const log = await this.logRepository.getByTaskId(logItem.TaskId);
-            const hoursWorked = await this.logService.getHoursWorkedAfterUpdate(log);
 
-            task.name = log[0].name;
-            task.hoursWorked = hoursWorked;
-            task.hoursRemaining = log[0].hoursRemaining;
-            task.hoursRequiredByBim = log[0].hoursRequiredByBim;
-            task.reviewHours = log[0].reviewHours;
-            task.notes = log[0].notes;
-            task.hoursAvailableToWork = log[0].hoursAvailableToWork;
-            task.numberOfReviews = log[0].numberOfReviews;
-
+            this.logService.updateHours(log);
+            this.taskService.matchLatestLog(task, log[0]);
             this.taskRepository.save(task);
 
             return this.ok(new Alert(HttpResponse.LOG_UPDATED));

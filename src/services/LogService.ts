@@ -46,7 +46,7 @@ export class LogService {
         });
     }
 
-    public async getHoursWorkedAfterDelete(log: Log[], hours: number) {
+    public async updateHoursAfterDelete(log: Log[], hours: number) {
         let sum = 0;
 
         for (let i = log.length - 1; i >= 0; i--) {
@@ -63,7 +63,7 @@ export class LogService {
         return sum;
     }
 
-    public async getHoursWorkedAfterUpdate(log: Log[]) {
+    public async updateHours(log: Log[]) {
         let sum = 0;
 
         for (let i = log.length - 1; i >= 0; i--) {
