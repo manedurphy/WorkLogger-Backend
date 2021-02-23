@@ -11,8 +11,8 @@ import { ITaskRepository } from '../data/interfaces/ITaskRepository';
 import { ValidationMessages } from '../constants/ValidationMessages';
 import { HttpResponse } from '../constants/HttpResponse';
 import { LogService } from '../services/LogService';
-import { mapUserToTask } from '../middleware/MapUserToTask';
-import { calculateHoursRemaining } from '../middleware/CalculateHoursRemaining';
+import { mapUserToTask } from '../middleware/mapUserToTask';
+import { calculateHoursRemaining } from '../middleware/calculateHoursRemaining';
 import {
     BaseHttpController,
     controller,
@@ -105,7 +105,6 @@ export class TasksController extends BaseHttpController {
             const { id } = req.payload.userInfo;
 
             const existingTask = await this.taskRepository.getByProjectNumber(projectNumber, id);
-
             if (existingTask) return this.json(new Alert(HttpResponse.TASK_EXISTS), 400);
 
             const newTask = await this.taskRepository.add(req.body);
@@ -189,7 +188,6 @@ export class TasksController extends BaseHttpController {
             }
 
             await this.taskRepository.addHours(task, +req.body.hours);
-
             return this.ok(new Alert(HttpResponse.TASK_UPDATE));
         } catch (error) {
             Logger.Err(error);
