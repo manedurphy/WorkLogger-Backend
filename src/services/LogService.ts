@@ -14,20 +14,36 @@ export class LogService {
         this.logRepository = logRepository;
     }
 
-    public getCreateDto(taskFormData: TaskCreateDto, hours: number = 0): ILogCreateDto {
-        const dto: any = {};
-        dto.name = taskFormData.name;
-        dto.projectNumber = taskFormData.projectNumber;
-        dto.hoursAvailableToWork = taskFormData.hoursAvailableToWork;
-        dto.hoursWorked = taskFormData.hoursWorked;
-        dto.notes = taskFormData.notes;
-        dto.numberOfReviews = taskFormData.numberOfReviews;
-        dto.hoursRequiredByBim = taskFormData.hoursRequiredByBim;
-        dto.productiveHours = hours > 0 ? hours : taskFormData.hoursWorked;
-        dto.hoursRemaining = taskFormData.hoursRemaining;
-        dto.reviewHours = taskFormData.reviewHours;
+    public getCreateDto(taskFormData: TaskCreateDto, hours: number): ILogCreateDto {
+        return new LogCreateDto({
+            name: taskFormData.name,
+            projectNumber: taskFormData.projectNumber,
+            hoursAvailableToWork: taskFormData.hoursAvailableToWork,
+            hoursWorked: taskFormData.hoursWorked,
+            hoursRemaining: taskFormData.hoursRemaining,
+            numberOfReviews: taskFormData.numberOfReviews,
+            notes: taskFormData.notes,
+            reviewHours: taskFormData.reviewHours,
+            hoursRequiredByBim: taskFormData.hoursRequiredByBim,
+            complete: false,
+            productiveHours: hours,
+        });
+    }
 
-        return new LogCreateDto(dto);
+    public addHours(log: Log, hours: number): ILogCreateDto {
+        return new LogCreateDto({
+            name: log.name,
+            projectNumber: log.projectNumber,
+            hoursAvailableToWork: log.hoursAvailableToWork,
+            hoursWorked: +log.hoursWorked + hours,
+            hoursRemaining: log.hoursRemaining - hours,
+            notes: log.notes,
+            numberOfReviews: log.numberOfReviews,
+            reviewHours: log.reviewHours,
+            hoursRequiredByBim: log.hoursRequiredByBim,
+            complete: log.complete,
+            productiveHours: hours,
+        });
     }
 
     public async getHoursWorkedAfterDelete(log: Log[], hours: number) {

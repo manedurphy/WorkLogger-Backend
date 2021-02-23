@@ -111,7 +111,7 @@ export class TasksController extends BaseHttpController {
             const newTask = await this.taskRepository.add(req.body);
 
             if (newTask) {
-                const logCreateDto = this.logService.getCreateDto(req.body);
+                const logCreateDto = this.logService.getCreateDto(req.body, newTask.hoursWorked);
                 await this.logRepository.add(logCreateDto, newTask);
             }
 
@@ -183,9 +183,12 @@ export class TasksController extends BaseHttpController {
             if (!task) return this.json(new Alert(HttpResponse.TASK_NOT_FOUND), 404);
 
             const log = await this.logRepository.getByTaskId(task.id);
+            if (log[0]) {
+                const logCreateDto = this.logService.addHours(log[0], +req.body.hours);
+                await this.logRepository.add(logCreateDto, task);
+            }
 
             await this.taskRepository.addHours(task, +req.body.hours);
-            if (log[0]) await this.logRepository.addHours(log[0], +req.body.hours);
 
             return this.ok(new Alert(HttpResponse.TASK_UPDATE));
         } catch (error) {

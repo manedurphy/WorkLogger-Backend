@@ -14,47 +14,34 @@ beforeAll(async () => {
     process.env.NODE_ENV = 'testing';
     await sequelize.sync({ force: true });
 
-    await request(app)
-        .post('/api/users/register')
-        .send(userData.register.success);
+    await request(app).post('/api/users/register').send(userData.register.success);
     const user = await User.findByPk(1);
     if (user) await user.update({ active: true });
 
-    const loginRes = await request(app)
-        .post('/api/users/login')
-        .send(userData.login.success);
+    const loginRes = await request(app).post('/api/users/login').send(userData.login.success);
 
     token = loginRes.body.jwt;
 
-    await request(app)
-        .post('/api/tasks')
-        .send(taskData.create)
-        .set('Authorization', `Bearer ${token}`);
+    await request(app).post('/api/tasks').send(taskData.create).set('Authorization', `Bearer ${token}`);
 });
 
 afterEach(() => server.close());
 
-describe('/api/tasks', () => {
+describe('Tasks Controller /api/tasks', () => {
     test('/GET /incomplete should get incomplete tasks for user', async () => {
-        const res = await request(app)
-            .get('/api/tasks/incomplete')
-            .set('Authorization', `Bearer ${token}`);
+        const res = await request(app).get('/api/tasks/incomplete').set('Authorization', `Bearer ${token}`);
 
         expect(res.status).toBe(200);
         expect(res.body).toHaveLength(1);
     });
     test('/GET /complete should get incomplete tasks for user', async () => {
-        const res = await request(app)
-            .get('/api/tasks/complete')
-            .set('Authorization', `Bearer ${token}`);
+        const res = await request(app).get('/api/tasks/complete').set('Authorization', `Bearer ${token}`);
 
         expect(res.status).toBe(200);
         expect(res.body).toHaveLength(0);
     });
     test('/GET /:id', async () => {
-        const res = await request(app)
-            .get('/api/tasks/1')
-            .set('Authorization', `Bearer ${token}`);
+        const res = await request(app).get('/api/tasks/1').set('Authorization', `Bearer ${token}`);
 
         expect(res.status).toBe(200);
         expect(res.body).toHaveProperty('id');

@@ -41,25 +41,4 @@ export class LogRepository implements ILogRepository {
         const log = await this.getByTaskId(taskId);
         if (log.length > 0) await log[0].update({ complete: true });
     }
-
-    public async addHours(log: any, hours: number): Promise<void> {
-        await Log.create({
-            name: log.dataValues.name,
-            projectNumber: log.dataValues.projectNumber,
-            hoursAvailableToWork: log.dataValues.hoursAvailableToWork,
-            hoursWorked: +log.dataValues.hoursWorked + hours,
-            hoursRemaining: log.dataValues.hoursRemaining - hours,
-            notes: log.dataValues.notes,
-            numberOfReviews: log.dataValues.numberOfReviews,
-            reviewHours: log.dataValues.reviewHours,
-            hoursRequiredByBim: log.dataValues.hoursRequiredByBim,
-            complete: log.dataValues.complete,
-            day: log.dataValues.day,
-            weekOf: log.dataValues.weekOf,
-            productiveHours: hours,
-            loggedAt: log.dataValues.loggedAt,
-            TaskId: log.dataValues.TaskId,
-            UserId: log.dataValues.UserId,
-        });
-    }
 }
