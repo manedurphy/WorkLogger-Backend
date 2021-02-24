@@ -2,18 +2,17 @@ import { Task } from '../../models/Task';
 import { TaskCreateDto } from '../dtos/TaskCreateDto';
 
 export interface ITaskRepository {
-    Get(userId: number): Promise<Task[]>;
-    GetByStatus(userId: number, complete: boolean): Promise<Task[]>;
+    getIncomplete(userId: number): Promise<Task[]>;
+    getComplete(userId: number): Promise<Task[]>;
     getById(id: number): Promise<Task | null>;
-    GetByProjectNumber(
+    getByProjectNumber(
         projectNumber: number,
         userId: number
     ): Promise<Task | null>;
-    Add(taskCreateDto: TaskCreateDto): Promise<Task | null>;
-    Delete(task: Task): Promise<void>;
-    Update(task: Task, updatedTask: TaskCreateDto): Promise<Task | null>;
-    Complete(task: Task): Promise<void>;
-    InComplete(task: Task): Promise<void>;
+    add(taskCreateDto: TaskCreateDto): Promise<Task | null>;
+    delete(task: Task): Promise<void>;
+    update(task: Task, updatedTask: TaskCreateDto): Promise<Task | null>;
+    complete(task: Task): Promise<void>;
     save(task: Task): Promise<void>;
-    AddHours(task: Task, hours: number): Promise<void>;
+    addHours(task: Task, hours: number): Promise<void>;
 }

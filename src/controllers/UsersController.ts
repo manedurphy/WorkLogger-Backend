@@ -5,21 +5,15 @@ import { Logger } from '@overnightjs/logger';
 import { body } from 'express-validator';
 import { UserService } from '../services/UserService';
 import { Alert } from '../responseObjects/Alert';
-import { LoggerMiddleware } from '../middleware/LoggerMiddleware';
+import { logRoute } from '../middleware/logRoute';
 import { HttpResponse } from '../constants/HttpResponse';
 import { Types } from '../constants/Types';
 import { IActivationPasswordRepository } from '../data/interfaces/IActivationPasswordRepository';
 import { AuthService } from '../services/AuthService';
 import { ValidationMessages } from '../constants/ValidationMessages';
 import { AuthenticatedRequest } from './interfaces/authenticatedReq';
-import {
-    controller,
-    httpGet,
-    request,
-    response,
-    httpPost,
-    BaseHttpController,
-} from 'inversify-express-utils';
+import { LoginRequest } from './interfaces/loginReq';
+import { controller, httpGet, request, httpPost, BaseHttpController } from 'inversify-express-utils';
 
 @controller('/api/users')
 export class UsersController extends BaseHttpController {
@@ -44,46 +38,30 @@ export class UsersController extends BaseHttpController {
 
     @httpPost(
         '/register',
-        LoggerMiddleware,
-        body('firstName')
-            .not()
-            .isEmpty()
-            .withMessage(ValidationMessages.FIRST_NAME),
-        body('lastName')
-            .not()
-            .isEmpty()
-            .withMessage(ValidationMessages.LAST_NAME),
+        logRoute,
+        body('firstName').not().isEmpty().withMessage(ValidationMessages.FIRST_NAME),
+        body('lastName').not().isEmpty().withMessage(ValidationMessages.LAST_NAME),
         body('email').isEmail().withMessage(ValidationMessages.EMAIL),
-        body('password')
-            .not()
-            .isEmpty()
-            .isLength({ min: 6 })
-            .withMessage(ValidationMessages.PASSWORD)
+        body('password').isLength({ min: 6 }).withMessage(ValidationMessages.PASSWORD)
     )
     private async register(@request() req: Request) {
-        Logger.Warn(req.body, true);
         try {
             const errorsPresent = this.userService.validateForm(req);
             const passordsMatch = this.userService.verifyPassordsMatch(req);
 
-            if (errorsPresent || !passordsMatch)
-                return this.json(new Alert(this.userService.errorMessage), 400);
+            if (errorsPresent || !passordsMatch) return this.json(new Alert(this.userService.errorMessage), 400);
 
             const { email } = req.body;
             const existingUser = await this.userRepository.getByEmail(email);
 
-            if (existingUser)
-                return this.json(new Alert(HttpResponse.USER_EXISTS), 400);
+            if (existingUser) return this.json(new Alert(HttpResponse.USER_EXISTS), 400);
 
             await this.userService.hashPassword(req);
 
             const newUser = await this.userRepository.add(req.body);
-            const activationPassword = this.activationPasswordRepository.add(
-                newUser.id
-            );
+            const activationPassword = this.activationPasswordRepository.add(newUser.id);
 
-            if (process.env.NODE_ENV !== 'testing')
-                this.authService.sendVerificationEmail(activationPassword);
+            if (process.env.NODE_ENV !== 'testing') this.authService.sendVerificationEmail(activationPassword);
 
             return this.json(new Alert(HttpResponse.USER_CREATED), 201);
         } catch (error) {
@@ -94,100 +72,60 @@ export class UsersController extends BaseHttpController {
 
     @httpPost(
         '/login',
-        LoggerMiddleware,
+        logRoute,
         body('email').not().isEmpty().withMessage(ValidationMessages.EMAIL),
-        body('password')
-            .not()
-            .isEmpty()
-            .withMessage(ValidationMessages.PASSWORD_MISSING)
+        body('password').not().isEmpty().withMessage(ValidationMessages.PASSWORD_MISSING)
     )
-    private async login(@request() req: Request, @response() res: Response) {
+    private async login(@request() req: LoginRequest) {
         try {
-            const loginFormsPresent = this.userService.validateForm(req);
+            const errorsPresent = this.userService.validateForm(req);
+            if (errorsPresent) return this.json(new Alert(this.userService.errorMessage), 400);
 
-            if (loginFormsPresent)
-                return this.json(new Alert(this.userService.errorMessage), 400);
+            const { email, password } = req.body;
+            const existingUser = await this.userRepository.getByEmail(email);
 
-            const existingUser = await this.userRepository.getByEmail(
-                req.body.email
-            );
-            if (!existingUser)
-                return this.json(new Alert(HttpResponse.USER_NOT_FOUND), 404);
+            if (!existingUser) return this.json(new Alert(HttpResponse.USER_NOT_FOUND), 404);
+            if (!existingUser.active) return this.json(new Alert(HttpResponse.USER_NOT_VERIFIED), 400);
 
-            if (process.env.NODE_ENV === 'testing')
-                await existingUser.update({ active: true });
+            const passwordIsCorrect = await this.userService.verifyLoginPassword(password, existingUser.password);
+            if (!passwordIsCorrect) return this.json(new Alert(HttpResponse.INVALID_CREDENTIALS), 400);
 
-            if (!existingUser.active)
-                return this.json(
-                    new Alert(HttpResponse.USER_NOT_VERIFIED),
-                    400
-                );
+            const userReadDto = this.userService.getReadDto(existingUser);
+            const token = this.authService.generateToken(userReadDto);
+            const refreshToken = this.authService.generateRefreshToken(userReadDto);
 
-            const passwordIsCorrect = await this.userService.verifyLoginPassword(
-                req.body.password,
-                existingUser.password
-            );
-
-            if (!passwordIsCorrect)
-                return this.json(
-                    new Alert(HttpResponse.INVALID_CREDENTIALS),
-                    400
-                );
-
-            const userReadDto = this.userService.MapUserReadDto(existingUser);
-            const token = this.authService.GenerateToken(userReadDto);
-            const refreshToken = this.authService.GenerateRefreshToken(
-                userReadDto
-            );
-            const userLoginResponseObject = this.userService.GetLoginResponse(
-                token,
-                refreshToken,
-                userReadDto
-            );
-
-            return this.ok(userLoginResponseObject);
+            const userLoginResponse = this.userService.getLoginResponse(token, refreshToken, userReadDto);
+            return this.ok(userLoginResponse);
         } catch (error) {
             Logger.Err('ERROR IN LOGIN ROUTE', error);
-            return this.internalServerError();
+            return this.json(new Alert(HttpResponse.SERVER_ERROR), 500);
         }
     }
 
     @httpGet('/verify-token')
-    private async VerifyToken(
-        @request() req: AuthenticatedRequest,
-        @response() res: Response
-    ) {
+    private async verifyToken(@request() req: AuthenticatedRequest) {
         try {
-            return this.ok(
-                this.userService.GetTokenValidResponse(req.payload.userInfo)
-            );
+            const { userInfo } = req.payload;
+            return this.ok(this.userService.getTokenValidResponse(userInfo));
         } catch (error) {
             Logger.Err('ERROR IN VERIFY-TOKEN ROUTE', error);
-            return this.internalServerError();
+            return this.json(new Alert(HttpResponse.SERVER_ERROR), 500);
         }
     }
 
     @httpGet('/refresh')
-    private async GetNewToken(
-        @request() req: AuthenticatedRequest,
-        @response() res: Response
-    ) {
+    private async getNewToken(@request() req: AuthenticatedRequest) {
         try {
-            const token = this.authService.GenerateToken(req.payload.userInfo);
-            const refreshToken = this.authService.GenerateRefreshToken(
-                req.payload.userInfo
-            );
+            const { userInfo } = req.payload;
+            const token = this.authService.generateToken(userInfo);
+            const refreshToken = this.authService.generateRefreshToken(userInfo);
 
-            const refreshTokenResponse = this.userService.GetRefreshTokenResponse(
-                token,
-                refreshToken,
-                req.payload.userInfo
-            );
+            const refreshTokenResponse = this.userService.getRefreshTokenResponse(token, refreshToken, userInfo);
 
             return this.ok(refreshTokenResponse);
         } catch (error) {
             Logger.Err('ERROR IN REFRESH ROUTE', error);
-            return this.internalServerError();
+            return this.json(new Alert(HttpResponse.SERVER_ERROR), 500);
         }
     }
 }

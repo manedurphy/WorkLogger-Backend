@@ -9,7 +9,5 @@ export interface ILogCreateDto {
     reviewHours: number;
     hoursRequiredByBim: number;
     complete: boolean;
-    day: number;
-    weekOf: string;
     productiveHours: number;
 }

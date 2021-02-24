@@ -1,19 +1,18 @@
-import { Response } from 'express';
 import { inject } from 'inversify';
 import { Alert } from '../responseObjects/Alert';
 import { Types } from '../constants/Types';
 import { Logger } from '@overnightjs/logger';
 import { AuthenticatedRequest } from './interfaces/authenticatedReq';
 import { ILogRepository } from '../data/interfaces/ILogRepository';
-import { LoggerMiddleware } from '../middleware/LoggerMiddleware';
+import { logRoute } from '../middleware/logRoute';
 import { body } from 'express-validator';
 import { TaskService } from '../services/TaskService';
 import { ITaskRepository } from '../data/interfaces/ITaskRepository';
 import { ValidationMessages } from '../constants/ValidationMessages';
 import { HttpResponse } from '../constants/HttpResponse';
 import { LogService } from '../services/LogService';
-import { MapUserToTask } from '../middleware/MapUserToTask';
-import { CalculateHoursRemaining } from '../middleware/CalculateHoursRemaining';
+import { mapUserToTask } from '../middleware/mapUserToTask';
+import { calculateHoursRemaining } from '../middleware/calculateHoursRemaining';
 import {
     BaseHttpController,
     controller,
@@ -23,7 +22,6 @@ import {
     httpPost,
     httpPut,
     request,
-    response,
 } from 'inversify-express-utils';
 
 @controller('/api/tasks')
@@ -46,292 +44,154 @@ export class TasksController extends BaseHttpController {
         this.logService = logService;
     }
 
-    @httpGet('')
-    private async GetTasks(
-        @request() req: AuthenticatedRequest,
-        @response() res: Response
-    ) {
+    @httpGet('/incomplete', logRoute)
+    private async getIncompleteTasks(@request() req: AuthenticatedRequest) {
         try {
-            const incompleteTasks = await this.taskRepository.GetByStatus(
-                req.payload.userInfo.id,
-                false
-            );
-
-            const completeTasks = await this.taskRepository.GetByStatus(
-                req.payload.userInfo.id,
-                true
-            );
-
-            if (!incompleteTasks || !completeTasks)
-                return this.json(new Alert(HttpResponse.TASKS_NOT_FOUND), 404);
-
-            return this.ok({ incompleteTasks, completeTasks });
-        } catch (error) {
-            return this.internalServerError();
-        }
-    }
-
-    @httpGet('/incomplete')
-    private async GetIncompleteTasks(
-        @request() req: AuthenticatedRequest,
-        @response() res: Response
-    ) {
-        try {
-            const incompleteTasks = await this.taskRepository.GetByStatus(
-                req.payload.userInfo.id,
-                false
-            );
+            const { id } = req.payload.userInfo;
+            const incompleteTasks = await this.taskRepository.getIncomplete(id);
             return this.ok(incompleteTasks);
         } catch (error) {
             Logger.Err(error);
-            return this.internalServerError();
+            return this.json(new Alert(HttpResponse.SERVER_ERROR), 500);
         }
     }
 
-    @httpGet('/incomplete/:id', LoggerMiddleware)
-    private async GetIncompleteTask(
-        @request() req: AuthenticatedRequest,
-        @response() res: Response
-    ) {
+    @httpGet('/complete', logRoute)
+    private async getCompleteTasks(@request() req: AuthenticatedRequest) {
         try {
-            const task = await this.taskRepository.getById(+req.params.id);
-            if (!task) return this.notFound();
-
-            return this.ok(task);
-        } catch (error) {
-            Logger.Err(error);
-            return this.internalServerError();
-        }
-    }
-
-    @httpGet('/complete', LoggerMiddleware)
-    private async GetCompleteTasks(
-        @request() req: AuthenticatedRequest,
-        @response() res: Response
-    ) {
-        try {
-            const tasks = await this.taskRepository.GetByStatus(
-                req.payload.userInfo.id,
-                true
-            );
+            const { id } = req.payload.userInfo;
+            const tasks = await this.taskRepository.getComplete(id);
             return this.ok(tasks);
         } catch (error) {
             Logger.Err(error);
-            return this.internalServerError();
+            return this.json(new Alert(HttpResponse.SERVER_ERROR), 500);
         }
     }
 
-    @httpGet('/complete/:id', LoggerMiddleware)
-    private async GetCompleteTask(
-        @request() req: AuthenticatedRequest,
-        @response() res: Response
-    ) {
+    @httpGet('/:id', logRoute)
+    private async getById(@request() req: AuthenticatedRequest) {
         try {
             const task = await this.taskRepository.getById(+req.params.id);
-            if (!task) return this.notFound();
+            if (!task) return this.json(new Alert(HttpResponse.TASK_NOT_FOUND), 404);
 
             return this.ok(task);
         } catch (error) {
             Logger.Err(error);
-            return this.internalServerError();
-        }
-    }
-
-    @httpGet('/:id', LoggerMiddleware)
-    private async getById(
-        @request() req: AuthenticatedRequest,
-        @response() res: Response
-    ) {
-        try {
-            const task = await this.taskRepository.getById(+req.params.id);
-            if (!task)
-                return this.json(new Alert(HttpResponse.TASK_NOT_FOUND), 404);
-
-            return this.ok(task);
-        } catch (error) {
-            Logger.Err(error);
-            return this.internalServerError();
+            return this.json(new Alert(HttpResponse.SERVER_ERROR), 500);
         }
     }
 
     @httpPost(
         '/',
-        LoggerMiddleware,
-        MapUserToTask,
-        CalculateHoursRemaining,
+        logRoute,
+        mapUserToTask,
+        calculateHoursRemaining,
         body('name').not().isEmpty().withMessage(ValidationMessages.TASK_NAME),
-        body('projectNumber')
-            .not()
-            .isEmpty()
-            .withMessage(ValidationMessages.PROJECT_NUMBER),
-        body('hoursAvailableToWork')
-            .not()
-            .isEmpty()
-            .withMessage(ValidationMessages.AVAILABLE_HOURS),
-        body('hoursWorked')
-            .not()
-            .isEmpty()
-            .withMessage(ValidationMessages.HOURS_WORKED),
-        body('reviewHours')
-            .not()
-            .isEmpty()
-            .withMessage(ValidationMessages.REVIEW_HOURS),
-        body('numberOfReviews')
-            .not()
-            .isEmpty()
-            .withMessage(ValidationMessages.NUMBER_OF_REVIEWS),
-        body('hoursRequiredByBim')
-            .not()
-            .isEmpty()
-            .withMessage(ValidationMessages.HOURS_BIM),
-        body('dateAssigned')
-            .not()
-            .isEmpty()
-            .withMessage(ValidationMessages.DATE_ASSGINED),
+        body('projectNumber').not().isEmpty().withMessage(ValidationMessages.PROJECT_NUMBER),
+        body('hoursAvailableToWork').not().isEmpty().withMessage(ValidationMessages.AVAILABLE_HOURS),
+        body('hoursWorked').not().isEmpty().withMessage(ValidationMessages.HOURS_WORKED),
+        body('reviewHours').not().isEmpty().withMessage(ValidationMessages.REVIEW_HOURS),
+        body('numberOfReviews').not().isEmpty().withMessage(ValidationMessages.NUMBER_OF_REVIEWS),
+        body('hoursRequiredByBim').not().isEmpty().withMessage(ValidationMessages.HOURS_BIM),
+        body('dateAssigned').not().isEmpty().withMessage(ValidationMessages.DATE_ASSGINED),
         body('dueDate').not().isEmpty().withMessage(ValidationMessages.DUE_DATE)
     )
-    public async CreateTask(
-        @request() req: AuthenticatedRequest,
-        @response() res: Response
-    ) {
-        Logger.Warn(req.body, true);
+    private async createTask(@request() req: AuthenticatedRequest) {
         try {
             const taskFormErrorsPresent = this.taskService.validateForm(req);
-            if (taskFormErrorsPresent)
-                return this.badRequest(this.taskService.errorMessage);
+            if (taskFormErrorsPresent) return this.json(new Alert(this.taskService.errorMessage), 400);
 
-            const existingTask = await this.taskRepository.GetByProjectNumber(
-                req.body.projectNumber,
-                req.payload.userInfo.id
-            );
+            const { projectNumber } = req.body;
+            const { id } = req.payload.userInfo;
 
-            if (existingTask) return this.badRequest(HttpResponse.TASK_EXISTS);
-            const newTask = await this.taskRepository.Add(req.body);
+            const existingTask = await this.taskRepository.getByProjectNumber(projectNumber, id);
+            if (existingTask) return this.json(new Alert(HttpResponse.TASK_EXISTS), 400);
+
+            const newTask = await this.taskRepository.add(req.body);
 
             if (newTask) {
-                const logCreateDto = this.logService.MapProps(req.body, null);
-                await this.logRepository.Add(logCreateDto, newTask);
+                const logCreateDto = this.logService.getCreateDto(req.body, newTask.hoursWorked);
+                await this.logRepository.add(logCreateDto, newTask);
             }
 
-            return this.created('/', new Alert(HttpResponse.TASK_CREATED));
+            return this.json(new Alert(HttpResponse.TASK_CREATED), 201);
         } catch (error) {
             Logger.Err(error);
-            return this.internalServerError();
+            return this.json(new Alert(HttpResponse.SERVER_ERROR), 500);
         }
     }
 
-    @httpDelete('/:id', LoggerMiddleware)
-    private async DeleteTask(
-        @request() req: AuthenticatedRequest,
-        @response() res: Response
-    ) {
+    @httpDelete('/:id', logRoute)
+    private async deleteTask(@request() req: AuthenticatedRequest) {
         try {
             const task = await this.taskRepository.getById(+req.params.id);
 
-            if (!task)
-                return this.json(new Alert(HttpResponse.TASK_NOT_FOUND), 404);
-            await this.taskRepository.Delete(task);
+            if (!task) return this.json(new Alert(HttpResponse.TASK_NOT_FOUND), 404);
 
+            await this.taskRepository.delete(task);
             return this.ok(new Alert(HttpResponse.TASK_DELETED));
         } catch (error) {
             Logger.Err(error);
-            return this.internalServerError();
+            return this.json(new Alert(HttpResponse.SERVER_ERROR), 500);
         }
     }
 
-    @httpPut('/:id', LoggerMiddleware, MapUserToTask, CalculateHoursRemaining)
-    private async Update(
-        @request() req: AuthenticatedRequest,
-        @response() res: Response
-    ) {
-        Logger.Warn(req.body, true);
+    @httpPut('/:id', logRoute, mapUserToTask, calculateHoursRemaining)
+    private async update(@request() req: AuthenticatedRequest) {
         try {
             const task = await this.taskRepository.getById(+req.params.id);
-            if (!task) return this.notFound();
+            if (!task) return this.json(new Alert(HttpResponse.TASK_NOT_FOUND), 404);
 
-            const previouslyWorkedHours = task.hoursWorked;
-            const updatedTask = await this.taskRepository.Update(
-                task,
-                req.body
-            );
+            const updatedTask = await this.taskRepository.update(task, req.body);
 
             if (updatedTask) {
-                const hoursWorked =
-                    updatedTask.hoursWorked - previouslyWorkedHours;
-                const logCreateDto = this.logService.MapProps(
-                    req.body,
-                    hoursWorked
-                );
-                await this.logRepository.Add(logCreateDto, task);
+                const productivity = updatedTask.hoursWorked - task.hoursWorked;
+                const logCreateDto = this.logService.getCreateDto(req.body, productivity);
+                await this.logRepository.add(logCreateDto, task);
             }
 
             return this.ok(new Alert(HttpResponse.TASK_UPDATE));
         } catch (error) {
             Logger.Err(error);
-            return this.internalServerError();
+            return this.json(new Alert(HttpResponse.SERVER_ERROR), 500);
         }
     }
 
-    @httpPut('/incomplete/:id', LoggerMiddleware)
-    private async CompleteTask(
-        @request() req: AuthenticatedRequest,
-        @response() res: Response
-    ) {
+    @httpPut('/incomplete/:id', logRoute)
+    private async completeTask(@request() req: AuthenticatedRequest) {
         try {
             const task = await this.taskRepository.getById(+req.params.id);
 
-            if (!task)
-                return this.json(new Alert(HttpResponse.TASK_NOT_FOUND), 404);
+            if (!task) return this.json(new Alert(HttpResponse.TASK_NOT_FOUND), 404);
 
-            await this.taskRepository.Complete(task);
-            await this.logRepository.CompleteLatest(task.id);
+            await this.taskRepository.complete(task);
+            await this.logRepository.completeLatest(task.id);
 
             return this.ok(new Alert(HttpResponse.TASK_COMPLETE));
         } catch (error) {
             Logger.Err(error);
-            return this.internalServerError();
+            return this.json(new Alert(HttpResponse.SERVER_ERROR), 500);
         }
     }
 
-    @httpPut('/complete/:id', LoggerMiddleware)
-    private async InCompleteTask(
-        @request() req: AuthenticatedRequest,
-        @response() res: Response
-    ) {
-        try {
-            const task = await this.taskRepository.getById(+req.params.id);
-
-            if (!task) return this.notFound();
-            await this.taskRepository.InComplete(task);
-
-            return this.ok(new Alert(HttpResponse.TASK_INCOMPLETE));
-        } catch (error) {
-            Logger.Err(error);
-            return this.internalServerError();
-        }
-    }
-
-    @httpPatch('/add-hours/:id', LoggerMiddleware, CalculateHoursRemaining)
-    private async AddHours(
-        @request() req: AuthenticatedRequest,
-        @response() res: Response
-    ) {
+    @httpPatch('/add-hours/:id', logRoute, calculateHoursRemaining)
+    private async addHours(@request() req: AuthenticatedRequest) {
         try {
             const task = await this.taskRepository.getById(req.params.id);
 
-            if (!task)
-                return this.json(new Alert(HttpResponse.TASK_NOT_FOUND), 404);
+            if (!task) return this.json(new Alert(HttpResponse.TASK_NOT_FOUND), 404);
 
             const log = await this.logRepository.getByTaskId(task.id);
+            if (log[0]) {
+                const logCreateDto = this.logService.addHours(log[0], +req.body.hours);
+                await this.logRepository.add(logCreateDto, task);
+            }
 
-            await this.taskRepository.AddHours(task, +req.body.hours);
-            if (log[0])
-                await this.logRepository.AddHours(log[0], +req.body.hours);
-
+            await this.taskRepository.addHours(task, +req.body.hours);
             return this.ok(new Alert(HttpResponse.TASK_UPDATE));
         } catch (error) {
             Logger.Err(error);
-            return this.internalServerError();
+            return this.json(new Alert(HttpResponse.SERVER_ERROR), 500);
         }
     }
 }

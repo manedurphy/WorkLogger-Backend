@@ -35,32 +35,19 @@ export class UserService extends ValidationService {
         return passwordsMatch;
     }
 
-    public MapUserReadDto(user: User): UserReadDto {
-        return new UserReadDto(
-            user.id,
-            user.firstName,
-            user.lastName,
-            user.email
-        );
+    public getReadDto(user: User): UserReadDto {
+        return new UserReadDto(user.id, user.firstName, user.lastName, user.email);
     }
 
-    public GetLoginResponse(
-        token: string,
-        refreshToken: string,
-        user: UserReadDto
-    ) {
+    public getLoginResponse(token: string, refreshToken: string, user: UserReadDto) {
         return new UserLoginResponse(token, refreshToken, user);
     }
 
-    public GetRefreshTokenResponse(
-        token: string,
-        refreshToken: string,
-        user: UserReadDto
-    ) {
+    public getRefreshTokenResponse(token: string, refreshToken: string, user: UserReadDto) {
         return new UserRefreshTokenResponse(token, refreshToken, user);
     }
 
-    public GetTokenValidResponse(user: UserReadDto) {
+    public getTokenValidResponse(user: UserReadDto) {
         return new UserTokenValidResponse(user);
     }
 }
