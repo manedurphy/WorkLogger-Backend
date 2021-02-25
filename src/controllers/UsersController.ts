@@ -61,7 +61,7 @@ export class UsersController extends BaseHttpController {
             const newUser = await this.userRepository.add(req.body);
             const activationPassword = this.activationPasswordRepository.add(newUser.id);
 
-            if (process.env.NODE_ENV !== 'testing') this.authService.sendVerificationEmail(activationPassword);
+            if (process.env.NODE_ENV !== 'testing') this.authService.sendVerificationEmail(activationPassword, email);
 
             return this.json(new Alert(HttpResponse.USER_CREATED), 201);
         } catch (error) {
