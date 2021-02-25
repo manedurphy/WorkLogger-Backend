@@ -20,7 +20,6 @@ import { Errback, Request, Response, NextFunction } from 'express';
 import { HttpResponse } from './constants/HttpResponse';
 import { ITaskRepository } from './data/interfaces/ITaskRepository';
 import { IActivationPasswordRepository } from './data/interfaces/IActivationPasswordRepository';
-import { join } from 'path';
 
 const container = new Container();
 
