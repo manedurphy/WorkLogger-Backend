@@ -7,7 +7,7 @@ const sequelize = new Sequelize(
     {
         host: process.env.DATABASE_HOST as string,
         dialect: 'mysql',
-        logging: false,
+        logging: true,
         timezone: '-08:00',
     }
 );
