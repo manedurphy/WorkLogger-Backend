@@ -1,10 +1,19 @@
-import { injectable } from 'inversify';
+import { inject, injectable } from 'inversify';
+import { Op } from 'sequelize';
+import { Types } from '../../constants/Types';
 import { Log, Task } from '../../models';
+import { DateService } from '../../services/DateService';
 import { LogCreateDto } from '../dtos/LogCreateDto';
 import { ILogRepository } from '../interfaces/ILogRepository';
 
 @injectable()
 export class LogRepository implements ILogRepository {
+    private readonly dateService: DateService;
+
+    public constructor(@inject(Types.DateService) dateService: DateService) {
+        this.dateService = dateService;
+    }
+
     public async getByTaskId(taskId: number): Promise<Log[]> {
         return Log.findAll({
             where: { TaskId: taskId },
@@ -14,6 +23,17 @@ export class LogRepository implements ILogRepository {
 
     public async getById(id: number): Promise<Log | null> {
         return Log.findByPk(id);
+    }
+
+    public async getWeeklyLogs(userId: number): Promise<Log[]> {
+        return Log.findAll({
+            where: {
+                UserId: userId,
+                loggedAt: {
+                    [Op.between]: [this.dateService.lastSunday, this.dateService.nextSunday],
+                },
+            },
+        });
     }
 
     public async add(logCreateDto: LogCreateDto, task: Task): Promise<Log> {

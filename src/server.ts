@@ -20,6 +20,7 @@ import { Errback, Request, Response, NextFunction } from 'express';
 import { HttpResponse } from './constants/HttpResponse';
 import { ITaskRepository } from './data/interfaces/ITaskRepository';
 import { IActivationPasswordRepository } from './data/interfaces/IActivationPasswordRepository';
+import { DateService } from './services/DateService';
 
 const container = new Container();
 
@@ -30,6 +31,7 @@ container.bind<UserService>(Types.UserService).to(UserService);
 container.bind<AuthService>(Types.AuthService).to(AuthService);
 container.bind<TaskService>(Types.TaskService).to(TaskService);
 container.bind<LogService>(Types.LogService).to(LogService);
+container.bind<DateService>(Types.DateService).to(DateService);
 container.bind<IActivationPasswordRepository>(Types.ActivationPasswordRepository).to(ActivationPasswordRepository);
 
 const server = new InversifyExpressServer(container);

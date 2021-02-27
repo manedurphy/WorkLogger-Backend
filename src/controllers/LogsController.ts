@@ -1,3 +1,4 @@
+import { DateService } from '../services/DateService';
 import { inject } from 'inversify';
 import { Types } from '../constants/Types';
 import { ILogRepository } from '../data/interfaces/ILogRepository';
@@ -18,8 +19,6 @@ import {
     request,
     requestParam,
 } from 'inversify-express-utils';
-import Log from '../models/Log';
-import { Op } from 'sequelize';
 
 @controller('/api/logs', logRoute)
 export class LogsController extends BaseHttpController {
@@ -27,18 +26,21 @@ export class LogsController extends BaseHttpController {
     private readonly logService: LogService;
     private readonly taskRepository: ITaskRepository;
     private readonly taskService: TaskService;
+    private readonly dateService: DateService;
 
     public constructor(
         @inject(Types.LogRepository) logRepository: ILogRepository,
         @inject(Types.LogService) logService: LogService,
         @inject(Types.TaskRepository) taskRepository: ITaskRepository,
-        @inject(Types.TaskService) taskService: TaskService
+        @inject(Types.TaskService) taskService: TaskService,
+        @inject(Types.DateService) datekService: DateService
     ) {
         super();
         this.logRepository = logRepository;
         this.logService = logService;
         this.taskRepository = taskRepository;
         this.taskService = taskService;
+        this.dateService = datekService;
     }
 
     @httpDelete('/log-item/:id', logRoute)
@@ -96,34 +98,10 @@ export class LogsController extends BaseHttpController {
     @httpGet('/dates')
     private async getWeeklyReport(@request() req: AuthenticatedRequest) {
         try {
-            function getLocalSunday(today: Date = new Date()) {
-                const sunday = new Date(today);
-                sunday.setDate(sunday.getDate() - sunday.getDay());
+            const log = await this.logRepository.getWeeklyLogs(req.payload.userInfo.id);
+            if (log.length === 0) return this.json(new Alert(HttpResponse.LOG_WEEKLY_NOT_FOUND), 404);
 
-                const sundayOffset = sunday.getTimezoneOffset() * 60000;
-                return new Date(sunday.getTime() - sundayOffset).toISOString().slice(0, 10);
-            }
-
-            const lastSunday = getLocalSunday();
-            console.log(lastSunday);
-
-            const d = new Date();
-            d.setDate(d.getDate() + 7 - (d.getDay() % 7) + 1);
-
-            const nextSunday = getLocalSunday(d);
-
-            console.log(nextSunday);
-
-            const log = await Log.findAll({
-                where: {
-                    UserId: req.payload.userInfo.id,
-                    loggedAt: {
-                        [Op.between]: [lastSunday, nextSunday],
-                    },
-                },
-            });
-
-            return log;
+            return this.ok(log);
         } catch (error) {
             return this.json(new Alert(HttpResponse.SERVER_ERROR), 500);
         }

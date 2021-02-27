@@ -10,4 +10,5 @@ export interface ILogRepository {
     delete(logItem: Log): Promise<void>;
     save(logItem: Log): Promise<void>;
     completeLatest(taskId: number): Promise<void>;
+    getWeeklyLogs(userId: number): Promise<Log[]>;
 }
