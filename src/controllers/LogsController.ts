@@ -1,3 +1,4 @@
+import { DateService } from '../services/DateService';
 import { inject } from 'inversify';
 import { Types } from '../constants/Types';
 import { ILogRepository } from '../data/interfaces/ILogRepository';
@@ -7,9 +8,17 @@ import { Logger } from '@overnightjs/logger';
 import { LogService } from '../services/LogService';
 import { ITaskRepository } from '../data/interfaces/ITaskRepository';
 import { Alert } from '../responseObjects/Alert';
-import { logRoute } from '../middleware/logRoute';
-import { BaseHttpController, controller, httpDelete, httpPut, request, requestParam } from 'inversify-express-utils';
 import { TaskService } from '../services/TaskService';
+import { logRoute } from '../middleware/logRoute';
+import {
+    BaseHttpController,
+    controller,
+    httpDelete,
+    httpGet,
+    httpPut,
+    request,
+    requestParam,
+} from 'inversify-express-utils';
 
 @controller('/api/logs', logRoute)
 export class LogsController extends BaseHttpController {
@@ -17,18 +26,21 @@ export class LogsController extends BaseHttpController {
     private readonly logService: LogService;
     private readonly taskRepository: ITaskRepository;
     private readonly taskService: TaskService;
+    private readonly dateService: DateService;
 
     public constructor(
         @inject(Types.LogRepository) logRepository: ILogRepository,
         @inject(Types.LogService) logService: LogService,
         @inject(Types.TaskRepository) taskRepository: ITaskRepository,
-        @inject(Types.TaskService) taskService: TaskService
+        @inject(Types.TaskService) taskService: TaskService,
+        @inject(Types.DateService) datekService: DateService
     ) {
         super();
         this.logRepository = logRepository;
         this.logService = logService;
         this.taskRepository = taskRepository;
         this.taskService = taskService;
+        this.dateService = datekService;
     }
 
     @httpDelete('/log-item/:id', logRoute)
@@ -79,6 +91,18 @@ export class LogsController extends BaseHttpController {
             return this.ok(new Alert(HttpResponse.LOG_UPDATED));
         } catch (error) {
             Logger.Err(error);
+            return this.json(new Alert(HttpResponse.SERVER_ERROR), 500);
+        }
+    }
+
+    @httpGet('/dates')
+    private async getWeeklyReport(@request() req: AuthenticatedRequest) {
+        try {
+            const log = await this.logRepository.getWeeklyLogs(req.payload.userInfo.id);
+            if (log.length === 0) return this.json(new Alert(HttpResponse.LOG_WEEKLY_NOT_FOUND), 404);
+
+            return this.ok(log);
+        } catch (error) {
             return this.json(new Alert(HttpResponse.SERVER_ERROR), 500);
         }
     }
