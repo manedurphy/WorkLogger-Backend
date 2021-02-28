@@ -35,10 +35,11 @@ export class LogRepository implements ILogRepository {
                 },
             },
             attributes: [
+                'name',
                 [fn('sum', col('productiveHours')), 'hours'],
                 [fn('dayofweek', col('loggedAt')), 'day'],
             ],
-            group: 'loggedAt',
+            group: ['name', 'day'],
         });
     }
 

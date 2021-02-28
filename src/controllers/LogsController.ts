@@ -103,6 +103,7 @@ export class LogsController extends BaseHttpController {
 
             return this.ok(log);
         } catch (error) {
+            console.log(error);
             return this.json(new Alert(HttpResponse.SERVER_ERROR), 500);
         }
     }
