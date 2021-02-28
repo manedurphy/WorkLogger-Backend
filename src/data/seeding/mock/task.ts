@@ -17,7 +17,7 @@ const task: TaskCreateDto = {
     UserId: 1,
 };
 
-export default async function () {
+export default async function (): Promise<Task> {
     await Task.sync();
     return Task.create(task);
 }

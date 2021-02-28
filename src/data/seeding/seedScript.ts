@@ -13,9 +13,7 @@ const connection = mysql.createConnection({
 
 (async () => {
     try {
-        await connection
-            .promise()
-            .execute('DROP DATABASE IF EXISTS `workLogger`');
+        await connection.promise().execute('DROP DATABASE IF EXISTS `workLogger`');
         await connection.promise().execute('CREATE DATABASE `workLogger`');
         connection.destroy();
 

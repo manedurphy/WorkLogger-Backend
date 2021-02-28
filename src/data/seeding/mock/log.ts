@@ -18,7 +18,7 @@ const log = {
     UserId: 1,
 };
 
-export default async function () {
+export default async function (): Promise<Log> {
     await Log.sync();
     return Log.create(log);
 }

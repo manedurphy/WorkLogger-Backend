@@ -75,6 +75,10 @@ Log.init(
             allowNull: false,
             defaultValue: 0,
         },
+        // day: {
+        //     type: DataTypes.INTEGER,
+        //     allowNull: false,
+        // },
         loggedAt: {
             type: DataTypes.DATE,
             allowNull: false,
@@ -93,7 +97,7 @@ Log.init(
         createdAt: true,
         updatedAt: false,
         modelName: 'Log',
-    }
+    },
 );
 
 export default Log;

@@ -9,7 +9,7 @@ const admin = {
     password: '',
 };
 
-export default async function () {
+export default async function (): Promise<User> {
     await User.sync();
     admin.password = await hash(process.env.ADMIN_PASSWORD as string, 12);
     return User.create(admin);

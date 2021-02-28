@@ -5,6 +5,7 @@ import { Log, Task } from '../../models';
 import { DateService } from '../../services/DateService';
 import { LogCreateDto } from '../dtos/LogCreateDto';
 import { ILogRepository } from '../interfaces/ILogRepository';
+import { fn, col } from 'sequelize';
 
 @injectable()
 export class LogRepository implements ILogRepository {
@@ -33,13 +34,20 @@ export class LogRepository implements ILogRepository {
                     [Op.between]: [this.dateService.lastSunday, this.dateService.nextSunday],
                 },
             },
+            attributes: [
+                [fn('sum', col('productiveHours')), 'hours'],
+                [fn('dayofweek', col('loggedAt')), 'day'],
+            ],
+            group: 'loggedAt',
         });
     }
 
     public async add(logCreateDto: LogCreateDto, task: Task): Promise<Log> {
+        const date = new Date();
+
         return Log.create({
             ...logCreateDto,
-            loggedAt: new Date(),
+            loggedAt: date,
             TaskId: task.id,
             UserId: task.UserId,
         });
@@ -49,11 +57,11 @@ export class LogRepository implements ILogRepository {
         return log.update(logCreateDto);
     }
 
-    public async delete(logItem: Log) {
+    public async delete(logItem: Log): Promise<void> {
         await logItem.destroy();
     }
 
-    public async save(logItem: Log) {
+    public async save(logItem: Log): Promise<void> {
         await logItem.save();
     }
 

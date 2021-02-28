@@ -8,7 +8,7 @@ export class TaskService extends ValidationService {
         super();
     }
 
-    public matchLatestLog(task: Task, logItem: Log) {
+    public matchLatestLog(task: Task, logItem: Log): void {
         task.name = logItem.name;
         task.hoursWorked = logItem.hoursWorked;
         task.hoursRemaining = logItem.hoursRemaining;

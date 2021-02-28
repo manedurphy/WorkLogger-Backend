@@ -33,7 +33,7 @@ export class LogsController extends BaseHttpController {
         @inject(Types.LogService) logService: LogService,
         @inject(Types.TaskRepository) taskRepository: ITaskRepository,
         @inject(Types.TaskService) taskService: TaskService,
-        @inject(Types.DateService) datekService: DateService
+        @inject(Types.DateService) datekService: DateService,
     ) {
         super();
         this.logRepository = logRepository;

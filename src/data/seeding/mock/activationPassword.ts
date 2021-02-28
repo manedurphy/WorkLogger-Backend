@@ -6,7 +6,7 @@ const activationPassword = {
     UserId: 1,
 };
 
-export default async function () {
+export default async function (): Promise<ActivationPassword> {
     await ActivationPassword.sync();
     return ActivationPassword.create(activationPassword);
 }
