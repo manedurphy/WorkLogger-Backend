@@ -1,4 +1,5 @@
 import { injectable } from 'inversify';
+import { PreShapeData, WeeklyData } from './types';
 
 @injectable()
 export class DateService {
@@ -8,6 +9,19 @@ export class DateService {
     public constructor() {
         this.lastSunday = this.getLocalSunday();
         this.nextSunday = this.getNextSunday();
+    }
+
+    public shapeWeeklyLogData(weeklyData: PreShapeData[]): WeeklyData {
+        const data: WeeklyData = {};
+
+        for (const logItem of weeklyData) {
+            if (data[logItem.projectNumber] == null) {
+                data[logItem.projectNumber] = [];
+            }
+            data[logItem.projectNumber].push({ hours: logItem.hours, day: logItem.day });
+        }
+
+        return data;
     }
 
     private getLocalSunday(day: Date = new Date()): string {

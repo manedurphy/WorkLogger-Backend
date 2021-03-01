@@ -66,8 +66,8 @@ describe('Log Controller /api/logs', () => {
         const user = await request(app).post('/api/users/login').send(userData.login.success);
         const res = await request(app).get('/api/logs/dates').set('Authorization', `Bearer ${user.body.jwt}`);
 
-        expect(res.body[0]).toHaveProperty('projectNumber');
-        expect(res.body[0]).toHaveProperty('hours');
-        expect(res.body[0]).toHaveProperty('day');
+        expect(res.body).toHaveProperty('1');
+        expect(res.body[1][0]).toHaveProperty('hours');
+        expect(res.body[1][0]).toHaveProperty('day');
     });
 });

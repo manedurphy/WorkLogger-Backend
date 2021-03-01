@@ -6,6 +6,7 @@ import { DateService } from '../../services/DateService';
 import { LogCreateDto } from '../dtos/LogCreateDto';
 import { ILogRepository } from '../interfaces/ILogRepository';
 import { fn, col } from 'sequelize';
+import { PreShapeData, WeeklyData } from '../../services/types';
 
 @injectable()
 export class LogRepository implements ILogRepository {
@@ -26,8 +27,9 @@ export class LogRepository implements ILogRepository {
         return Log.findByPk(id);
     }
 
-    public async getWeeklyLogs(userId: number): Promise<Log[]> {
-        return Log.findAll({
+    public async getWeeklyLogs(userId: number): Promise<WeeklyData> {
+        const log = (await Log.findAll({
+            raw: true,
             where: {
                 UserId: userId,
                 loggedAt: {
@@ -40,7 +42,9 @@ export class LogRepository implements ILogRepository {
                 [fn('dayofweek', col('loggedAt')), 'day'],
             ],
             group: ['projectNumber', 'day'],
-        });
+        })) as unknown;
+
+        return this.dateService.shapeWeeklyLogData(log as PreShapeData[]);
     }
 
     public async add(logCreateDto: LogCreateDto, task: Task): Promise<Log> {
