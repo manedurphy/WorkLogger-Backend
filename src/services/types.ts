@@ -1,11 +1,11 @@
 export interface PreShapeData {
     projectNumber: number;
-    hours: number;
+    hours: string;
     day: number;
 }
 
 interface Day {
-    hours: number;
+    hours: string;
     day: number;
 }
 

@@ -21,6 +21,15 @@ export class DateService {
             data[logItem.projectNumber].push({ hours: logItem.hours, day: logItem.day });
         }
 
+        for (const key in data) {
+            for (let i = 0; i <= 6; i++) {
+                if (!data[key][i] || data[key][i].day !== i) {
+                    data[key].push({ hours: '0.00', day: i + 1 });
+                    data[key].sort((a, b) => a.day - b.day);
+                }
+            }
+        }
+
         return data;
     }
 
