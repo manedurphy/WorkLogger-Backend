@@ -69,5 +69,6 @@ describe('Log Controller /api/logs', () => {
         expect(res.body).toHaveProperty('1');
         expect(res.body[1][0]).toHaveProperty('hours');
         expect(res.body[1][0]).toHaveProperty('day');
+        expect(res.body[1]).toHaveLength(7);
     });
 });
