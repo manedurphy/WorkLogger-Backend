@@ -10,7 +10,7 @@ import { TaskCreateDto } from '../data/dtos/TaskCreateDto';
 export class LogService {
     private readonly logRepository: ILogRepository;
 
-    constructor(@inject(Types.LogRepository) logRepository: ILogRepository) {
+    public constructor(@inject(Types.LogRepository) logRepository: ILogRepository) {
         this.logRepository = logRepository;
     }
 
@@ -46,7 +46,7 @@ export class LogService {
         });
     }
 
-    public async updateHoursAfterDelete(log: Log[], hours: number) {
+    public async updateHoursAfterDelete(log: Log[], hours: number): Promise<number> {
         let sum = 0;
 
         for (let i = log.length - 1; i >= 0; i--) {
@@ -63,7 +63,7 @@ export class LogService {
         return sum;
     }
 
-    public async updateHours(log: Log[]) {
+    public async updateHours(log: Log[]): Promise<number> {
         let sum = 0;
 
         for (let i = log.length - 1; i >= 0; i--) {

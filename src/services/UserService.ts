@@ -30,7 +30,7 @@ export class UserService extends ValidationService {
         req.body.password = hashPassword;
     }
 
-    public async verifyLoginPassword(password: string, hashPassword: string) {
+    public async verifyLoginPassword(password: string, hashPassword: string): Promise<boolean> {
         const passwordsMatch = await compare(password, hashPassword);
         return passwordsMatch;
     }
@@ -39,15 +39,15 @@ export class UserService extends ValidationService {
         return new UserReadDto(user.id, user.firstName, user.lastName, user.email);
     }
 
-    public getLoginResponse(token: string, refreshToken: string, user: UserReadDto) {
+    public getLoginResponse(token: string, refreshToken: string, user: UserReadDto): UserLoginResponse {
         return new UserLoginResponse(token, refreshToken, user);
     }
 
-    public getRefreshTokenResponse(token: string, refreshToken: string, user: UserReadDto) {
+    public getRefreshTokenResponse(token: string, refreshToken: string, user: UserReadDto): UserRefreshTokenResponse {
         return new UserRefreshTokenResponse(token, refreshToken, user);
     }
 
-    public getTokenValidResponse(user: UserReadDto) {
+    public getTokenValidResponse(user: UserReadDto): UserTokenValidResponse {
         return new UserTokenValidResponse(user);
     }
 }

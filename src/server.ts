@@ -46,7 +46,7 @@ server.setConfig((app) => {
             requestProperty: 'payload',
         }).unless({
             path: ['/api/users/login', '/api/users/register', { url: /^\/api\/activation\/.*/ }, '/'],
-        })
+        }),
     );
     app.use((err: Errback, req: Request, res: Response, next: NextFunction) => {
         if (err.name === 'UnauthorizedError') return res.status(401).json({ message: HttpResponse.UNAUTHORIZED });

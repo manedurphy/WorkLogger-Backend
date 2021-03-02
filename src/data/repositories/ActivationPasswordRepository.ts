@@ -1,6 +1,7 @@
 import { injectable } from 'inversify';
 import { ActivationPassword, User } from '../../models';
 import { IActivationPasswordRepository } from '../interfaces/IActivationPasswordRepository';
+import { randomBytes } from 'crypto';
 
 @injectable()
 export class ActivationPasswordRepository implements IActivationPasswordRepository {
@@ -21,7 +22,7 @@ export class ActivationPasswordRepository implements IActivationPasswordReposito
     }
 
     public generateActivationPassword(): string {
-        return require('crypto').randomBytes(80).toString('hex');
+        return randomBytes(80).toString('hex');
     }
 
     public async update(activationPassword: ActivationPassword): Promise<void> {

@@ -35,7 +35,7 @@ export class TasksController extends BaseHttpController {
         @inject(Types.TaskRepository) taskRepository: ITaskRepository,
         @inject(Types.LogRepository) logRepository: ILogRepository,
         @inject(Types.TaskService) taskService: TaskService,
-        @inject(Types.LogService) logService: LogService
+        @inject(Types.LogService) logService: LogService,
     ) {
         super();
         this.taskRepository = taskRepository;
@@ -94,7 +94,7 @@ export class TasksController extends BaseHttpController {
         body('numberOfReviews').not().isEmpty().withMessage(ValidationMessages.NUMBER_OF_REVIEWS),
         body('hoursRequiredByBim').not().isEmpty().withMessage(ValidationMessages.HOURS_BIM),
         body('dateAssigned').not().isEmpty().withMessage(ValidationMessages.DATE_ASSGINED),
-        body('dueDate').not().isEmpty().withMessage(ValidationMessages.DUE_DATE)
+        body('dueDate').not().isEmpty().withMessage(ValidationMessages.DUE_DATE),
     )
     private async createTask(@request() req: AuthenticatedRequest) {
         try {

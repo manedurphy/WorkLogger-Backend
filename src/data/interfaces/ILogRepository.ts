@@ -1,5 +1,6 @@
 import { Task } from '../../models';
 import { Log } from '../../models/Log';
+import { WeeklyData } from '../../services/types';
 import { LogCreateDto } from '../dtos/LogCreateDto';
 
 export interface ILogRepository {
@@ -10,5 +11,5 @@ export interface ILogRepository {
     delete(logItem: Log): Promise<void>;
     save(logItem: Log): Promise<void>;
     completeLatest(taskId: number): Promise<void>;
-    getWeeklyLogs(userId: number): Promise<Log[]>;
+    getWeeklyLogs(userId: number): Promise<WeeklyData>;
 }

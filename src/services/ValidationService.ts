@@ -6,9 +6,9 @@ import { AuthenticatedRequest } from '../controllers/interfaces/authenticatedReq
 
 @injectable()
 export class ValidationService {
-    private _errorMessage: string = '';
+    private _errorMessage = '';
 
-    get errorMessage() {
+    get errorMessage(): string {
         return this._errorMessage;
     }
 

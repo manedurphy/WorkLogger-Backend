@@ -33,7 +33,7 @@ export class LogsController extends BaseHttpController {
         @inject(Types.LogService) logService: LogService,
         @inject(Types.TaskRepository) taskRepository: ITaskRepository,
         @inject(Types.TaskService) taskService: TaskService,
-        @inject(Types.DateService) datekService: DateService
+        @inject(Types.DateService) datekService: DateService,
     ) {
         super();
         this.logRepository = logRepository;
@@ -98,11 +98,14 @@ export class LogsController extends BaseHttpController {
     @httpGet('/dates')
     private async getWeeklyReport(@request() req: AuthenticatedRequest) {
         try {
-            const log = await this.logRepository.getWeeklyLogs(req.payload.userInfo.id);
-            if (log.length === 0) return this.json(new Alert(HttpResponse.LOG_WEEKLY_NOT_FOUND), 404);
+            const weeklyData = await this.logRepository.getWeeklyLogs(req.payload.userInfo.id);
 
-            return this.ok(log);
+            if (Object.keys(weeklyData).length === 0)
+                return this.json(new Alert(HttpResponse.LOG_WEEKLY_NOT_FOUND), 404);
+
+            return this.ok(weeklyData);
         } catch (error) {
+            console.log(error);
             return this.json(new Alert(HttpResponse.SERVER_ERROR), 500);
         }
     }
